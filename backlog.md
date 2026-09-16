@@ -215,7 +215,7 @@ budget stops being one.
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
 | [B-12](docs/backlog/B-12-skill-evals.md) `[ ]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
-| [B-17](docs/backlog/B-17-adopt-the-jvm-distribution-convention.md) `[ ]` | Adopt sborka's jvm-distribution convention once it exists | P3 | XS | - |
+| [B-17](docs/backlog/B-17-adopt-the-jvm-distribution-convention.md) `[~]` | Adopt sborka's jvm-distribution convention once it exists | P3 | XS | - |
 
 ## Closed (17)
 
