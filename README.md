@@ -7,10 +7,10 @@ image, every check green on day one.
 *keel* — the first member laid down; everything else is built on it.
 
 > **Status: the skeleton builds and is tested; that is all.** `./gradlew build` produces a JVM jar
-> and a `linuxX64` executable, `GET /items` answers, kore is wired, the size gate runs, and **12 tests
-> run on each of the two targets from one source** — CI names both suites and fails if either goes
-> missing. There is no store, no JVM distribution and no image. [backlog.md](backlog.md) is the order
-> the rest arrives in.
+> and a `linuxX64` executable, `GET`/`POST /items` go through a real SQLite database that survives a
+> restart, kore is wired, the size gate runs, and **22 tests run on each of the two targets from one
+> source** — CI names both suites and fails if either goes missing. There is no JVM distribution and
+> no image. [backlog.md](backlog.md) is the order the rest arrives in.
 >
 > **Most numbers here are still targets, and each says so.** They are the acceptance thresholds
 > declared in the brief before the first commit; the table below names the item that replaces each
@@ -31,7 +31,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 | `:server` | one KMP module, `jvm()` + `linuxX64` (+ `linuxArm64` behind a property) |
 | `:server-jvm` | ten lines, so the JVM half can have `application` and an AOT cache — [why](docs/research/research-architecture.md) |
 | one route | `GET`/`POST /items`, JSON via kotlinx.serialization |
-| one store | `ItemStore` over `sqlx4k-sqlite`: the Rust driver on native, `sqlite-jdbc` on the JVM, one implementation |
+| one store | `ItemStore` over `sqlx4k-sqlite`: the Rust driver on native, `sqlite-jdbc` on the JVM, **one** implementation |
 | kore | `installKoreProbes`, `installKoreVersion`, `runUntilSignal` with `announce → drain → release` |
 | sborka | `fixedBlockPageSize=16`, `--as-needed`, ktlint, a size budget, the staged binary path |
 | zavarnik | a Leyden AOT cache for the JVM distribution, `aotVerify` on `check` |
@@ -48,7 +48,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 | image, `STATIC=1` | under 12 MB | not yet — [B-04](docs/backlog/B-04-image-and-size-budget.md) |
 | Kotlin in `server/` | under 500 lines | **140** code lines (275 as written), 2026-09-16 |
 | Gradle across the repository | under 100 lines | **91** code lines (225 as written), 2026-09-16 |
-| the `linuxX64` release binary | — | **4 983 240 bytes**, declaring 7 shared libraries, 2026-09-16 |
+| the `linuxX64` release binary | — | **9 227 448 bytes**, declaring 7 shared libraries, 2026-09-16 (4 983 240 before the SQLite driver) |
 
 **Code lines**, meaning blank lines and comments dropped, and both numbers are reported so the choice
 stays visible — the reasoning in this portfolio lives beside the line it explains, and on the four

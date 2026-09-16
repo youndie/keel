@@ -3,11 +3,12 @@
 A GitHub template repository for a Kotlin server that ships twice: one source, a JVM distribution and
 a Kotlin/Native binary, both runnable, both tested, one image. konekt with the domain removed.
 
-**The skeleton builds and is tested.** `./gradlew build` produces a JVM jar and a `linuxX64`
-executable, `GET /items` answers, kore is wired, the size gate runs, and 12 tests run on each target
-from one source. CI names `jvmTest` and `linuxX64Test` and fails when either produces no result file
-or reports zero tests. There is no store, no JVM distribution and no image; `linuxArm64` is built and
-tested by nobody (B-15, blocked on [razves#3](https://github.com/youndie/razves/issues/3)).
+**The service runs and is tested.** `./gradlew build` produces a JVM jar and a `linuxX64` executable,
+`GET`/`POST /items` go through a real SQLite database that survives a restart, kore is wired, the size
+gate runs, and 22 tests run on each target from one source. CI names `jvmTest` and `linuxX64Test` and
+fails when either produces no result file or reports zero tests. There is no JVM distribution and no
+image; `linuxArm64` is built and tested by nobody (B-15, blocked on
+[razves#3](https://github.com/youndie/razves/issues/3)).
 
 This paragraph said *"nothing is built"*, and then *"no test at all"*, each wrong one iteration
 later. A sentence about the state
@@ -35,7 +36,7 @@ is why it is worth naming here.
    `docs/backlog/`; the index between the markers is generated, so edit the item and run
    `python3 scripts/backlog_index.py`.
 3. The layer document the task belongs to — [docs/services/keel-server.md](docs/services/keel-server.md)
-   for the modules and the fifteen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
+   for the modules and the seventeen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
    for the routes, [docs/features/feature-item-round-trip.md](docs/features/feature-item-round-trip.md)
    for the scenarios that are the template's acceptance. The map is [docs/README.md](docs/README.md).
 4. The skills, when the task is building rather than documenting: `native-service-bootstrap` for the

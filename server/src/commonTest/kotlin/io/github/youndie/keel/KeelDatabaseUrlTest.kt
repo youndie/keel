@@ -27,9 +27,12 @@ class KeelDatabaseUrlTest {
     }
 
     /**
-     * `mode=rwc` is not decoration: without it the Rust driver does not create a missing file, while
-     * Xerial's JDBC does — so a service that omits it works on the JVM and starts empty on the target
-     * that ships.
+     * `mode=rwc` is intent, not a fix — and the distinction was established by removing it.
+     *
+     * With the parameter gone, both targets still create a missing database on sqlx4k 1.13.1: the
+     * mutation failed only these URL tests and the store suite stayed green. So this assertion does
+     * not guard a driver that would otherwise break; it guards a line that says what the service
+     * wants, against two drivers that document no such default.
      */
     @Test
     fun `the url asks for the file to be created`() {

@@ -27,9 +27,9 @@ starter.
 non-goal. A client template is a separate repository.
 
 The scenarios below **are** the acceptance criteria of the template. Six of them restate the brief's
-declared acceptance in a form a test can hold. Six of the sixteen are automated since B-06; the rest
-are target behaviour, and the missing `**Automated:**` line is the honest signal rather than an
-oversight — `bdd_report.py` counts each of those as manual.
+declared acceptance in a form a test can hold. Eight of the seventeen are automated; the rest are
+target behaviour, and the missing `**Automated:**` line is the honest signal rather than an oversight
+— `bdd_report.py` counts each of those as manual.
 
 ## 2. Business rules
 
@@ -76,9 +76,8 @@ authentication (see [endpoint-items](../api/endpoint-items.md)).
 ## 5. Scenarios (BDD / test cases)
 
 A scenario carries an `**Automated:**` line when a test exercises it **as written**; the rest are
-target behaviour, and the absence is the honest signal. Six of sixteen are automated since B-06 —
-each on the JVM and on `linuxX64` from one source, which is the property worth having rather than
-the count.
+target behaviour, and the absence is the honest signal. Eight of seventeen are automated — each on
+the JVM and on `linuxX64` from one source, which is the property worth having rather than the count.
 
 ### Scenario: an item survives the round trip, on both targets
 
@@ -104,8 +103,19 @@ the count.
 * **When:** it is run as `jvmTest` and as `linuxX64Test`
 * **Then:** both run the same scenarios against a real SQLite file, and **both report a non-zero
   count** — a suite that ran nothing exits zero and must not pass
-* **And:** if the common surface does not typecheck against both sqlx4k variants, this scenario is
-  what says so, and [B-02](../backlog/B-02-one-store-on-both-targets.md) takes the fallback
+* **And:** one `commonMain` implementation satisfies both, which is what settled D1: the brief's
+  second implementation was never needed
+* **Automated:** `ItemStoreContractTest`
+
+### Scenario: the rows are on disk and survive a restart
+
+* **Given:** an item written through the store
+* **When:** the driver is closed and another is opened on the same file
+* **Then:** the item is there
+* **And:** this is the one case the rest of the suite cannot be: writing and reading through the same
+  open driver passes just as well against a database that exists only in that process, which the
+  service shipped for the length of one build — every request correct, everything gone on restart
+* **Automated:** `ItemStoreContractTest`
 
 ### Scenario: `kill -TERM` under load finishes every in-flight request
 

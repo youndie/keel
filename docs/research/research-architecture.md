@@ -197,11 +197,27 @@ an in-memory `ItemStore` is what the route's tests run against.
 link, in a message about a Rust symbol. keel takes exactly one, and the comment saying why lives in
 the build file rather than only here.
 
-**Hypothesis, and where it is settled.** That the two variants present an API a single `commonMain`
-`ItemStore` can be written against — same suspend signatures, same `ResultSet` shape, same pool
-lifecycle — is read out of a class listing and a POM, not out of a compiled `commonMain`. It is
-settled by the first build: [B-02](../backlog/B-02-one-store-on-both-targets.md), and if it is wrong
-the fallback is the brief's original two implementations, which costs the port nothing.
+**Settled in B-02, 2026-09-16: one implementation, and it works.** The hypothesis was that the two
+variants present an API a single `commonMain` store can be written against — read out of a class
+listing and a POM rather than out of a compiled `commonMain`. `SqliteItemStore` is 20 lines of
+`commonMain` over `Statement.create(...).bind(...)`, `execute` and `fetchAll`, and its seven-case
+contract suite passes against a real database file on `jvm` and on `linuxX64`. The fallback — the
+brief's two implementations — was not needed.
+
+Three corrections the build made to this section, each of which was a claim nobody had run:
+
+* **`asString` is a member of `ResultSet.Row.Column`, not an extension.** The `impl.extensions`
+  package publishes `asInt`/`asLong`/`asIntOrNull`/`asLongOrNull` and no string decoders, verified by
+  `javap` over `sqlx4k-jvm-1.13.1.jar`. Importing it the way the neighbouring repository imports the
+  numeric ones fails to compile on every target at once, which is the harmless way to find out.
+* **`mode=rwc` is not required on either target.** This document's first draft of the wiring said the
+  Rust driver would not create a missing file while Xerial's JDBC would. Removing the parameter and
+  running the binary shows `linuxX64` creating the database exactly as the JVM does. The parameter
+  stays as a statement of intent — two different drivers, neither documenting the default — and the
+  reasoning is now in the code beside it rather than as a fact here.
+* **A file, never `:memory:`.** The two halves genuinely do disagree here: the JVM one refuses a pool
+  larger than one, because each connection would get a database of its own. A file is also the shape
+  the service runs in.
 
 ### 1.7 chronik does have a native artefact, on exactly one native target
 
@@ -436,10 +452,12 @@ date it was taken — and if it is two hours, the README says two hours.
 
 **Open question 2 — is 25 MB (`distroless/cc`) / 12 MB (`STATIC=1`) the right budget?** The brief
 declares both before the first commit, which is the right order; the numbers next to them are from
-neighbouring services rather than from keel. **One half is now measured**: B-01's `linuxX64` release
-binary is **4 983 240 bytes**, well under tracy's 13 863 696, because keel links no database driver
-and no TLS client yet — B-02 will move it. The image is still unmeasured, and the binary is only its
-payload. tracy's `:server` binary is 13 863 696 bytes unstripped
+neighbouring services rather than from keel. **One half is now measured, twice**: B-01's `linuxX64` release binary was **4 983 240 bytes**, and
+B-02's — the same binary with the SQLite driver and its Rust runtime linked in — is **9 227 448**.
+The driver costs 4.2 MB, which is the single largest thing keel will ever add to itself, and it is
+still well under tracy's 13 863 696. The image is unmeasured and the binary is only its payload, so
+B-04's 25 MB is not yet in any danger from this direction — but the margin is now 15 MB rather than
+20, and a clone that adds a TLS client spends more of it. tracy's `:server` binary is 13 863 696 bytes unstripped
 and 10 241 264 stripped, and the static probe's image was 9 570 311 bytes to pull *with the whole
 gconv directory*. Hypothesis: the `distroless/cc` budget is comfortable and the static one is tight
 by about the size of gconv. Settled by [B-04](../backlog/B-04-image-and-size-budget.md); a budget

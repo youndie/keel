@@ -136,13 +136,22 @@ fun Application.keelModule(
 /**
  * Where the database is, as sqlx4k wants it.
  *
- * **`mode=rwc` creates the file when it is not there**, and it is the parameter that makes one line
- * correct on both targets rather than on whichever was tried first: sqlx4k is two drivers behind one
- * API and they disagree about this by default — Xerial's JDBC creates the file, the Rust driver does
- * not.
+ * **`mode=rwc` asks for the file to be created when it is not there.**
+ *
+ * It is kept as a statement of intent rather than as a fix, and the difference is worth the line
+ * because this comment first claimed the opposite. It said the Rust driver would not create the file
+ * and Xerial's JDBC would, so the parameter was what made one line work on both. **Measured on
+ * sqlx4k 1.13.1, that is not true**: the `linuxX64` binary creates a missing database with the
+ * parameter removed, exactly as the JVM half does. The claim came from reasoning about a default,
+ * not from running anything.
+ *
+ * What it is worth keeping for is that neither driver documents the default as part of its contract,
+ * and they are two different drivers — so a build that depends on them agreeing depends on something
+ * nobody promised. Saying it costs nine characters.
  *
  * A function rather than an interpolation at the call site because it is the piece that was wrong
- * once and is worth a test. `KeelDatabaseUrlTest` is that test.
+ * once and is worth a test. `KeelDatabaseUrlTest` is that test — and what it guards is the
+ * interpolation, not the driver's behaviour.
  */
 internal fun keelDatabaseUrl(path: String): String = "sqlite://$path?mode=rwc"
 
