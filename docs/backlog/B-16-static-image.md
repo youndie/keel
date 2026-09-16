@@ -1,7 +1,7 @@
 ---
 id: B-16
 title: "Should the template ship the scratch recipe at all?"
-status: question
+status: done
 priority: P2
 size: M
 stage: m2-image
@@ -55,3 +55,20 @@ watching. That is the same trade sborka made, and keel is further from the fix t
 This is a deviation from the brief and it is written down as one rather than taken quietly.
 
 - Anchors: `Dockerfile`, `.dockerignore`, `docs/research/research-architecture.md`
+
+---
+
+## Answered 2026-09-16: option 2, then 3
+
+**keel documents the recipe and does not ship it.** Research §1.5 carries the five paths, the
+build-stage rule and the rendered-page acceptance; §2 gains **D8** recording the decision as a
+deviation from the brief rather than a quiet omission; the `Dockerfile` has no static variant.
+
+The reasoning that decided it, in one line: a convention that breaks on a Kotlin bump is fixed once
+for everyone, and a template that breaks on a Kotlin bump is copied and never updated again — so
+sborka's refusal of the same recipe applies here with more force, not less.
+
+**The expiry is [B-18](B-18-scratch-when-static-is-static.md)**, which is what makes this a decision
+rather than a refusal: when [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) lands, `-static`
+needs no property overrides and the recipe becomes a linker option. The gconv half does not change
+and was never the reason for saying no.

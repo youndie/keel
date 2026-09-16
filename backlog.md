@@ -21,8 +21,9 @@ B-03 a JVM distribution whose AOT cache is verified on every `check`.
 
 **keel now ships twice in the sense the brief meant it.** What is left is the measuring: parity
 (B-05), the shutdown oracle against the binary (B-07), clone-to-ready (B-08) and the stand (B-13).
-**B-16 is a `question`** — whether a template should ship the `scratch` recipe at all, given it pins
-keys JetBrains may change in any patch release. `linuxArm64` is covered by nobody (B-15).
+**B-16 is answered**: keel documents the `scratch` recipe and does not ship it, because a convention
+that breaks on a Kotlin bump is fixed once for everyone and a template that breaks on one is copied
+and never updated again. B-18 is the expiry. `linuxArm64` is covered by nobody (B-15).
 
 Every document outside `docs/research/` is still `status: draft`, because each of them describes more
 than exists. The research is `active`: the reading it records happened on 2026-09-16 against artefacts
@@ -149,10 +150,10 @@ budget stops being one.
 | [B-10](docs/backlog/B-10-draft-gate.md) `[ ]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
 | [B-12](docs/backlog/B-12-skill-evals.md) `[ ]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
 | [B-15](docs/backlog/B-15-arm64-suite-runs.md) `[ ]` | Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks | P2 | S | - |
-| [B-16](docs/backlog/B-16-static-image.md) `[?]` | Should the template ship the scratch recipe at all? | P2 | M | - |
 | [B-17](docs/backlog/B-17-adopt-the-jvm-distribution-convention.md) `[ ]` | Adopt sborka's jvm-distribution convention once it exists | P3 | XS | - |
+| [B-18](docs/backlog/B-18-scratch-when-static-is-static.md) `[ ]` | Ship the scratch image once -static needs no property overrides | P3 | S | - |
 
-## Closed (6)
+## Closed (7)
 
 **Shape**
 
@@ -168,5 +169,6 @@ budget stops being one.
 **The image**
 
 - [B-04](docs/backlog/B-04-image-and-size-budget.md) `[x]` - Two images from one Dockerfile, both measured against a budget declared first
+- [B-16](docs/backlog/B-16-static-image.md) `[x]` - Should the template ship the scratch recipe at all?
 
 <!-- END INDEX -->

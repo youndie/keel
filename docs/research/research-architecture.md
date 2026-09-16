@@ -344,11 +344,10 @@ Why:
   (`-static` is undone twice — open, its patch closed unmerged on 2026-09-15), and the charset layer's
   `dlopen`, which is not a bug in anything and is answered by copying five paths out of the build
   stage;
-- so the default stays `distroless/cc-debian13` and `STATIC=1` stays a flag with the recipe and the
-  caveats in comments beside it, including that the copies must come from the build stage and that
-  the smoke test has to reach a rendered page (§1.5);
-- the price: keel's image is ~10× the size of the static one and that is stated in the README with
-  both numbers, rather than being a thing a reader discovers by trying.
+- so the default stays `distroless/cc-debian13`. **`STATIC=1` is not a flag, and that is a deviation
+  from the brief taken in B-16 rather than quietly** — see §2 D8 below;
+- the price: the measured one is 4.5 MB on an image that came in at 13 972 497 bytes against a 25 MB
+  budget, and both numbers are in the README rather than left for a reader to discover by trying.
 
 ### D4. `:server:measure` refuses to write `docs/research/` without `--stand`
 
@@ -425,6 +424,37 @@ the next real divergence without anybody noticing. sborka's own parity conventio
 reason and asks the platform through Ktor rather than through the syscall underneath, because the
 failure this portfolio paid for was in Ktor's `InetSocketAddress` while every syscall below it worked
 (`sborka/docs/research/research-parity.md` §1.5).
+
+### D8. keel documents the `scratch` recipe and does not ship it — *deviation from the brief*
+
+Brief: *"`scratch` behind `--build-arg STATIC=1` with the four gconv lines and the curl caveat in a
+comment"*.
+
+Decision, taken in [B-16](../backlog/B-16-static-image.md): the recipe is written down — §1.5 above
+has the five paths, the build-stage rule and the rendered-page acceptance — and the `Dockerfile`
+carries no static variant.
+
+Why:
+
+- **sborka refused the same recipe as a convention option, and its reason applies here with more
+  force.** The recipe pins five `konan.properties` keys, and JetBrains' advice on that mechanism
+  (KT-38876) is that they may change in any patch release. sborka's D3: *"An option in a shared
+  convention plugin that breaks on a Kotlin bump, silently, in someone else's service, costs more
+  than the 9 MB it saves."*
+- **A template is that hazard with a longer fuse.** A convention is fixed once and every consumer
+  picks the fix up; a template is copied and never updated again. Every clone would carry a build
+  that breaks on a Kotlin bump, in a repository whose owner has never read this document, and §1.6
+  records what that failure looks like: four link attempts each failing differently, ending in a
+  segfault with no output.
+- **The prize is smaller than it was when the brief was written.** ~4.5 MB against an image already
+  44 % under its budget. The brief declared 12 MB for the static image without knowing the dynamic one
+  would come in at 14.
+- The price, honestly: a clone that wants `scratch` follows a recipe instead of passing a flag, and
+  `scratch`'s other benefit — no shell to `kubectl exec` into — is not on offer by default.
+
+Settled by [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) rather than by preference: when
+`-static` means static without property overrides, the recipe is two lines and this decision
+dissolves. [B-18](../backlog/B-18-scratch-when-static-is-static.md) is the address.
 
 ### D7. The documentation tree carries drafts on `main`, with the gate off and addressed
 
