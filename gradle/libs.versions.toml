@@ -44,7 +44,7 @@ okio = "3.18.2"
 
 # The Leyden AOT cache for the JVM distribution. JDK 25 or newer is a hard requirement — the one-step
 # training workflow is JEP 514 — which agrees with the toolchain kore already forces.
-zavarnik = "0.1.0"
+zavarnik = "0.1.0.41"
 
 [libraries]
 kore-core = { module = "io.github.youndie:kore-core", version.ref = "kore" }

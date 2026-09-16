@@ -400,12 +400,14 @@ found on the way, none of them visible from this decision as written:
   `KotlinNativeBundleBuildService` exists twice. The failure names two classloaders and nothing about
   the cause. keel had no root build file until this item; every clone that adds a second module meets
   it.
-* **`KEEL_DB_PATH` stopped being required.** zavarnik's training run inherits the build's environment
-  and cannot be given one ([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)), so a service
-  that refuses without configuration cannot have its cache trained by `check`. The README's
-  `./gradlew run` promise was already false for the same reason. keel now declares **no** required
-  key, which is a fact about a template whose store is a file beside the process rather than a lesson
-  — and `KeelConfigTest` keeps the required shape in a test so it is not lost with the key.
+* **`KEEL_DB_PATH` stopped being required**, for two reasons of which **only one still holds**.
+  zavarnik's training run could not be given an environment
+  ([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)) — fixed in `0.1.0.41`, and B-20 took
+  it, so the training run now has a database path of its own. What stands is the other: the README
+  promises `./gradlew run` works on a fresh clone, which a required key makes false. keel declares
+  **no** required key, which is a fact about a template whose store is a file beside the process
+  rather than a lesson, and `KeelConfigTest` keeps the required shape in a test so it is not lost with
+  the key.
 
 Twelve of the module's lines are not keel's: [B-17](../backlog/B-17-adopt-the-jvm-distribution-convention.md)
 adopts them from sborka once [sborka#78](https://github.com/youndie/sborka/issues/78) exists.

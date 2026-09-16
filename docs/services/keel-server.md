@@ -309,15 +309,12 @@ And keel's own:
     release check keeps the real 25 MiB — `stageNativeImage` stages that binary and the image carries
     it — and the debug check is disabled in `server/build.gradle.kts`. It is the only line in this
     repository's build files that is not "apply a convention and set a name".
-17. **The AOT training run leaves a database inside `build/install/`, and `distTar` does not carry
-    it.** `KEEL_DB_PATH` defaults to the relative `keel.db` and the start script runs from the
-    installed directory, so `aotTrain` creates `build/install/distribution/keel.db` with whatever the
-    training workload wrote. The tar is built from the distribution spec rather than from that
-    directory, so the shipped archive is clean — checked, not assumed.
-    **The trap is for a clone**: zavarnik's guidance is "ship `installDist` **or** `distTar`", and a
-    Dockerfile that copies `build/install/distribution` after `check` picks the training database up
-    and ships it. A clone that does that either copies the tar instead or sets `KEEL_DB_PATH` to a
-    path outside the distribution.
+17. **`KEEL_DB_PATH` through a directory that does not exist fails with a raw JDBC stack trace.**
+    `mode=rwc` creates the database *file*, not its parent, so a path like `/var/lib/keel/keel.db` on
+    a host where `/var/lib/keel` is absent dies at startup in `org.sqlite.core.DB.open` with nothing
+    said about the directory. A deployment mounting a volume creates the directory; a `--build-arg` or
+    an `environment(...)` pointing somewhere new does not. Found by pointing the AOT training run at
+    `build/tmp/aot-train/`, which did not exist.
 18. **`GET /items` returns the whole table, and every clone inherits that.** There is no limit, no
     cursor and no page. It is fine for a template whose example holds a handful of rows and it is not
     fine in a service: B-13's first stand run drove it at 500 req/s and got **29.8 iterations a
