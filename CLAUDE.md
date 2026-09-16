@@ -3,13 +3,19 @@
 A GitHub template repository for a Kotlin server that ships twice: one source, a JVM distribution and
 a Kotlin/Native binary, both runnable, both tested, one image. konekt with the domain removed.
 
-**The service runs and is tested.** `./gradlew build` produces a JVM jar and a `linuxX64` executable,
-`GET`/`POST /items` go through a real SQLite database that survives a restart, kore is wired, the size
-gate runs, and 22 tests run on each target from one source. CI names `jvmTest` and `linuxX64Test` and
-fails when either produces no result file or reports zero tests. The image builds and runs at 14 MB,
-and `:distribution` ships the JVM half with an AOT cache verified on every `check`. `linuxArm64` is
-built and tested by nobody (B-15, blocked on
-[razves#3](https://github.com/youndie/razves/issues/3)).
+**The template is finished against its brief.** Three targets build, 23 tests run on each of `jvm`
+and `linuxX64` from one source and the same binary runs on arm64 hardware, both halves pass kore's
+shutdown oracle, parity holds after a normaliser written first, the image is 13 972 497 bytes, and the
+stand measured p95 at 1.86 ms. A webhook relay was built from it and needed no change to any
+infrastructure file.
+
+What is **not** done: the kotlin.website page (B-22). What is deliberately absent and says so: a
+`scratch` image (B-16, B-18), an automated stand run (B-13 — the measurement was taken by hand), and
+authentication, a chart and a client, which are non-goals.
+
+This paragraph has been wrong three times — *"nothing is built"*, *"no test at all"*, *"`linuxArm64`
+is built and tested by nobody"* — each true when written and false within a day. `backlog.md` and the
+build are what cannot go stale; prefer them.
 
 This paragraph said *"nothing is built"*, and then *"no test at all"*, each wrong one iteration
 later. A sentence about the state
