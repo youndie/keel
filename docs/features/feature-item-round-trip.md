@@ -128,8 +128,11 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
   in flight at the signal
 * **Verified on the native image** by kore's oracle in [B-07](../backlog/B-07-shutdown-oracle.md):
   4472 exchanges, **32 of 32 spanning the signal all completed**, 4089 refusals all carrying
-  `Connection: close`, exit `0`. Not automated, and not yet run against the JVM half, which ships as
-  a distribution rather than an image
+  `Connection: close`, exit `0`. Not automated
+* **The JVM half is observed, not asserted**, and the gap is not symmetric: `EmbeddedServer.stop` runs
+  its steps in the opposite order there, which is the whole reason kore exists.
+  [B-19](../backlog/B-19-oracle-on-the-jvm-half.md), blocked on
+  [kore#85](https://github.com/youndie/kore/issues/85)
 
 ### Scenario: readiness goes false before the drain starts
 
