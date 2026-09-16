@@ -1,7 +1,7 @@
 ---
 id: B-01
 title: "The repository builds both targets with the conventions applied and nothing of its own"
-status: open
+status: wip
 priority: P0
 size: M
 stage: m0-shape
