@@ -229,7 +229,7 @@ and it was found by reading zavarnik's functional test rather than by building a
 
 | Fact | Where verified |
 |---|---|
-| [KTOR-9891](https://youtrack.jetbrains.com/issue/KTOR-9891) is **fixed**: [ktorio/ktor#5874](https://github.com/ktorio/ktor/pull/5874) is merged into the `release/3.x` branch and targets **3.6.0** | `kotlin-website/site/src/jsMain/resources/markdown/blog/UnderAContainerLimit.md` |
+| [KTOR-9891](https://youtrack.jetbrains.com/issue/KTOR-9891) is **fixed**: [ktorio/ktor#5874](https://github.com/ktorio/ktor/pull/5874) is merged into the release/3.x branch and targets **3.6.0** | `kotlin-website/site/src/jsMain/resources/markdown/blog/UnderAContainerLimit.md` |
 | it is a concurrency finding from the container-limit study, measured on a two-host stand at 2 000 rps — nothing to do with charsets | same |
 | the runtime half, [KT-89365](https://youtrack.jetbrains.com/issue/KT-89365), is **open** | same |
 | the gconv finding has **no ticket**; it was found at a deploy and lives in sborka's research and in [katcher#55](https://github.com/youndie/katcher/issues/55) | `sborka/docs/research/research-static-binary.md` §1.5c, D3 |
