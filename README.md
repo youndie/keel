@@ -45,7 +45,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 
 | | target | measured |
 |---|---|---|
-| clone → `/health/ready` on both targets, cold machine, including the toolchain fetch | under 1 h | not yet — [B-08](docs/backlog/B-08-clone-to-ready.md) |
+| clone → `/health/ready` on both targets, cold machine, including the toolchain fetch | under 1 h | **3 min 48 s**, 2026-09-16 — fresh container, no cache, cloned from GitHub. The image build is **not** in it: +2 min on a warm host, more on a cold one ([B-08](docs/backlog/B-08-clone-to-ready.md)) |
 | image, `distroless/cc` | under 25 MB | **13 972 497 bytes**, 2026-09-16 — `docker image inspect`, `linux/amd64` |
 | image, `STATIC=1` | under 12 MB | **not shipped, by decision** — [B-16](docs/backlog/B-16-static-image.md): the recipe pins five `konan.properties` keys JetBrains may change in any patch release, and a template is copied and never updated again. It is documented in the research; [B-18](docs/backlog/B-18-scratch-when-static-is-static.md) revisits it when [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) lands |
 | Kotlin, main sources | under 500 lines | **214** code lines, 2026-09-16 |
