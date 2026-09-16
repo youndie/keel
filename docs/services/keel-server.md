@@ -19,9 +19,10 @@ publishes:
 
 # keel `:server`
 
-**The skeleton is built; most of this document is not.** Since B-01 `:server` produces a JVM jar and
-a `linuxX64` executable, `GET /items` answers a constant, kore is wired and the size gate runs. The
-store, `:server-jvm`, the `Dockerfile`, `k6/` and every test are still descriptions —
+**The service runs; the packaging does not exist.** Since B-01 `:server` produces a JVM jar and a
+`linuxX64` executable with kore wired and the size gate running; since B-06 there are suites on both
+targets; since B-02 `GET`/`POST /items` go through a real SQLite database that survives a restart.
+`:server-jvm`, the `Dockerfile` and `k6/` are still descriptions —
 [backlog.md](../../backlog.md) is the order they arrive in, and the paths in §2a are a mixture of real
 files and places code will live, which is why `code_anchors.py` still reports some of them rotten.
 
@@ -69,7 +70,7 @@ What it deliberately does **not** do:
 | `server/src/commonMain/kotlin/.../KeelMain.kt` | everything both entry points do: `--print-config`, the build line, the configuration read, then start |
 | `server/src/commonMain/kotlin/.../Wiring.kt` | `embeddedServer(CIO)`, `installKoreProbes`, `installKoreVersion`, `runUntilSignal` with the four registrations |
 | `server/src/commonMain/kotlin/.../KeelConfig.kt` | the four `ConfigKey`s and the `ConfigSchema` |
-| `server/src/commonMain/kotlin/.../item/ItemStore.kt` | the port, and the `sqlx4k-sqlite` implementation behind it |
+| `server/src/commonMain/kotlin/.../item/ItemStore.kt` | the port, the schema and `SqliteItemStore` — one implementation, both targets |
 | `server/src/commonMain/kotlin/.../item/ItemRoutes.kt` | `GET`/`POST /items` |
 | `server/src/jvmMain/kotlin/.../Main.kt`, `server/src/linuxX64Main/kotlin/.../Main.kt` | four lines each; the only thing that differs between the two builds |
 | `server-jvm/build.gradle.kts` | `application` + zavarnik, and the reason it exists (§3) |
@@ -195,7 +196,7 @@ until B-06 wrote a test against the schema and had to count the keys.
 
 ## 8. Quirks
 
-Fifteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Seventeen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -252,7 +253,20 @@ And keel's own:
     without adding a gate has a startup probe that lies. `StartupGate(gates = setOf("migrations"))`
     and `completed("migrations")` are the two lines that fix it, and `ItemRoutesTest` guards both
     halves so the behaviour is written down where someone will meet it.
-15. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+15. **The store suite cannot see a database that is not on disk, and one test exists only for that.**
+    Every case that writes through the store and reads back through it passes just as well against a
+    database living only in that process — which the service shipped for the length of one build,
+    answering every request correctly and coming back empty after a restart. The cause was a broken
+    string template, so the URL named the expression instead of the path.
+    `the rows survive the driver being closed and reopened` is the one case that would have caught it,
+    and `KeelDatabaseUrlTest` guards the line itself.
+16. **The size budget is off for the debug binary, and that is a workaround with an address:
+    [razves#4](https://github.com/youndie/razves/issues/4).** razves applies one `budget` to every
+    executable; debug is 28,580,560 against release's 9,227,448, so one number cannot watch both. The
+    release check keeps the real 25 MiB — `stageNativeImage` stages that binary and the image carries
+    it — and the debug check is disabled in `server/build.gradle.kts`. It is the only line in this
+    repository's build files that is not "apply a convention and set a name".
+17. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.

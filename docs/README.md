@@ -11,7 +11,7 @@ is konekt with the domain removed. The documentation is layered; links run top t
                               │
 [ API — every route keel serves, keel's own and kore's ]
                               │
-[ Service — the modules, how they are built, and fifteen quirks ]
+[ Service — the modules, how they are built, and seventeen quirks ]
 ```
 
 There is **no `screens/` layer** and there will not be one: keel ships no client, by the brief's
@@ -102,7 +102,7 @@ the machine only guards the membership.
 
 ### Services (1)
 
-- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and fifteen quirks
+- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and seventeen quirks
 
 ### Features (1)
 

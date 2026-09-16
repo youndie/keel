@@ -17,16 +17,17 @@ parent_feature: feature-item-round-trip
 > route it will collide with. Bodies live in the contract class named in `contract_source`; this
 > document gives paths, statuses and the things that are not obvious.
 >
-> **Nothing here is built.** Every status below is *target* behaviour except where a row says which
-> kore source it was read in — those four routes exist today in `kore-ktor` and keel only mounts
-> them.
+> **All seven routes answer.** keel's two go through a real SQLite database since B-02; kore's five
+> are mounted from `kore-ktor` and the rows below say which source each was read in. What is still
+> *target* is the error table's first row — nothing has yet sent a malformed body and written down
+> what came back.
 
 ## Routes — all of them, no exceptions
 
 | Method and path | Auth tier | Mounted by | In a generated schema? | Purpose |
 |---|---|---|---|---|
-| `GET /items` | none | keel | no — keel generates no schema | every item, as a JSON array |
-| `POST /items` | none | keel | no | create one item from a JSON body |
+| `GET /items` | none | keel | no — keel generates no schema | every item, ordered by id, as a JSON array |
+| `POST /items` | none | keel | no | create one item from a JSON body; answers `201` with what was stored |
 | `GET /health/startup` | none | kore, `installKoreProbes` | no | has the process finished starting? A **latch**: once `200`, never `503` again |
 | `GET /health/ready` | none | kore, `installKoreProbes` | no | should traffic be sent here *right now*? |
 | `GET /health/live` | none | kore, `installKoreProbes` | no | is the process wedged and in need of a restart? |
@@ -48,10 +49,10 @@ running deployment. Verified in
 | Route | Handler |
 |---|---|
 | `GET /items`, `POST /items` | `server/src/commonMain/kotlin/.../item/ItemRoutes.kt` |
+| the store behind both | `server/src/commonMain/kotlin/.../item/ItemStore.kt` |
 | the three probes and `/health` | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` |
 | `/version` | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/VersionRoute.kt` |
 | the 503-during-shutdown interceptor | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ShutdownRefusal.kt` |
-| the store the two routes go through | `server/src/commonMain/kotlin/.../item/ItemStore.kt` |
 
 ## Request and response bodies
 
@@ -67,6 +68,7 @@ and there is a check for the path.
 | Condition | Status | Body | Note |
 |---|---|---|---|
 | a malformed or unparseable JSON body on `POST` | `400` | the serialization failure as text | *target*; the exact string is whatever `kotlinx.serialization` produces and is written down here after the first run, not guessed |
+| `POST /items` with an id that is already stored | *unhandled* — the constraint violation propagates | — | **a quirk rather than a contract.** The primary key refuses, and the two drivers word it differently, so keel asserts that it fails and not what it says. A clone wanting a `409` writes it; a template that invented one would be teaching an error model it had not thought about |
 | readiness has not been reached | `503` on `/health/ready` | the failing check, **with the age of its answer** | kore: a stale healthy answer and a fresh one are different facts |
 | startup has not completed | `503` on `/health/startup` | `starting — waiting for: <names>` | kore, read in `ProbeRoutes.kt` |
 | the process is wedged | `503` on `/health/live` | `wedged — <reason>` | kore, read in `ProbeRoutes.kt` |
