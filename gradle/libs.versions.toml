@@ -6,7 +6,7 @@
 [versions]
 
 # The shared build conventions. One number: every sborka plugin below takes its version from here.
-sborka = "0.4.0.80"
+sborka = "0.4.0.81"
 
 # NOT 2.4.20, which is the current release. It is what the portfolio's toolkits are built with, it is
 # the distribution kore's research addresses were dumped from, and it is what is already on both
@@ -86,6 +86,10 @@ sborkaNativeService = { id = "io.github.youndie.sborka.native-service", version.
 # the compilation rather than something the build wrote first. Kotlin/Native has no manifest and no
 # JVM-style resource loading, so a resource-based identity compiles there and returns nothing.
 koreBuild = { id = "io.github.youndie.kore.build", version.ref = "kore" }
+
+# The JVM half's module shape — `application`, the distribution's name and zavarnik's readiness
+# default — as a convention rather than as twelve lines every native service writes again. B-17.
+sborkaJvmDistribution = { id = "io.github.youndie.sborka.jvm-distribution", version.ref = "sborka" }
 
 razves = { id = "io.github.youndie.razves", version.ref = "razves" }
 zavarnik = { id = "io.github.youndie.zavarnik", version.ref = "zavarnik" }
