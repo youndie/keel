@@ -130,13 +130,14 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **And:** the process ends itself — `0` on native, `143` on the JVM — and is not `SIGKILL`ed (`137`)
 * **And:** the run is **inconclusive**, not green, if fewer than the declared floor of requests were
   in flight at the signal
-* **Verified on the native image** by kore's oracle in [B-07](../backlog/B-07-shutdown-oracle.md):
-  4472 exchanges, **32 of 32 spanning the signal all completed**, 4089 refusals all carrying
-  `Connection: close`, exit `0`. Not automated
-* **The JVM half is observed, not asserted**, and the gap is not symmetric: `EmbeddedServer.stop` runs
-  its steps in the opposite order there, which is the whole reason kore exists.
-  [B-19](../backlog/B-19-oracle-on-the-jvm-half.md), blocked on
-  [kore#85](https://github.com/youndie/kore/issues/85)
+* **Verified on both halves** by kore's oracle — the native image in
+  [B-07](../backlog/B-07-shutdown-oracle.md) and the JVM distribution in
+  [B-19](../backlog/B-19-oracle-on-the-jvm-half.md). Seven passes each, nothing failed: 32 of 32
+  spanning the signal all completed on both, every refusal carrying `Connection: close`, exit `0`
+  native and `143` JVM
+* **The asymmetry is closed**, and it mattered: `EmbeddedServer.stop` runs its steps in the opposite
+  order on the two platforms, so the JVM half was where a defect could hide from a green native run.
+  Not automated — nothing runs the oracle on a build
 
 ### Scenario: readiness goes false before the drain starts
 

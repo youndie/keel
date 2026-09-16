@@ -29,13 +29,12 @@ and fixing that would touch the `Dockerfile` — filed as
 agent that did the work, which is the measurement this item warns about.
 
 **keel ships twice in the sense the brief meant it.** What is left is the measuring: parity
-(B-05), clone-to-ready (B-08) and the stand (B-13). **Acceptance 3 is verified on the artefact that ships**: kore's oracle against keel's image, 32 of 32
-requests in flight at the signal all completed. B-07 was **narrowed** from "both targets" to that,
-because the oracle drives a container and the JVM half is a distribution — adding a JVM image would
-contradict the brief's "one image" and hand every clone a test-only artefact. What that costs is
-[B-19](docs/backlog/B-19-oracle-on-the-jvm-half.md): the JVM half's shutdown is observed and not
-asserted, on the platform where `EmbeddedServer.stop` runs its steps in the opposite order. Blocked on
-[kore#85](https://github.com/youndie/kore/issues/85).
+(B-05), clone-to-ready (B-08) and the stand (B-13). **Acceptance 3 is verified on both halves.** kore's oracle asserts seven things from the client's
+record against the native image (B-07) and, since kore#85 gave it `--command`, against the JVM
+distribution too (B-19): 32 of 32 requests in flight at the signal all completed on each, every
+refusal carrying `Connection: close`, exit `0` native and `143` JVM. **The asymmetry that made this
+worth two items is closed** — `EmbeddedServer.stop` runs its steps in the opposite order on the two
+platforms, so the JVM half was where a defect could hide from a green native run.
 **B-16 is answered and B-18 is `dropped`**: keel ships on `distroless/cc-debian13` and the `scratch`
 recipe stays written down rather than shipped. That is now a decision without an expiry — it carried
 KT-89362 as one until the owner closed the question on 2026-09-16, on the ground that 4.5 MB off an
