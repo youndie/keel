@@ -1,7 +1,7 @@
 ---
 id: B-12
 title: "An eval suite for native-service-bootstrap with checkable expectations"
-status: wip
+status: done
 priority: P2
 size: M
 stage: m4-consumer
@@ -73,3 +73,26 @@ not travel.
 
 The item closes when a person merges the pull request. **Until then, saying "the eval suite exists"
 would be the thing this whole backlog is written against.**
+
+---
+
+## Closed 2026-09-16
+
+[kotlin-skills#7](https://github.com/youndie/kotlin-skills/pull/7) merged as `73f1cd2`. Verified in the
+file on `origin/main` rather than in the label: five cases —
+`outbound-tls-decides-the-image`, `cancellation-is-not-swallowed`,
+`native-service-block-before-the-targets`, `health-is-not-readiness`,
+`nothing-closes-in-applicationstopping` — beside the fixture script and the README.
+
+**The suite has not been run, by instruction.** So what exists is a set of cases nobody has scored,
+and that is the honest description of it: `evals.json` is a claim about what the skill should get
+right, not evidence that it does. The first run will say which of the five the skill actually passes,
+and it may well say that some expectation is scored loosely or that a fixture is too thin — the two
+judgement calls flagged in the pull request are the likeliest candidates.
+
+**That is the last item in this backlog.** What remains open is in other people's repositories
+([sborka#80](https://github.com/youndie/sborka/issues/80) for the two-target staging,
+[zavarnik#13](https://github.com/youndie/zavarnik/issues/13) for the training environment) and one
+thing here that is deliberately not automated: `:server:measure --stand` still refuses, because the
+measurement that exists was taken by hand over ssh and writing orchestration nobody has run would
+give this repository the appearance of a capability it does not have.
