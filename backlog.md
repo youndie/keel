@@ -306,7 +306,7 @@ budget stops being one.
 
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
-| [B-22](docs/backlog/B-22-the-page.md) `[ ]` | The kotlin.website page: a Kotlin server that ships twice, in an hour | P1 | M | - |
+| [B-22](docs/backlog/B-22-the-page.md) `[~]` | The kotlin.website page: a Kotlin server that ships twice, in an hour | P1 | M | - |
 
 ## Closed (21)
 
