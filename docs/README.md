@@ -30,13 +30,19 @@ are one file each in [`backlog/`](backlog/), cited as
 
 ## Read this first
 
-**Every document outside `research/` describes more than exists.** Since B-01 the `:server` module,
-its two entry points, `GET /items` and the kore wiring are real; the store, the JVM distribution, the
-image and every test are not. So all three remain `status: draft`, and the paths in their code-anchor
-tables are a mixture of real files and places code will live — `code_anchors.py` reports the second
-kind rotten, which is correct, and the count going down is how the template arriving looks from
-here. The gate that makes a draft an error on the default branch
-is **off**, with [B-10](backlog/B-10-draft-gate.md) as its address rather than as a relaxed rule.
+**Every document here is `active`, and each was re-read against the code rather than flipped** —
+[B-10](backlog/B-10-draft-gate.md), which records the four sentences that re-reading corrected. One of
+them was not a stale reference but an instruction that ran and silently produced the wrong artefact,
+which is why the re-reading is the point and the status field is only its result.
+`docs_check.py --on-main` enforces it on the default branch.
+
+**`active` does not mean everything described is built; it means nothing described is wrong.** What is
+absent says so where a reader meets it: a `scratch` image (B-16, by decision), `linuxArm64` coverage
+(B-15), an automated stand run (B-13 — that measurement was taken by hand).
+
+This section said the opposite for most of the tree's life, and correctly: until B-10 every layer
+document was `draft` and the gate was off with B-10 as its address. The history is in the item rather
+than quoted here.
 
 What *is* verified is [research-architecture](research/research-architecture.md) §1: eleven groups of
 facts, each read on 2026-09-16 in a published artefact (`sqlx4k-sqlite:1.13.1`'s Gradle metadata and

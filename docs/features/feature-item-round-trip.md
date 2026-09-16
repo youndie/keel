@@ -2,7 +2,7 @@
 id: feature-item-round-trip
 title: One item, stored and returned, on both targets
 type: feature
-status: draft
+status: active
 owner: unassigned
 involved_services:
   - keel-server
@@ -26,10 +26,14 @@ starter.
 `client_entries: []` is the answer rather than an omission: keel has no client, by the brief's first
 non-goal. A client template is a separate repository.
 
-The scenarios below **are** the acceptance criteria of the template. Six of them restate the brief's
-declared acceptance in a form a test can hold. Eight of the seventeen are automated; the rest are
-target behaviour, and the missing `**Automated:**` line is the honest signal rather than an oversight
-— `bdd_report.py` counts each of those as manual.
+The scenarios below **are** the acceptance criteria of the template, and six of them restate the
+brief's declared acceptance in a form a test can hold.
+
+Eight of seventeen carry an `**Automated:**` line. Of the rest, several are **verified without being
+automated** and say which run did it — the oracle for the shutdown, the stand for the numbers, a
+container for the image — and one, the `scratch` page, has nothing to run against at all because
+[B-16](../backlog/B-16-static-image.md) decided not to ship that image. The missing line is the honest
+signal in every case: `bdd_report.py` counts each of them as manual, and it is right to.
 
 ## 2. Business rules
 
@@ -214,16 +218,21 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **And:** the image is under the declared budget for its base — 13 972 497 bytes against 25 MB,
   measured with the method named in [B-04](../backlog/B-04-image-and-size-budget.md)
 
-### Scenario: the static image serves a rendered page, not a status code
+### Scenario: the static image serves a rendered page, not a status code — *not shipped*
 
-* **Given:** the image built with `--build-arg STATIC=1`
+**keel builds no static image**, so this scenario has nothing to run against. It is kept rather than
+deleted because it is the acceptance [B-18](../backlog/B-18-scratch-when-static-is-static.md) inherits
+the day [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) makes the recipe two lines, and
+because the reason it is worded this way is worth not losing:
+
+* **Given:** a `scratch` image, if one is ever built
 * **When:** `POST /items` and then `GET /items` are called against it
 * **Then:** the JSON body comes back correct — **not** merely a `2xx`
 * **And:** no `Failed to open iconv for charset UTF-8 with error code 22` appears in the log
 
-This scenario is worded the way it is because a `401` from a static image was once read as a pass: a
-`401` is produced before any text crosses a charset, and every rendered byte goes through glibc
-`iconv`, which is `dlopen`ed.
+A `401` from a static image was once read as a pass: a `401` is produced before any text crosses a
+charset, and every rendered byte goes through glibc `iconv`, which is `dlopen`ed. [B-16](../backlog/B-16-static-image.md)
+is why there is nothing to run it against today.
 
 ### Scenario: parity — the same k6 scenario, no diff after the normaliser
 
@@ -252,7 +261,12 @@ This scenario is worded the way it is because a `401` from a static image was on
 
 * **Given:** the repository at any commit
 * **When:** the line counts are taken
-* **Then:** Kotlin under `server/` is under 500 lines and Gradle across the repository is under 100
+* **Then:** Kotlin under `server/` is under 500 lines and Gradle **build logic** across the repository
+  is under 100
+* **Measured** 2026-09-16: Kotlin 214 main-source lines, build logic **95 of 100**. What the second
+  counts was decided under pressure in [B-03](../backlog/B-03-jvm-half-ships.md) — the version catalog
+  is excluded — and `backlog.md` carries that argument, including the part where a criterion was
+  edited by the work it was constraining
 * **And:** going over either is treated as the signal that something belongs in sborka or kore, and
   the finding is filed there rather than fixed here
 

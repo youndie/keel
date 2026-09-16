@@ -2,7 +2,7 @@
 id: endpoint-items
 title: keel — every route the template serves
 type: api_endpoints
-status: draft
+status: active
 services:
   - keel-server
 contract_source:

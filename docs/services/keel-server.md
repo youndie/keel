@@ -6,7 +6,7 @@ repo_url: https://github.com/youndie/keel
 module: ":server and :distribution — see section 3"
 tech_stack: [Kotlin Multiplatform, Ktor CIO, sqlx4k-sqlite, kore, sborka, Docker]
 owner: unassigned
-status: draft
+status: active
 depends_on:
   - kore
   - sborka
@@ -19,12 +19,21 @@ publishes:
 
 # keel `:server`
 
-**The service runs; the packaging does not exist.** Since B-01 `:server` produces a JVM jar and a
-`linuxX64` executable with kore wired and the size gate running; since B-06 there are suites on both
-targets; since B-02 `GET`/`POST /items` go through a real SQLite database that survives a restart.
-`:distribution`, the `Dockerfile` and `k6/` are still descriptions —
-[backlog.md](../../backlog.md) is the order they arrive in, and the paths in §2a are a mixture of real
-files and places code will live, which is why `code_anchors.py` still reports some of them rotten.
+**Everything below is built, and this document was re-read against it rather than flipped.** Two
+targets that run, a store that survives a restart, suites on both, an ordered shutdown verified under
+load by kore's oracle, a distribution with a verified AOT cache, an image, and a measurement taken on
+two hosts. `status` is `active` because of that re-reading — B-10 — and the four things it corrected
+are worth knowing, because each was a sentence that had quietly stopped being true:
+
+* §2a named `server/src/linuxX64Main/.../Main.kt`; the file is in `nativeMain`, so that enabling
+  `keel.linuxArm64` needs a property rather than a second copy of it;
+* §2a and §6 offered `--build-arg STATIC=1`, which B-16 decided not to ship — a reader following §6
+  would have built the ordinary image and believed it was the static one;
+* §5 said B-16 *asks* whether to ship it. B-16 answered;
+* `k6/measure.sh` existed and was in no anchor table.
+
+What is **not** here and says so: a `scratch` image (B-16, by decision), `linuxArm64` coverage (B-15),
+and an automated stand run (B-13 — the measurement was taken by hand).
 
 What *is* verified rather than merely built is
 [research-architecture](../research/research-architecture.md) §1: everything keel depends on was read
@@ -72,12 +81,13 @@ What it deliberately does **not** do:
 | `server/src/commonMain/kotlin/.../KeelConfig.kt` | the four `ConfigKey`s and the `ConfigSchema` |
 | `server/src/commonMain/kotlin/.../item/ItemStore.kt` | the port, the schema and `SqliteItemStore` — one implementation, both targets |
 | `server/src/commonMain/kotlin/.../item/ItemRoutes.kt` | `GET`/`POST /items` |
-| `server/src/jvmMain/kotlin/.../Main.kt`, `server/src/linuxX64Main/kotlin/.../Main.kt` | four lines each; the only thing that differs between the two builds |
+| `server/src/jvmMain/kotlin/.../Main.kt`, `server/src/nativeMain/kotlin/.../Main.kt` | four lines each; the only thing that differs between the two builds. The native one is in `nativeMain` rather than `linuxX64Main` so that turning `keel.linuxArm64` on is a property and not a second copy of the file |
 | `build.gradle.kts` | the root, and it exists for one reason — two Kotlin plugins in one build |
 | `distribution/build.gradle.kts` | `application` + zavarnik, and the reason it exists (§3) |
 | `distribution/src/main/kotlin/.../jvm/Main.kt` | one line; anything that grows here belongs in `:server` |
-| `Dockerfile` | two stages, `STATIC=1` behind a build arg |
-| `k6/items.js` | the scenario both binaries are driven with |
+| `Dockerfile` | two stages; one runtime image, and no static variant — B-16 |
+| `k6/items.js` | the scenario both binaries are driven with; `KEEL_MEASURE=1` gives it a constant-work profile |
+| `k6/measure.sh` | the three numbers, and the refusal to write them without a stand |
 | `.github/workflows/check.yaml` | the documentation gate and the build gate |
 
 ## 3. How it is built
@@ -157,8 +167,11 @@ repository configured — which is acceptance 1's precondition and the README's 
 * **Image:** built from the repository root, two stages, runtime `gcr.io/distroless/cc-debian13`.
   **13 972 497 bytes**, measured 2026-09-16 with `docker image inspect` on `linux/amd64` — the method
   is named because `docker images` reports 55.4MB for the same image, counting every platform of the
-  base manifest. There is no `STATIC=1` variant: [B-16](../backlog/B-16-static-image.md) asks whether
-  a template should carry that recipe at all.
+  base manifest. **There is no `STATIC=1` variant, by decision**: the `scratch` recipe pins five
+  `konan.properties` keys JetBrains may change in any patch release, and a template is copied and
+  never updated again — [B-16](../backlog/B-16-static-image.md), with
+  [B-18](../backlog/B-18-scratch-when-static-is-static.md) as its expiry. The recipe is written down
+  in the research; it is not shipped.
 * **`.dockerignore` does not exclude `.git`**, deliberately. `/version` is served from an identity the
   Gradle plugin reads out of git at build time, so excluding the directory — the obvious thing to do
   for context size — answers `0.1.0+unknown` in the artefact where the question matters most.
@@ -175,8 +188,8 @@ repository configured — which is acceptance 1's precondition and the README's 
 ```bash
 ./gradlew :distribution:run                     # the JVM half; works on a fresh clone, no config
 ./gradlew :server:linkReleaseExecutableLinuxX64 # the native binary; Linux only
-docker build -t keel .                          # distroless/cc
-docker build --build-arg STATIC=1 -t keel:static .
+./gradlew :server:measure                       # three numbers, and a refusal to write them
+docker build -t keel .                          # the only image there is
 ```
 
 Nothing else has to be running: the store is SQLite in a file, and `KEEL_DB_PATH` defaults to one
