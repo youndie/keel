@@ -78,9 +78,16 @@ Three things about this backlog that are not obvious from the items:
 A milestone closes as a whole and gets a line here saying what came out beyond the plan, and which
 research hypothesis was confirmed or refuted.
 
-**Two of the five are closed. The other three are each held open by one item blocked in another
-repository** — `m1-ships-twice` by B-15, B-17 and B-19, `m2-image` by B-18, `m4-consumer` by B-12 —
-which is worth naming because it is not the same as work remaining here.
+**All five are closed.** Nineteen items: seventeen done, one dropped (B-18 — keel ships on
+`distroless/cc-debian13` and the `scratch` recipe stays written down rather than shipped), one closed
+by a person merging it elsewhere.
+
+What is still open is in other repositories — [sborka#80](https://github.com/youndie/sborka/issues/80)
+for staging two native targets, [zavarnik#13](https://github.com/youndie/zavarnik/issues/13) for the
+training environment — and one thing here that is deliberately not automated:
+`:server:measure --stand` refuses, because the measurement that exists was taken by hand and
+orchestration nobody has run would give this repository the appearance of a capability it does not
+have.
 
 ### Shape closed — 2026-09-16
 
@@ -106,6 +113,45 @@ different ones.
 
 *Also out of it:* acceptance 6 had no definition. Counting every Gradle line or only build logic
 differed by 2.5x, and the question could not be deferred — B-03 could not fit until it was answered.
+
+### Ships twice closed — 2026-09-16
+
+**Both halves run, both are tested, and both are asserted by the same oracle.** B-02 settled D1 with
+one `commonMain` store, B-03 gave the JVM half a distribution whose AOT cache verifies at 100 %, B-06
+made CI name the suites so a target going dark fails loudly, B-07 and B-19 pointed kore's oracle at
+each half in turn, B-15 put `linuxArm64` on a runner of that architecture, and B-17 handed the module
+shape back to sborka.
+
+*Beyond the plan:* **the brief's contents table and its acceptance list contradicted each other**, and
+nothing but building it could have shown that. zavarnik refuses a project without `application`,
+`application` cannot apply to a multiplatform module, so "one KMP module" and "`aotVerify` on `check`"
+were never both possible. The answer cost a redefinition of acceptance 6 — taken under pressure, by
+the work it was constraining, which is written down rather than smoothed over.
+
+*Confirmed:* D1, and more cheaply than the brief priced it. `sqlx4k-sqlite` publishes both halves, so
+the second store implementation was never needed.
+
+*Refuted:* that the JVM half was the risky one. It passes the same seven assertions as native, and
+what actually bit was a broken string template that made the **native** service persist nothing while
+answering every request correctly.
+
+*Also out of it:* three defects in other people's repositories — razves#3, razves#4, sborka#80 — each
+found by being the second consumer of a convention written for one.
+
+### The image closed — 2026-09-16
+
+**One image, 13 972 497 bytes, 44 % under a budget declared before the first commit.** It serves a
+rendered page with non-ASCII intact and stops with exit 0 and kore's transcript.
+
+*Beyond the plan:* **the size could not be reported until it was measured three ways.** `docker
+images` says 55.4MB for that same image, counting every platform of the base manifest; `docker save`
+settles it at the smaller figure. Publishing the first number would have failed a budget that is not
+missed.
+
+*Refuted, and it took two items:* that `scratch` was worth waiting for. B-16 declined to ship the
+recipe because a template is copied and never updated again; B-18 then removed the expiry entirely,
+because 4.5 MB off an image already 44 % under budget was never a trade a JetBrains ticket could
+swing. The research keeps the recipe — those are facts about glibc, not about this decision.
 
 ### Measured closed — 2026-09-16
 
@@ -135,6 +181,28 @@ dominates was right at 82 %.
 `bench-a` and `bench-b` were in `~/.ssh/config` the whole time. The claim was written without
 checking, and it is the one entry in this backlog that was wrong for no reason other than not
 looking.
+
+### The first consumer closed — 2026-09-16
+
+**A service was built from keel and the template needed no change to carry it**: 249 lines of
+renaming, 178 of the relay's own domain, and six that were neither — two dependency declarations. Every
+infrastructure file came through byte-identical, checked one by one.
+
+*Beyond the plan:* **the conventions caught two real defects an agent wrote and a human reading would
+have passed.** kapkan failed the build on a `runCatching` that swallowed cancellation — which would
+have left a sweep loop running against a store the release stage was closing, in a service whose whole
+point is an ordered shutdown — and on a discarded `Result`. That is the strongest evidence in this
+backlog that the portfolio's conventions travel.
+
+*Confirmed:* the brief's kill criterion was not triggered. Acceptance 6 survives a real service.
+
+*Refuted:* that the six-line tally means the template is finished. The relay **forwards over http
+only**: `ktor-client-cio` has no TLS on Kotlin/Native, and fixing that needs `ktor-client-curl`, which
+links libcurl and would change the image — a change to the template that was neither made nor counted.
+So the figure is six lines *for a consumer that does not need outbound TLS*, and the item says so.
+
+*And one honest limit:* the count was kept by the agent that did the work, which B-09's own text names
+as the measurement that always passes. The four commits exist so somebody else can re-derive it.
 
 ## What the numbers are, and where they come from
 
@@ -210,13 +278,11 @@ budget stops being one.
 
 <!-- BEGIN INDEX - generated by scripts/backlog_index.py, do not edit by hand -->
 
-## Open (1)
+## Open (0)
 
-| Task | | Priority | Size | Blocked by |
-|---|---|---|---|---|
-| [B-12](docs/backlog/B-12-skill-evals.md) `[~]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
+No open tasks.
 
-## Closed (18)
+## Closed (19)
 
 **Shape**
 
@@ -250,5 +316,6 @@ budget stops being one.
 - [B-09](docs/backlog/B-09-first-consumer.md) `[x]` - The webhook relay is built from keel, and every non-domain line the agent added is a defect
 - [B-10](docs/backlog/B-10-draft-gate.md) `[x]` - Turn docs_check.py --on-main on once the tree describes code that exists
 - [B-11](docs/backlog/B-11-skill-points-at-keel.md) `[x]` - native-service-bootstrap names keel as its reference project in Step 0
+- [B-12](docs/backlog/B-12-skill-evals.md) `[x]` - An eval suite for native-service-bootstrap with checkable expectations
 
 <!-- END INDEX -->
