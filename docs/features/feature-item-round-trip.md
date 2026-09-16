@@ -133,8 +133,13 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **When:** `SIGTERM` arrives
 * **Then:** `/health/ready` answers `503` while the socket is still accepting, and only then does the
   drain begin
+* **And:** new arrivals get `503` for the whole announce window rather than being refused at the
+  socket
 * **And:** nothing is closed in `ApplicationStopping`, which runs on the wrong side of the drain on
   one of the two platforms
+* **Observed** against the image in [B-07](../backlog/B-07-shutdown-oracle.md) — `503` from 0.0 s to
+  4.6 s, connection refused from 5.1 s, exit `0`. Not automated: kore's oracle cannot yet be pointed
+  at keel ([kore#81](https://github.com/youndie/kore/issues/81))
 
 ### Scenario: a missing required variable stops the process instead of a route
 
