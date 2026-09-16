@@ -98,7 +98,7 @@ budget stops being one.
 
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
-| [B-02](docs/backlog/B-02-one-store-on-both-targets.md) `[ ]` | One ItemStore implementation compiles and passes its contract suite on both targets | P0 | M | B-01 |
+| [B-02](docs/backlog/B-02-one-store-on-both-targets.md) `[~]` | One ItemStore implementation compiles and passes its contract suite on both targets | P0 | M | B-01 |
 | [B-03](docs/backlog/B-03-jvm-half-ships.md) `[ ]` | installDist runs with a verified AOT cache, and the split it costs is one module | P0 | M | B-01 |
 | [B-04](docs/backlog/B-04-image-and-size-budget.md) `[ ]` | Two images from one Dockerfile, both measured against a budget declared first | P0 | M | B-01 |
 | [B-07](docs/backlog/B-07-shutdown-oracle.md) `[ ]` | kore's oracle runs against keel's binary, on both targets | P0 | M | B-02, B-03, B-04 |
