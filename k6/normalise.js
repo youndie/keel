@@ -20,14 +20,16 @@ export const IGNORED_HEADERS = [
 ];
 
 /**
- * `/version` is a contract, so it is compared — except the two fields that are facts about the build
+ * `/version` is a contract, so it is compared — except the fields that are facts about the build
  * rather than about the service.
  *
- * `built_at` differs because the two binaries are linked at different moments. `commit` is the same
- * in CI and differs locally, where only one half may have been rebuilt; keeping it would make the
- * parity run fail for a reason that is not parity.
+ * **These names were read out of a real response, and the first version of this list was not.** It
+ * said `built_at`, `commit` and `release`; the body actually carries `version:` and `built:`. Nothing
+ * failed, because both halves happen to share one generated build identity and the timestamps
+ * matched — so a normaliser that normalised nothing looked correct. It would have started failing the
+ * first time the two artefacts were built a second apart.
  */
-export const VERSION_VOLATILE_FIELDS = ['built_at', 'commit', 'release'];
+export const VERSION_VOLATILE_FIELDS = ['built', 'commit', 'release'];
 
 /**
  * The exit code is NOT normalised here, because nothing in an HTTP response carries it — it is named
@@ -41,13 +43,25 @@ export const EXIT_CODES_DIFFER_LEGITIMATELY = { native: 0, jvm: 143 };
 
 /** A response reduced to what the two targets must agree on, byte for byte. */
 export function normalise(response) {
+  // SORTED, because the two engines emit headers in different orders and a comparison of serialised
+  // objects would call that a difference. It is not one: a header set is unordered by definition.
   const headers = {};
-  for (const [name, value] of Object.entries(response.headers)) {
-    const key = name.toLowerCase();
-    if (IGNORED_HEADERS.includes(key)) continue;
-    headers[key] = value;
+  for (const key of Object.keys(response.headers)
+    .map((name) => name.toLowerCase())
+    .filter((key) => !IGNORED_HEADERS.includes(key))
+    .sort()) {
+    headers[key] = response.headers[Object.keys(response.headers).find((n) => n.toLowerCase() === key)];
   }
-  return { status: response.status, headers, body: normaliseBody(response) };
+  const body = normaliseBody(response);
+
+  // `content-length` COUNTS THE BODY THAT WAS SENT, not the one left after normalisation. Where a
+  // line has been dropped the header no longer describes what is being compared, and keeping it
+  // would fail the run for a reason that is not parity — a `commit` of `unknown` on one side and a
+  // hash on the other differ in length even though the field is deliberately ignored. It survives
+  // everywhere else, where it is a real part of the contract.
+  if (body !== String(response.body ?? '')) delete headers['content-length'];
+
+  return { status: response.status, headers, body };
 }
 
 function normaliseBody(response) {
