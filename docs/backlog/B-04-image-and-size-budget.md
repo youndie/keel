@@ -39,6 +39,6 @@ is where they meet a real image.
   additionally passes the rendered-page smoke of [B-05](B-05-parity-smoke.md)'s harness, because a
   status code is not evidence there.
 - AC: both sizes are recorded in the README with the date, against the declared budgets.
-- Anchors: `Dockerfile`, `server/build/native-image/keel`,
+- Anchors: `Dockerfile`, `server/build.gradle.kts`,
   `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/internal/NativeImageReference.kt`,
   `sborka/docs/research/research-static-binary.md`

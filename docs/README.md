@@ -11,7 +11,7 @@ is konekt with the domain removed. The documentation is layered; links run top t
                               │
 [ API — every route keel serves, keel's own and kore's ]
                               │
-[ Service — the modules, how they are built, and thirteen quirks ]
+[ Service — the modules, how they are built, and fifteen quirks ]
 ```
 
 There is **no `screens/` layer** and there will not be one: keel ships no client, by the brief's
@@ -30,10 +30,12 @@ are one file each in [`backlog/`](backlog/), cited as
 
 ## Read this first
 
-**Nothing outside `research/` describes code that exists.** Every document in `features/`, `api/` and
-`services/` is `status: draft`, and the paths in their code-anchor tables are where the code will
-live — so `code_anchors.py` reports most of them rotten, which is correct, and the count going down
-is one way to watch the template arrive. The gate that makes a draft an error on the default branch
+**Every document outside `research/` describes more than exists.** Since B-01 the `:server` module,
+its two entry points, `GET /items` and the kore wiring are real; the store, the JVM distribution, the
+image and every test are not. So all three remain `status: draft`, and the paths in their code-anchor
+tables are a mixture of real files and places code will live — `code_anchors.py` reports the second
+kind rotten, which is correct, and the count going down is how the template arriving looks from
+here. The gate that makes a draft an error on the default branch
 is **off**, with [B-10](backlog/B-10-draft-gate.md) as its address rather than as a relaxed rule.
 
 What *is* verified is [research-architecture](research/research-architecture.md) §1: eleven groups of
@@ -64,9 +66,9 @@ defect worth a backlog item, because both halves then look equally authoritative
   `ktor-server-core-3.5.2!/nixMain/io/ktor/server/engine/EmbeddedServerNix.kt` — because no search
   over sibling repositories can ever resolve them, and a permanently non-zero rot list is a list
   nobody reads.
-- `keel-server.md` carries **no `repo_url`**, and the checker warns about it. That is correct:
-  `github.com/youndie/keel` does not exist yet, and a URL written before the repository is intent
-  documented as fact.
+- `keel-server.md` carries `repo_url` since B-01, and not before: the repository did not exist when
+  the tree was written, and a URL written before its repository is intent documented as fact. The
+  checker's warning about its absence was the correct state for exactly one commit.
 - Do not duplicate what lives in code: give the path. A copy rots, a path does not.
 - **Language: English**, documents and code alike. HTTP headers, environment variable names and
   identifiers verbatim.
@@ -100,7 +102,7 @@ the machine only guards the membership.
 
 ### Services (1)
 
-- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and thirteen quirks
+- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and fifteen quirks
 
 ### Features (1)
 

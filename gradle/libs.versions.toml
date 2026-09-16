@@ -1,0 +1,65 @@
+# One line per version, and a comment above a line says what makes it non-obvious.
+#
+# Every version here was read from its own registry listing on 2026-09-16 — Maven Central for
+# sqlx4k, the portfolio's reposilite for the rest — rather than recalled.
+
+[versions]
+
+# The shared build conventions. One number: every sborka plugin below takes its version from here.
+sborka = "0.4.0.79"
+
+# NOT 2.4.20, which is the current release. It is what the portfolio's toolkits are built with, it is
+# the distribution kore's research addresses were dumped from, and it is what is already on both
+# machines — so a build here does not start with a gigabyte of download. Bumping it means re-running
+# those dumps, not just editing this line.
+kotlin = "2.4.10"
+
+# The exact artefact kore's five platform divergences were read in: EmbeddedServerJvm.kt,
+# EmbeddedServerNix.kt, CIOApplicationEngine.kt, ServerPipeline.kt. A bump is a re-read of those four
+# places before anything else. CIO because it is the only engine on Kotlin/Native — Netty and Jetty
+# are Java libraries.
+ktor = "3.5.2"
+
+coroutines = "1.11.0"
+serialization = "1.11.0"
+
+# The process lifecycle: the ordered shutdown, the three probes, the typed configuration, /version.
+# On the portfolio's repository and NOT on Maven Central, which is what the README's reposilite block
+# is for and what the "stranger test" waits on.
+kore = "0.1.4"
+
+# The size gate `sborka.binaryBudget` is enforced by. Applied by `:server` rather than carried by the
+# convention — sborka's own comment says why.
+razves = "0.1.0.30"
+
+[libraries]
+kore-core = { module = "io.github.youndie:kore-core", version.ref = "kore" }
+kore-ktor = { module = "io.github.youndie:kore-ktor", version.ref = "kore" }
+
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+# Test-only. It publishes linuxx64 and linuxarm64 — checked in Central before depending on it from a
+# common test source set, which is the check a `-jvm`-suffixed coordinate in a KMP module means
+# somebody skipped.
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+[plugins]
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+sborkaKmp = { id = "io.github.youndie.sborka.kmp", version.ref = "sborka" }
+sborkaLint = { id = "io.github.youndie.sborka.lint", version.ref = "sborka" }
+sborkaNativeService = { id = "io.github.youndie.sborka.native-service", version.ref = "sborka" }
+
+# Generates the `KoreBuildIdentity` object `/version` serves, as a Kotlin source that is an INPUT of
+# the compilation rather than something the build wrote first. Kotlin/Native has no manifest and no
+# JVM-style resource loading, so a resource-based identity compiles there and returns nothing.
+koreBuild = { id = "io.github.youndie.kore.build", version.ref = "kore" }
+
+razves = { id = "io.github.youndie.razves", version.ref = "razves" }
