@@ -2,6 +2,7 @@
 id: keel-server
 title: keel :server — the template service
 type: service
+repo_url: https://github.com/youndie/keel
 module: ":server and :server-jvm — see section 3"
 tech_stack: [Kotlin Multiplatform, Ktor CIO, sqlx4k-sqlite, kore, sborka, Docker]
 owner: unassigned
@@ -18,12 +19,16 @@ publishes:
 
 # keel `:server`
 
-**Nothing described here is built.** keel is a documentation-first template repository: this
-document is what `:server` will be, and [backlog.md](../../backlog.md) is the order it arrives in.
-Every path in §2a is where the code will live, so `code_anchors.py` reports them rotten — which is
-correct, and the count going down is one way to watch the template arrive. What *is* verified is in
+**The skeleton is built; most of this document is not.** Since B-01 `:server` produces a JVM jar and
+a `linuxX64` executable, `GET /items` answers a constant, kore is wired and the size gate runs. The
+store, `:server-jvm`, the `Dockerfile`, `k6/` and every test are still descriptions —
+[backlog.md](../../backlog.md) is the order they arrive in, and the paths in §2a are a mixture of real
+files and places code will live, which is why `code_anchors.py` still reports some of them rotten.
+
+What *is* verified rather than merely built is
 [research-architecture](../research/research-architecture.md) §1: everything keel depends on was read
-in a published artefact or a portfolio repository on 2026-09-16.
+in a published artefact or a portfolio repository on 2026-09-16, and §1.3 and §1.4 gained a
+confirmation from B-01's first build.
 
 ## 1. Responsibility
 
@@ -93,7 +98,8 @@ pair is dangerous in one specific combination: with `-Xallocator=std`, `MALLOC_A
 peak from 39.3 MB to 413.7 MB and 10 survivals out of 10 to 7. Both lines carry that beside them.
 
 **Where the binary lands.** `stageNativeImage` puts the release `.kexe` at
-`server/build/native-image/keel` whatever the target was declared as, and writes `keel.needed.txt`
+`server/build/native-image/<baseName>` whatever the target was declared as, and writes a
+`<baseName>.needed.txt`
 next to it naming what the binary asks the loader for. The `Dockerfile` copies from that path and
 nothing else; the whole point of the convention is that a `COPY` line survives being moved between
 repositories.
@@ -180,8 +186,8 @@ without the other is a deployment that believes it is observed and is not.
 
 ## 8. Quirks
 
-The first five are not keel's: they are the platform divergences every Kotlin/Native Ktor service
-inherits, verified by kore against the artefacts rather than against documentation
+Fifteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
 
@@ -226,4 +232,18 @@ And keel's own:
 13. **A green `build` on one host does not mean both targets were tested.** Kotlin/Native has no
     `linux_arm64` host, so `linuxArm64Test` is never *created* — it does not appear as skipped, it does
     not appear at all. CI links there and executes the test binary on an arm64 runner; a local green
-    build proves nothing about it.
+    build proves nothing about it. **Today it is worse than that:** there is no test anywhere, so
+    `./gradlew build` is green having run zero of them. B-06.
+14. **The configuration cache is off, and it is a workaround with an address:
+    [sborka#76](https://github.com/youndie/sborka/issues/76).** Every other repository in this
+    portfolio has it on. `sborka.native-service`'s `stageNativeImage` cannot be stored — its two
+    `project.provider { }` blocks capture the script object — and the build fails with "cannot
+    serialize Gradle script object references", naming the task and nothing about the convention
+    behind it. keel is the first build anywhere to meet this: sborka's stand applies the convention
+    without the cache, and the three services that run with the cache hand-write their native builds.
+    The comment in `gradle.properties` is what makes the line deletable when the issue lands, instead
+    of inherited by every clone.
+15. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+    session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
+    `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
+    all.

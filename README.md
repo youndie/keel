@@ -6,16 +6,16 @@ image, every check green on day one.
 
 *keel* — the first member laid down; everything else is built on it.
 
-> **Status: nothing is built.** This repository is documentation first. There is a docs tree, a
-> backlog of thirteen items and a gate that runs; there is no `settings.gradle.kts`, no `:server` and
-> no `Dockerfile` yet. [backlog.md](backlog.md) is the order they arrive in, and
-> [docs/research/research-architecture.md](docs/research/research-architecture.md) is what was
-> checked before any of it was written.
+> **Status: the skeleton builds, and that is all.** `./gradlew build` produces a JVM jar and a
+> `linuxX64` executable, `GET /items` answers, kore is wired and the size gate runs. There is no
+> store, no JVM distribution, no image and **no test at all** — the build is green having run zero of
+> them, which is the thing B-06 exists to stop. [backlog.md](backlog.md) is the order the rest
+> arrives in.
 >
-> **No number in this README is measured yet.** The figures below are the acceptance thresholds
-> declared in the brief before the first commit — they are targets, and each says which item replaces
-> it with a measurement and the date it was taken. A starter that publishes an unmeasured number is
-> the first thing its reader will check against their own clock.
+> **Most numbers here are still targets, and each says so.** They are the acceptance thresholds
+> declared in the brief before the first commit; the table below names the item that replaces each
+> with a measurement and the date it was taken. A starter that publishes an unmeasured number is the
+> first thing its reader will check against their own clock.
 
 ## What it is
 
@@ -46,11 +46,19 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 | clone → `/health/ready` on both targets, cold machine, including the toolchain fetch | under 1 h | not yet — [B-08](docs/backlog/B-08-clone-to-ready.md) |
 | image, `distroless/cc` | under 25 MB | not yet — [B-04](docs/backlog/B-04-image-and-size-budget.md) |
 | image, `STATIC=1` | under 12 MB | not yet — [B-04](docs/backlog/B-04-image-and-size-budget.md) |
-| Kotlin in `:server` | under 500 lines | not yet — [B-01](docs/backlog/B-01-repository-skeleton.md) |
-| Gradle across the repository | under 100 lines | not yet — [B-01](docs/backlog/B-01-repository-skeleton.md) |
+| Kotlin in `server/` | under 500 lines | **140** code lines (275 as written), 2026-09-16 |
+| Gradle across the repository | under 100 lines | **91** code lines (225 as written), 2026-09-16 |
+| the `linuxX64` release binary | — | **4 983 240 bytes**, declaring 7 shared libraries, 2026-09-16 |
+
+**Code lines**, meaning blank lines and comments dropped, and both numbers are reported so the choice
+stays visible — the reasoning in this portfolio lives beside the line it explains, and on the four
+Gradle files that is 60 % of them. A comment cannot make a build do the wrong thing; a line of Gradle
+can, and that is what the budget is for.
 
 Going over either line budget is the signal that something belongs in sborka or kore instead, and it
-is filed there rather than fixed here.
+is filed there rather than fixed here. Gradle is at 91 of 100 with **one** module, before B-03 adds
+`:server-jvm` — that pressure is the brief working as intended, not a problem to solve by raising the
+number.
 
 ## Resolving the dependencies
 

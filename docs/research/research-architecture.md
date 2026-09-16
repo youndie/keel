@@ -97,6 +97,22 @@ Read in `youndie/sborka` at `fb35de4`.
 | the size budget is `sborka.binaryBudget` in `gradle.properties`, enforced by **razves**, which the repository applies itself — and the convention fails the configuration if the property is set and razves is absent | same file; `razves` published at `0.1.0.30` on reposilite, read 2026-09-16 |
 | the plugin marker resolves as `io.github.youndie.sborka.native-service`, latest `0.4.0.79` | `https://reposilite.kotlin.website/snapshots/io/github/youndie/sborka/native-service/io.github.youndie.sborka.native-service.gradle.plugin/maven-metadata.xml`, read 2026-09-16 |
 
+**Confirmed by keel's first build, 2026-09-16.** `stageNativeImage` wrote
+`server/build/native-image/<baseName>` and the `keel.needed.txt` beside it lists **seven** shared libraries —
+`libm`, `libpthread`, `librt`, `libdl`, `libgcc_s`, `libc`, `ld-linux-x86-64` — against the ten a
+Kotlin/Native binary names by default. `libresolv`, `libutil` and `libcrypt` are gone, which is
+exactly what §1.4 says removes the `COPY` line and the builder/runtime glibc pairing rule with it.
+The prediction was sborka's; this is the first time it has been read off a binary outside sborka.
+
+**Refuted by the same build: the configuration cache.** The conventions were taken to be usable with
+`org.gradle.configuration-cache=true`, which every other repository in this portfolio sets — nothing
+said otherwise and nothing had checked. `stageNativeImage` cannot be stored in the cache, so the
+build fails with "cannot serialize Gradle script object references". keel is the first build anywhere
+to meet it: sborka's stand applies the convention *without* the cache, and katcher, metrik and tracy
+run *with* the cache and hand-write their native builds. Filed as
+[sborka#76](https://github.com/youndie/sborka/issues/76); keel sets the property to `false` with a
+comment naming it, so the line is deleted when the issue lands rather than inherited by every clone.
+
 **Correction to the brief.** The brief lists `--as-needed` among `sborka.native-service`'s contents.
 It is in **`sborka.kmp`**, gated to the Linux target family because `ld64` and `lld-link` reject the
 flag — `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/kmp.gradle.kts`. The
@@ -410,7 +426,10 @@ date it was taken — and if it is two hours, the README says two hours.
 
 **Open question 2 — is 25 MB (`distroless/cc`) / 12 MB (`STATIC=1`) the right budget?** The brief
 declares both before the first commit, which is the right order; the numbers next to them are from
-neighbouring services rather than from keel. tracy's `:server` binary is 13 863 696 bytes unstripped
+neighbouring services rather than from keel. **One half is now measured**: B-01's `linuxX64` release
+binary is **4 983 240 bytes**, well under tracy's 13 863 696, because keel links no database driver
+and no TLS client yet — B-02 will move it. The image is still unmeasured, and the binary is only its
+payload. tracy's `:server` binary is 13 863 696 bytes unstripped
 and 10 241 264 stripped, and the static probe's image was 9 570 311 bytes to pull *with the whole
 gconv directory*. Hypothesis: the `distroless/cc` budget is comfortable and the static one is tight
 by about the size of gconv. Settled by [B-04](../backlog/B-04-image-and-size-budget.md); a budget

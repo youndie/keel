@@ -1,0 +1,59 @@
+// The whole service: one route, the kore wiring, two entry points. Everything that ships is here.
+//
+// What is deliberately NOT here: the `application` plugin and the AOT cache (they cannot apply to a
+// multiplatform module — `:server-jvm`, B-03), the store (B-02) and the image (B-04).
+
+plugins {
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.sborkaKmp)
+    alias(libs.plugins.sborkaLint)
+    alias(libs.plugins.sborkaNativeService)
+    alias(libs.plugins.koreBuild)
+
+    // APPLIED BY THE REPOSITORY, NOT BY SBORKA. `sborka.native-service` configures the gate and
+    // refuses the build when `sborka.binaryBudget` is set and this line is missing — a budget
+    // nothing checks is a build that passes forever.
+    alias(libs.plugins.razves)
+}
+
+// BEFORE THE TARGETS, AND IT HAS TO BE. The convention configures `binaries.executable` from inside
+// `targets.withType(...).configureEach`, which fires the moment `linuxX64()` declares one — so an
+// entry point set after that line is set after it was read, and the build fails with "property
+// entryPoint has no value available", naming neither the ordering nor this block.
+nativeService {
+    entryPoint = "io.github.youndie.keel.main"
+    baseName = "keel"
+}
+
+kotlin {
+    // Development and tests, and — from B-03 — a distribution that actually ships. The parity
+    // finding behind keel is that every service in this portfolio had this line and none had a
+    // runnable JVM.
+    jvm()
+
+    // The target that ships. `--as-needed`, `fixedBlockPageSize=16` and the staged binary path all
+    // arrive from the two conventions above; none of them is a line in this file, which is the
+    // arrangement the whole repository exists to demonstrate.
+    linuxX64()
+
+    // Off by default — see `keel.linuxArm64` in gradle.properties.
+    if (providers.gradleProperty("keel.linuxArm64").orNull.toBoolean()) linuxArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kore.core)
+            implementation(libs.kore.ktor)
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.cio)
+            implementation(libs.ktor.server.content.negotiation)
+            implementation(libs.ktor.serialization.json)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.ktor.server.test.host)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+    }
+}

@@ -3,14 +3,15 @@
 A GitHub template repository for a Kotlin server that ships twice: one source, a JVM distribution and
 a Kotlin/Native binary, both runnable, both tested, one image. konekt with the domain removed.
 
-**Nothing is built.** There is a documentation tree, thirteen backlog items and a gate that runs.
-There is no `settings.gradle.kts`, no `:server` and no `Dockerfile`. A path under `server/` named in
-a document is where the code **will** live, and `code_anchors.py` reports it rotten, correctly.
+**The skeleton builds.** `./gradlew build` produces a JVM jar and a `linuxX64` executable, `GET /items`
+answers, kore is wired, and the size gate runs. There is no store, no JVM distribution, no image and
+**no test at all** — the build runs zero tests today, which is the green-build-that-visited-nothing
+B-06 exists for.
 
-This paragraph will be wrong the day after [B-01](docs/backlog/B-01-repository-skeleton.md) closes.
-A sentence about the state of a repository has no way to fail; `backlog.md` and the build do — prefer
-them. Two neighbouring repositories in this portfolio had the equivalent sentence wrong for weeks in
-both directions, which is why it is worth naming here.
+This paragraph said *"nothing is built"* and was wrong one iteration later. A sentence about the state
+of a repository has no way to fail; `backlog.md` and the build do — prefer them. Two neighbouring
+repositories in this portfolio had the equivalent sentence wrong for weeks in both directions, which
+is why it is worth naming here.
 
 ## How to start a session
 
@@ -32,7 +33,7 @@ both directions, which is why it is worth naming here.
    `docs/backlog/`; the index between the markers is generated, so edit the item and run
    `python3 scripts/backlog_index.py`.
 3. The layer document the task belongs to — [docs/services/keel-server.md](docs/services/keel-server.md)
-   for the modules and the thirteen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
+   for the modules and the fifteen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
    for the routes, [docs/features/feature-item-round-trip.md](docs/features/feature-item-round-trip.md)
    for the scenarios that are the template's acceptance. The map is [docs/README.md](docs/README.md).
 4. The skills, when the task is building rather than documenting: `native-service-bootstrap` for the
@@ -102,7 +103,8 @@ repositories open. The full list with addresses is
 
 ## Where things build
 
-Gradle runs on the Linux box through the wrapper, once there is one:
+This repository is a mutagen session (one-way replica, alpha here, beta `keel` on the Linux box).
+**Gradle runs there**, through the wrapper:
 
 ```bash
 ~/.claude/bin/wsl-run ./gradlew build
@@ -115,8 +117,15 @@ hook:
 LOCAL=1 make check
 ```
 
-A Mac cannot link an ELF, so `linkReleaseExecutableLinuxX64` is a Linux-only command; a klib
-cross-compiles and an executable does not.
+A Mac cannot link an ELF, so the native link is a Linux-only command; a klib cross-compiles and an
+executable does not.
+
+**The replica is one way, and a Gradle task that writes into the repository loses its output there.**
+`./gradlew updateEditorconfig` run through `wsl-run` wrote `.editorconfig` on the Linux box, and the
+next sync deleted it — beta is made to match alpha, so work done there is reverted and a diff taken
+there proves nothing. A file a task generates has to arrive on the Mac: run the task with `LOCAL=1`,
+or write the file here. `.editorconfig` is sborka's own, copied verbatim, which is what the task
+writes and what `checkEditorconfig` compares against.
 
 ## Documentation
 
