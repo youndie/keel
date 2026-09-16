@@ -245,6 +245,8 @@ This scenario is worded the way it is because a `401` from a static image was on
 * **Then:** all three succeed and `/health/ready` answers on both binaries
 * **And:** the wall time — including the Kotlin/Native toolchain fetch — is recorded in the README
   with the date it was taken, whatever it turns out to be
+* **Measured** in [B-08](../backlog/B-08-clone-to-ready.md): **3 min 48 s**, of which the build is
+  82 %. The image build is excluded and says so — the timing container has no Docker
 
 ### Scenario: the template stays a template
 

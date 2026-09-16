@@ -14,6 +14,16 @@
 
 DOCS ?= docs
 BACKLOG ?= backlog.md
+# WHERE THE SIBLING REPOSITORIES ARE, for the two reports that resolve code anchors.
+#
+# `..` is right for this portfolio, where the checkouts sit side by side, and for CI, where the parent
+# holds one directory. It is WRONG for a clone anywhere else, and a template gets cloned anywhere
+# else: cloned to `/work`, `..` is `/`, and the report walks the entire filesystem — 25 seconds and
+# then OOM-killed on an 8 GB machine. Found by B-08, doing exactly that.
+#
+# A clone that does not sit beside kore and sborka sets `REPOS=.` and gets a report about its own
+# paths, with the anchors that name other repositories listed as not found — which is the truth for a
+# machine that does not have them.
 REPOS ?= ..
 PY ?= python3
 GRADLE ?= ./gradlew
@@ -42,16 +52,20 @@ gate:
 	$(PY) scripts/docs_check.py --docs $(DOCS) --backlog $(BACKLOG)
 	$(PY) scripts/coverage_map.py --check --docs $(DOCS)
 
-# Non-blocking, on purpose.
+# Non-blocking, on purpose — AND THE `-` IS WHAT MAKES THAT TRUE.
 #
-# `bdd_report` counts scenarios; a percentage is meaningless while every scenario is target
-# behaviour. `code_anchors` reports most of this tree rotten today, and correctly — the paths are
-# where the code will live. The count going down is how the template arriving looks from here. It is
-# not a gate even when it reaches zero: a path quoted AS OBSOLETE is indistinguishable by machine
-# from a live one, and what rots lives in other people's repositories.
+# `bdd_report` counts scenarios; a percentage is meaningless while most scenarios are target
+# behaviour. `code_anchors` cannot tell a path quoted AS OBSOLETE from a live one, and what rots lives
+# in other people's repositories. Neither is a gate.
+#
+# They were nevertheless *run* by `check`, so a report that failed failed the gate — which is the
+# opposite of what this comment claimed, and B-08 found it the way such things are found: a fresh
+# clone at `/work` made `code_anchors` scan `/`, the kernel killed it, and `make check` went red on a
+# repository whose documentation was entirely consistent. The `-` tells make to carry on; the reports
+# still print, and what they print is still read by a person.
 report:
-	$(PY) scripts/bdd_report.py --docs $(DOCS) --repos $(REPOS)
-	$(PY) scripts/code_anchors.py --docs $(DOCS) --repos $(REPOS)
+	-$(PY) scripts/bdd_report.py --docs $(DOCS) --repos $(REPOS)
+	-$(PY) scripts/code_anchors.py --docs $(DOCS) --repos $(REPOS)
 
 # The code gate, and CI's `build` job runs exactly this. One `build` for every target the project
 # declares — which today is `jvm` and `linuxX64`; `linuxArm64` is behind `keel.linuxArm64` and is not
