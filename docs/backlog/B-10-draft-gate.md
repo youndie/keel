@@ -1,7 +1,7 @@
 ---
 id: B-10
 title: "Turn docs_check.py --on-main on once the tree describes code that exists"
-status: open
+status: wip
 priority: P2
 size: XS
 stage: m4-consumer

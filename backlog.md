@@ -156,7 +156,7 @@ budget stops being one.
 
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
-| [B-10](docs/backlog/B-10-draft-gate.md) `[ ]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
+| [B-10](docs/backlog/B-10-draft-gate.md) `[~]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
 | [B-12](docs/backlog/B-12-skill-evals.md) `[ ]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
 | [B-15](docs/backlog/B-15-arm64-suite-runs.md) `[ ]` | Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks | P2 | S | - |
 | [B-19](docs/backlog/B-19-oracle-on-the-jvm-half.md) `[ ]` | Assert the JVM half's shutdown, once the oracle can reach a distribution | P2 | S | - |
