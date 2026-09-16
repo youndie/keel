@@ -114,7 +114,7 @@ budget stops being one.
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
 | [B-03](docs/backlog/B-03-jvm-half-ships.md) `[?]` | installDist runs with a verified AOT cache, and the split it costs is one module | P0 | M | B-01 |
-| [B-04](docs/backlog/B-04-image-and-size-budget.md) `[ ]` | Two images from one Dockerfile, both measured against a budget declared first | P0 | M | B-01 |
+| [B-04](docs/backlog/B-04-image-and-size-budget.md) `[~]` | Two images from one Dockerfile, both measured against a budget declared first | P0 | M | B-01 |
 | [B-07](docs/backlog/B-07-shutdown-oracle.md) `[ ]` | kore's oracle runs against keel's binary, on both targets | P0 | M | B-02, B-03, B-04 |
 | [B-09](docs/backlog/B-09-first-consumer.md) `[ ]` | The webhook relay is built from keel, and every non-domain line the agent added is a defect | P0 | L | B-07, B-08 |
 | [B-05](docs/backlog/B-05-parity-smoke.md) `[ ]` | The parity normaliser is written before the first parity run | P1 | S/M | B-02, B-03 |
