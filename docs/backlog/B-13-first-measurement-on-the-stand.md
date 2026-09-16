@@ -1,7 +1,7 @@
 ---
 id: B-13
 title: "The first measurement on the stand: readiness, RSS at ready, p95 at a fixed rate"
-status: open
+status: wip
 priority: P1
 size: M
 stage: m3-measured
