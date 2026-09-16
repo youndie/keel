@@ -38,7 +38,7 @@ is why it is worth naming here.
    `docs/backlog/`; the index between the markers is generated, so edit the item and run
    `python3 scripts/backlog_index.py`.
 3. The layer document the task belongs to — [docs/services/keel-server.md](docs/services/keel-server.md)
-   for the modules and the eighteen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
+   for the modules and the nineteen quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
    for the routes, [docs/features/feature-item-round-trip.md](docs/features/feature-item-round-trip.md)
    for the scenarios that are the template's acceptance. The map is [docs/README.md](docs/README.md).
 4. The skills, when the task is building rather than documenting: `native-service-bootstrap` for the

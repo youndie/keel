@@ -222,7 +222,7 @@ a credential.
 
 ## 8. Quirks
 
-Eighteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Nineteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -301,7 +301,14 @@ And keel's own:
     Dockerfile that copies `build/install/distribution` after `check` picks the training database up
     and ships it. A clone that does that either copies the tar instead or sets `KEEL_DB_PATH` to a
     path outside the distribution.
-18. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+18. **`GET /items` returns the whole table, and every clone inherits that.** There is no limit, no
+    cursor and no page. It is fine for a template whose example holds a handful of rows and it is not
+    fine in a service: B-13's first stand run drove it at 500 req/s and got **29.8 iterations a
+    second, 4 692 dropped and 151 MB in ten seconds**, all of it a response body growing by 500 rows
+    a second. The measurement profile skips it (`KEEL_MEASURE=1`); the parity and smoke runs keep it,
+    because there the body is the point. A clone that keeps this route past its first thousand rows
+    has a denial of service it wrote itself.
+19. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.

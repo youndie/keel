@@ -1,7 +1,7 @@
 ---
 id: B-13
 title: "The first measurement on the stand: readiness, RSS at ready, p95 at a fixed rate"
-status: wip
+status: done
 priority: P1
 size: M
 stage: m3-measured
@@ -77,3 +77,53 @@ rule out.
 **95 of 100** with the task in. The measurement logic is in `k6/measure.sh` rather than in Gradle for
 two reasons and only one of them is the budget: a measurement is a procedure somebody reads and edits,
 and a shell script is where that is legible.
+
+---
+
+## Iteration 2 — 2026-09-16, done: the stand existed
+
+**Iteration 1 said the hardware was not available to this loop. That was wrong, and it was asserted
+without checking.** `bench-a` and `bench-b` are in `~/.ssh/config`, both up, 4 cores and 7 GiB each,
+Ubuntu 26.04.1, joined by a private link at 1.2 ms with no loss — the stand the container-limit study
+describes. Twelve characters of `grep` would have found them.
+
+The measurement is [docs/research/measurements-2026-09-16.md](../research/measurements-2026-09-16.md),
+with the raw k6 summary in the directory beside it.
+
+| | |
+|---|---|
+| time to ready | 0.029 s |
+| RSS at ready | 14 136 kB |
+| p95 at 500 req/s | **1.86 ms**, median of three after discarding the first |
+| delivered rate | 499.95/s of 500 asked |
+| checks | 45 000 per run, 0 failed |
+
+**The roles are reversed from the study's**, on the owner's decision: `bench-a` runs a k0s control
+plane and idles at 0.37 against `bench-b`'s 0.03, so the subject went on the quiet host. These numbers
+are therefore not directly comparable to that study's, and the measurement says so where it is
+written rather than here.
+
+### What it found before it produced a number
+
+Both of these are defects in keel that only a fixed-rate run could surface:
+
+* **`GET /items` has no limit.** Driving the full scenario at 500/s achieved 29.8 iterations a second,
+  dropped 4 692 and moved 151 MB in ten seconds — every number describing a response body growing by
+  500 rows a second rather than a service under load. Now [quirk 18](../services/keel-server.md), and
+  the measurement profile skips the route;
+* **the scenario could not be run twice against one database.** Deterministic ids meant run 2 collided
+  with run 1 on the primary key and 1 886 checks failed, which reads exactly like degradation under
+  repetition. Ids are namespaced per run now.
+
+A third was in the harness rather than the subject: `handleSummary` threw on a metric this k6 does not
+publish under that name, so a run that had worked reported nothing at all. Every field it reads is
+guarded now — the same failure shape as B-05's empty collector, and the second time this repository
+has been bitten by `handleSummary` running somewhere the rest of the script does not.
+
+### The `--stand` path is still refused
+
+The task's stand mode remains unimplemented and says so. This measurement was taken by hand, over ssh,
+and that is the honest description of it: what exists is a procedure that worked once, not a task
+anybody can re-run. Automating it is worth an item when a second measurement is wanted; writing it now
+would be the orchestration-nobody-has-run problem that iteration 1 declined, with one run's worth of
+evidence behind it instead of none.

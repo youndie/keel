@@ -11,7 +11,7 @@ is konekt with the domain removed. The documentation is layered; links run top t
                               │
 [ API — every route keel serves, keel's own and kore's ]
                               │
-[ Service — the modules, how they are built, and eighteen quirks ]
+[ Service — the modules, how they are built, and nineteen quirks ]
 ```
 
 There is **no `screens/` layer** and there will not be one: keel ships no client, by the brief's
@@ -95,14 +95,15 @@ The list below is **checked** against the files on disk: a document missing here
 file behind it, fails `coverage_map.py`. The grouping and the descriptions are written by a person —
 the machine only guards the membership.
 
-### Research (2)
+### Research (3)
 
 - [x] [research-architecture](research/research-architecture.md) — what was read in the artefacts and the repositories, what follows from it, and the seven decisions including the three that deviate from the brief
 - [x] [source-brief-keel](research/source-brief-keel.md) — the brief as it arrived, kept verbatim so the deviations stay readable
+- [x] [measurements-2026-09-16](research/measurements-2026-09-16.md) — the first stand measurement: time to ready, RSS, p95, with the raw k6 output in the directory beside it
 
 ### Services (1)
 
-- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and eighteen quirks
+- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and nineteen quirks
 
 ### Features (1)
 
