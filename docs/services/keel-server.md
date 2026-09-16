@@ -237,7 +237,7 @@ a credential.
 
 ## 8. Quirks
 
-Nineteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Twenty, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -287,8 +287,8 @@ And keel's own:
     either produces no result file or reports zero tests — `find | wc -l` would pass while one target
     quietly stopped being wired, which is the brief's red list exactly. Since B-15 `linuxArm64` is
     covered too: the x86-64 job cross-links the test binary and an `ubuntu-24.04-arm` runner executes
-    it. What still does not work is `build` with that target on — `stageNativeImage` stages two
-    binaries under one name ([sborka#80](https://github.com/youndie/sborka/issues/80)).
+    it. Since B-21 `build` with that target on works too — sborka#80 fixed in `0.4.0.82`, one staged
+    binary per target, and quirk 19 for what that does to the `COPY` line.
 14. **keel's startup probe answers `200` immediately, and that is correct rather than broken.** A
     `StartupGate` with no named gates is started from birth — `started = gates.isEmpty()` — and keel
     names none, so `/health/startup` says "started" from the moment the module is installed. The probe
@@ -322,7 +322,14 @@ And keel's own:
     a second. The measurement profile skips it (`KEEL_MEASURE=1`); the parity and smoke runs keep it,
     because there the body is the point. A clone that keeps this route past its first thousand rows
     has a denial of service it wrote itself.
-19. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+19. **Turning `keel.linuxArm64` on moves the staged binary, and the `Dockerfile` does not follow.**
+    `stageNativeImage` stages flat under one native target and per-target under two —
+    `build/native-image/linux_x64/keel` — which is correct, because one name for two binaries is a
+    `COPY` that finds the wrong file. keel ships with the property off so the committed `COPY` is
+    right; a clone that turns it on edits that line, and the `Dockerfile` says so at the line itself.
+    The failure otherwise arrives at image build time as "not found", naming the path and nothing
+    about the property that moved it.
+20. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.
