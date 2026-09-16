@@ -1,7 +1,7 @@
 ---
 id: B-15
 title: "Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks"
-status: open
+status: wip
 priority: P2
 size: S
 stage: m1-ships-twice
