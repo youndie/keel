@@ -6,11 +6,11 @@ image, every check green on day one.
 
 *keel* — the first member laid down; everything else is built on it.
 
-> **Status: the skeleton builds, and that is all.** `./gradlew build` produces a JVM jar and a
-> `linuxX64` executable, `GET /items` answers, kore is wired and the size gate runs. There is no
-> store, no JVM distribution, no image and **no test at all** — the build is green having run zero of
-> them, which is the thing B-06 exists to stop. [backlog.md](backlog.md) is the order the rest
-> arrives in.
+> **Status: the skeleton builds and is tested; that is all.** `./gradlew build` produces a JVM jar
+> and a `linuxX64` executable, `GET /items` answers, kore is wired, the size gate runs, and **12 tests
+> run on each of the two targets from one source** — CI names both suites and fails if either goes
+> missing. There is no store, no JVM distribution and no image. [backlog.md](backlog.md) is the order
+> the rest arrives in.
 >
 > **Most numbers here are still targets, and each says so.** They are the acceptance thresholds
 > declared in the brief before the first commit; the table below names the item that replaces each

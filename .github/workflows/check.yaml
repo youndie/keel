@@ -82,22 +82,69 @@ jobs:
       #   - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       #     run: python3 scripts/docs_check.py --on-main
 
-  # THERE IS NO BUILD JOB, AND UNTIL B-06 THAT MEANS A PULL REQUEST THAT DOES NOT COMPILE IS GREEN.
+  # THE CODE GATE. Until B-06 there was none, and a pull request that did not compile was green —
+  # which stopped being only a reviewer's problem when the loop began merging on green CI.
+  build:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # BY NAME RATHER THAN BY COPY. Java, Gradle and the `~/.konan` cache in one step and at one
+      # version; the portfolio ran three different versions of `setup-gradle` at once before this
+      # action existed. The cache matters here specifically: the Kotlin/Native toolchain is around a
+      # gigabyte and is fetched on every cold runner.
+      - uses: youndie/sborka/.github/actions/setup-kotlin@main
+        with:
+          konan-cache: "true"
+
+      # `make build`, not `./gradlew` directly, so the command a contributor runs and the command
+      # that gates a pull request are one string in one place — the same reason the job above runs
+      # `make check` rather than listing the scripts.
+      - run: make build GRADLEFLAGS=--no-daemon
+
+      # THE EXIT CODE IS NOT THE EVIDENCE. A suite that ran zero tests exits zero, and on a
+      # multiplatform build the suite that silently does not run is the interesting one: `build` was
+      # green for two items here while running no tests at all.
+      #
+      # So the targets are named rather than counted. `find | wc -l` passes when `linuxX64Test`
+      # quietly stops being wired and the JVM suite carries the run on its own, which is the exact
+      # shape of "a check that passes on one target and is skipped on the other" — the brief's red
+      # list. Naming them means the failure says which one went missing.
+      - name: report which suites actually ran
+        if: always()
+        run: |
+          set -u
+          fail=0
+          for target in jvmTest linuxX64Test; do
+            files=$(find server/build/test-results/"$target" -name '*.xml' 2>/dev/null | sort)
+            if [ -z "$files" ]; then
+              echo "::error::no test results for $target - that suite did not run"
+              fail=1
+              continue
+            fi
+            total=0
+            for f in $files; do
+              printf '%s ' "$f"
+              grep -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' "$f" || echo
+              n=$(sed -n 's/.*<testsuite[^>]*tests="\([0-9]*\)".*/\1/p' "$f" | head -1)
+              total=$((total + ${n:-0}))
+            done
+            echo "$target: $total tests"
+            [ "$total" -gt 0 ] || { echo "::error::$target produced result files but ran zero tests"; fail=1; }
+          done
+          [ "$fail" = 0 ] || exit 1
+
+  # linuxArm64 IS NOT COVERED HERE, AND THAT IS WRITTEN DOWN RATHER THAN LEFT TO BE NOTICED.
   #
-  # This comment used to say the job arrived with B-01. It did not: B-01 stopped at its own
-  # acceptance — a build that runs on the Linux box — and left CI alone, so the sentence was false
-  # from the moment that item merged. Corrected rather than deleted, because the gap is the point.
+  # The target is off by default (`keel.linuxArm64`), and covering it needs the shape kore uses: the
+  # x86-64 job cross-links the test binary and an `ubuntu-24.04-arm` runner executes it, because
+  # Kotlin/Native has no `linux_arm64` host and so `linuxArm64Test` is never CREATED — it does not
+  # appear as skipped, it does not appear at all.
   #
-  # What it costs is larger since the loop began merging its own pull requests on green CI: `check`
-  # is the documentation gate, python and seconds, and it says nothing about whether the Kotlin
-  # compiles. Green here is not evidence that the code builds, and anything reading it as such —
-  # a person, the loop, or Renovate's automerge — is reading it wrong. That is why `renovate.json`
-  # does not extend `automerge-harness`.
-  #
-  # B-06 adds the job, with the two things kore's CI learned the hard way: every test result file
-  # printed with its counts, so that a suite which ran zero tests cannot pass, and the arm64 suite
-  # executed on an arm64 runner from a binary the x86-64 job cross-linked, because Kotlin/Native has
-  # no `linux_arm64` host and the test task is never created there.
+  # It is blocked on youndie/razves#3: with two native targets razves registers
+  # `sizeReportDebugExecutable` twice and the build fails at configuration, so `-Pkeel.linuxArm64=true`
+  # cannot be built at all today. B-15.
 
   # Separate from the gate, and on a schedule rather than on a pull request, because an anchor rots
   # when somebody refactors a **different** repository. A pull request here is the least likely
