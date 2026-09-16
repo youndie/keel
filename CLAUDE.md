@@ -55,6 +55,33 @@ If keel accumulates fixes, it is turning back into konekt. The mechanical half o
 line budgets — 500 lines of Kotlin under `server/`, 100 of Gradle across the repository — and going
 over either is the signal, not the failure.
 
+## The loop merges its own pull requests
+
+**A `/loop` iteration merges the pull request it opened, once CI is green.** One item, one branch, one
+pull request, merged by the loop — `gh pr merge --rebase --delete-branch`.
+
+This is a deliberate trade and it is worth naming rather than discovering. What is given up is
+review: nobody reads the diff before it is on `main`. What is bought is a loop that runs unattended,
+and without it the loop stops after one item — every other `P0` here is `blocked_by: B-01`, statuses
+only change on `main` when a pull request merges, and an item whose blocker still reads `open` is not
+pickable. The first iteration hit exactly that wall.
+
+The conditions, which are not negotiable inside an iteration:
+
+- **Green CI, read from the pull request, before merging.** Not `make check` locally — the run on the
+  head commit. A merge on a pending or failing run is the whole guard gone.
+- **The pull request body still carries the acceptance checklist**, ticked from evidence. The body is
+  what a person reads afterwards instead of the diff, so it is the review surface and it is written
+  as one.
+- **A `question` item is never merged into being decided.** It goes to `main` as a `question`, and
+  the loop stops there.
+- **Anything routed out of keel — sborka, kore, the skill — is filed before the merge**, not after.
+  A finding that exists only in a merged commit message is a finding nobody will act on.
+- **`--rebase`, not squash.** The commit messages carry the reasoning; a squash collapses them into
+  the pull request title and the *why* is what survives longest.
+
+Not covered by this: a pull request a person opened. The loop merges what the loop opened.
+
 ## The two rules
 
 - **`main` describes what exists.** Every layer document is `status: draft` because the code does
