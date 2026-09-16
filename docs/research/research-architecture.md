@@ -110,8 +110,18 @@ said otherwise and nothing had checked. `stageNativeImage` cannot be stored in t
 build fails with "cannot serialize Gradle script object references". keel is the first build anywhere
 to meet it: sborka's stand applies the convention *without* the cache, and katcher, metrik and tracy
 run *with* the cache and hand-write their native builds. Filed as
-[sborka#76](https://github.com/youndie/sborka/issues/76); keel sets the property to `false` with a
-comment naming it, so the line is deleted when the issue lands rather than inherited by every clone.
+[sborka#76](https://github.com/youndie/sborka/issues/76), and **fixed the same day** —
+`sborka 0.4.0.80`, taken in B-14, and the property is back to `true`.
+
+The fix is worth a line because it is larger than the serialisation it was reported for.
+`stageNativeImage` now stages from the link tasks' outputs rather than scanning `build/bin`: sborka
+found that making the scan lazy was not enough, because a copy spec resolves its sources while the
+cache entry is being written, so an entry stored just after a `clean` would report `NO-SOURCE` on
+every later run with the binary sitting right there — a task that quietly stages nothing, which is
+worse than the failure it replaced. Verified here rather than assumed: with `0.4.0.80` and the cache
+on, a clean build stores the entry and stages the binary, a second run reuses the entry, and a third
+run with `build/native-image` deleted re-stages it. The whole exchange took one working day, which
+is the routing table paying for itself.
 
 **Correction to the brief.** The brief lists `--as-needed` among `sborka.native-service`'s contents.
 It is in **`sborka.kmp`**, gated to the Linux target family because `ld64` and `lld-link` reject the

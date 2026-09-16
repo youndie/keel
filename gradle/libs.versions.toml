@@ -6,7 +6,7 @@
 [versions]
 
 # The shared build conventions. One number: every sborka plugin below takes its version from here.
-sborka = "0.4.0.79"
+sborka = "0.4.0.80"
 
 # NOT 2.4.20, which is the current release. It is what the portfolio's toolkits are built with, it is
 # the distribution kore's research addresses were dumped from, and it is what is already on both

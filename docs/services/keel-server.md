@@ -186,7 +186,7 @@ without the other is a deployment that believes it is observed and is not.
 
 ## 8. Quirks
 
-Fifteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Fourteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -234,16 +234,7 @@ And keel's own:
     not appear at all. CI links there and executes the test binary on an arm64 runner; a local green
     build proves nothing about it. **Today it is worse than that:** there is no test anywhere, so
     `./gradlew build` is green having run zero of them. B-06.
-14. **The configuration cache is off, and it is a workaround with an address:
-    [sborka#76](https://github.com/youndie/sborka/issues/76).** Every other repository in this
-    portfolio has it on. `sborka.native-service`'s `stageNativeImage` cannot be stored — its two
-    `project.provider { }` blocks capture the script object — and the build fails with "cannot
-    serialize Gradle script object references", naming the task and nothing about the convention
-    behind it. keel is the first build anywhere to meet this: sborka's stand applies the convention
-    without the cache, and the three services that run with the cache hand-write their native builds.
-    The comment in `gradle.properties` is what makes the line deletable when the issue lands, instead
-    of inherited by every clone.
-15. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+14. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.
