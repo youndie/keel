@@ -26,6 +26,21 @@ nativeService {
     baseName = "keel"
 }
 
+// THE BUDGET WATCHES WHAT SHIPS, AND THIS IS A WORKAROUND WITH AN ADDRESS: youndie/razves#4.
+//
+// razves applies `binarySize.budget` to every executable, and the debug binary is 3.1x the release
+// one — 28,580,560 against 9,227,448 on this commit, because the Rust driver and the unstripped
+// Kotlin arrive together. Holding both to one number means choosing: a ceiling debug fits under is
+// one the shipped binary could triple beneath without the build noticing.
+//
+// So the release check keeps the real 25 MiB and the debug one is off. `stageNativeImage` stages the
+// release binary and the image carries that; nothing deploys the debug one.
+//
+// This is the only line in this repository's build files that is not "apply a convention and set a
+// name", and it is here on the terms CLAUDE.md sets for a workaround: local, and carrying the issue
+// so the next person deletes it instead of inheriting it.
+tasks.matching { it.name == "sizeBudgetCheckDebugExecutable" }.configureEach { enabled = false }
+
 kotlin {
     // Development and tests, and — from B-03 — a distribution that actually ships. The parity
     // finding behind keel is that every service in this portfolio had this line and none had a
@@ -49,11 +64,13 @@ kotlin {
             implementation(libs.ktor.server.content.negotiation)
             implementation(libs.ktor.serialization.json)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.sqlx4k.sqlite)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.ktor.server.test.host)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.okio)
         }
     }
 }

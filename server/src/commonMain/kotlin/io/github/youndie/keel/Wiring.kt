@@ -1,6 +1,12 @@
 package io.github.youndie.keel
 
+import io.github.smyrgeorge.sqlx4k.ConnectionPool
+import io.github.smyrgeorge.sqlx4k.Driver
+import io.github.smyrgeorge.sqlx4k.sqlite.sqlite
+import io.github.youndie.keel.item.ItemStore
+import io.github.youndie.keel.item.SqliteItemStore
 import io.github.youndie.keel.item.itemRoutes
+import io.github.youndie.keel.item.itemsSchema
 import io.github.youndie.kore.generated.KoreBuildIdentity
 import io.github.youndie.kore.health.LivenessGate
 import io.github.youndie.kore.health.ReadinessGate
@@ -11,6 +17,7 @@ import io.github.youndie.kore.ktor.installKoreVersion
 import io.github.youndie.kore.ktor.installShutdownRefusal
 import io.github.youndie.kore.lifecycle.AnnounceNotReady
 import io.github.youndie.kore.lifecycle.ShutdownDeadlines
+import io.github.youndie.kore.lifecycle.ShutdownParticipant
 import io.github.youndie.kore.lifecycle.runUntilSignal
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -33,6 +40,26 @@ fun startKeel(settings: KeelSettings) {
     val liveness = LivenessGate()
     val deadlines = ShutdownDeadlines()
 
+    // THE DATABASE IS OPENED BEFORE ANYTHING SERVES, and the schema is applied before that. A
+    // migration that runs after the first request is a migration racing a user.
+    //
+    // The URL is built by a named function rather than inline, and that is a scar: this line once
+    // held a broken template, so the service opened a database at a path named after the expression
+    // that should have produced it. It answered every request correctly and persisted nothing —
+    // a restart came back empty. The store suite could not catch it, because the suite builds its
+    // own URL; only running the binary twice could. `keelDatabaseUrl` is now one thing, tested.
+    val db: Driver =
+        sqlite(
+            url = keelDatabaseUrl(settings.dbPath),
+            options =
+                ConnectionPool.Options
+                    .builder()
+                    .maxConnections(POOL_SIZE)
+                    .build(),
+        )
+    val store: ItemStore = SqliteItemStore(db)
+    runBlocking { itemsSchema().forEach { db.execute(it).getOrThrow() } }
+
     val server =
         embeddedServer(
             CIO,
@@ -48,7 +75,7 @@ fun startKeel(settings: KeelSettings) {
                 shutdownGracePeriod = deadlines.drain.inWholeMilliseconds
                 shutdownTimeout = deadlines.drain.inWholeMilliseconds + 5_000
             },
-            module = { keelModule(startup, readiness, liveness) },
+            module = { keelModule(startup, readiness, liveness, store) },
         )
 
     // NOT `start(wait = true)`. The main thread has to be free to wait for the signal and then run
@@ -71,8 +98,20 @@ fun startKeel(settings: KeelSettings) {
         ) {
             announce(AnnounceNotReady(readiness))
             drain(EngineDrain(server, deadlines.drain, deadlines.drain + 5.seconds))
-            // The store closes here, after the drain — B-02. NEVER in `ApplicationStopping`, which
-            // runs before the drain on Kotlin/Native and after it on the JVM, from identical source.
+
+            // AFTER THE DRAIN, AND NEVER IN `ApplicationStopping` — which runs before the drain on
+            // Kotlin/Native and after it on the JVM, from identical source. Closing the pool there
+            // takes the connection out from under a request still being served on one of the two
+            // platforms, and the code looks the same on both.
+            pool(
+                object : ShutdownParticipant {
+                    override val name = "sqlite"
+
+                    override suspend fun stop() {
+                        db.close()
+                    }
+                },
+            )
         }
     }
 }
@@ -82,6 +121,7 @@ fun Application.keelModule(
     startup: StartupGate,
     readiness: ReadinessGate,
     liveness: LivenessGate,
+    store: ItemStore,
 ) {
     // BEFORE the probes and the routes. An interceptor installed later would let calls through that
     // arrived first, and the one thing this must never miss is the first request after the announce.
@@ -90,5 +130,27 @@ fun Application.keelModule(
     installKoreVersion(KoreBuildIdentity)
 
     install(ContentNegotiation) { json() }
-    itemRoutes()
+    itemRoutes(store)
 }
+
+/**
+ * Where the database is, as sqlx4k wants it.
+ *
+ * **`mode=rwc` creates the file when it is not there**, and it is the parameter that makes one line
+ * correct on both targets rather than on whichever was tried first: sqlx4k is two drivers behind one
+ * API and they disagree about this by default — Xerial's JDBC creates the file, the Rust driver does
+ * not.
+ *
+ * A function rather than an interpolation at the call site because it is the piece that was wrong
+ * once and is worth a test. `KeelDatabaseUrlTest` is that test.
+ */
+internal fun keelDatabaseUrl(path: String): String = "sqlite://$path?mode=rwc"
+
+/**
+ * Two connections, not one.
+ *
+ * One deadlocks the moment anything holds a transaction open while the code inside asks for a second
+ * connection, and that shape arrives with a clone's first feature rather than being exotic. A
+ * starting point to measure, not a tuned number.
+ */
+private const val POOL_SIZE = 2
