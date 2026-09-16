@@ -6,18 +6,17 @@ image, every check green on day one.
 
 *keel* — the first member laid down; everything else is built on it.
 
-> **Status: the skeleton builds and is tested; that is all.** `./gradlew build` produces a JVM jar
-> and a `linuxX64` executable, `GET`/`POST /items` go through a real SQLite database that survives a
-> restart, kore is wired, the size gate runs, and **22 tests run on each of the two targets from one
-> source** — CI names both suites and fails if either goes missing. The image builds, serves and
-> stops cleanly at **14 MB**, and the JVM half ships as a distribution whose AOT cache is verified on
-> every `check` — 100 % of application classes served from it. [backlog.md](backlog.md) is the order
-> the rest arrives in.
+> **Status: every criterion the brief declared is met or explicitly refused.** Three targets build,
+> **23 tests run on each of `jvm` and `linuxX64`** from one source and the same suite runs on arm64
+> hardware, both halves pass kore's shutdown oracle, the two binaries produce no diff after a
+> normaliser written before the first run, and the image is 13 972 497 bytes. A service has been built
+> from this template and needed no change to any infrastructure file.
 >
-> **Most numbers here are still targets, and each says so.** They are the acceptance thresholds
-> declared in the brief before the first commit; the table below names the item that replaces each
-> with a measurement and the date it was taken. A starter that publishes an unmeasured number is the
-> first thing its reader will check against their own clock.
+> **One deliverable of the brief is not done**: the page on kotlin.website. B-22.
+>
+> **Every number below was measured, and each says when.** They began as thresholds declared before
+> the first commit; a starter that publishes an unmeasured number is the first thing its reader
+> checks against their own clock.
 
 ## What it is
 
