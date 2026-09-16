@@ -1,7 +1,7 @@
 ---
 id: B-08
 title: "Clone to /health/ready on a machine that has never seen the portfolio, timed"
-status: open
+status: wip
 priority: P1
 size: S/M
 stage: m3-measured
