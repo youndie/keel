@@ -196,8 +196,11 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **When:** the container is started
 * **Then:** it answers `/health/ready` — no `cannot open shared object file`, no library dragged from
   the builder stage
-* **And:** the image is under the declared budget for its base (see
-  [B-04](../backlog/B-04-image-and-size-budget.md))
+* **And:** `POST` then `GET /items` returns a body with non-ASCII intact, because a status code
+  crosses no charset
+* **And:** `docker stop` ends it with exit code `0` and kore's transcript in the logs
+* **And:** the image is under the declared budget for its base — 13 972 497 bytes against 25 MB,
+  measured with the method named in [B-04](../backlog/B-04-image-and-size-budget.md)
 
 ### Scenario: the static image serves a rendered page, not a status code
 

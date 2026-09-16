@@ -1,7 +1,7 @@
 ---
 id: B-04
 title: "Two images from one Dockerfile, both measured against a budget declared first"
-status: wip
+status: done
 priority: P0
 size: M
 stage: m2-image
@@ -42,3 +42,51 @@ is where they meet a real image.
 - Anchors: `Dockerfile`, `server/build.gradle.kts`,
   `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/internal/NativeImageReference.kt`,
   `sborka/docs/research/research-static-binary.md`
+
+---
+
+## Iteration 1 — 2026-09-16, done for the image that ships
+
+The default image builds, runs, serves a rendered page and stops cleanly. **13 972 497 bytes against
+a 25 MB budget** — 44 % under.
+
+| AC | Evidence |
+|---|---|
+| builds from the committed `Dockerfile` | `docker build -t keel:cc .`, 1m53s with a warm `~/.konan` cache mount |
+| answers `/health/ready` | `ready` |
+| under the declared budget | 13 972 497 bytes |
+| a rendered page, not a status code | `POST` then `GET /items` returns `ренденная страница` intact through glibc `iconv` |
+| stops cleanly | `docker stop` → exit code **0**, with kore's full transcript in the logs |
+
+### The size had to be measured three ways before it could be reported
+
+`docker image inspect --format '{{.Size}}'` says **13 972 497**. `docker images` says **55.4MB**.
+They disagree by 4x, and reporting the second would have failed a budget that is not actually missed.
+
+`docker save keel:cc | wc -c` gives **14 003 712** — the same number plus tar metadata — which
+settles it: the image is ~14 MB for `linux/amd64`, and `docker images` is counting every platform of
+the base image's manifest in the containerd store. `docker history` agrees: 9.24 MB for the binary
+layer and ~4.7 MB of base.
+
+**So the figure published in the README names its method.** A budget checked with the wrong command
+is a budget that fails at random.
+
+### Two things the image build found
+
+**`/version` answers `0.1.0+unknown` when built here**, because the mutagen replica ignores VCS
+directories, so the build context has no `.git` and the Gradle plugin has nothing to read. In a git
+checkout it would name the commit. The consequence is written into `.dockerignore`: `.git` is
+deliberately *not* excluded there, with the reason, because excluding it is the obvious thing to do
+for context size and it silently removes the one answer `/version` exists to give.
+
+**There was no `.dockerignore` at all**, so the first build shipped the whole tree — including
+`build/`, tens of megabytes of exactly what the image build is about to produce — into the context.
+Now 886 B.
+
+### Deliberately not done, and it narrows this item
+
+**The `STATIC=1` variant is not here.** It is not a task but a decision: sborka refused to carry the
+same recipe as a convention option because it pins five `konan.properties` keys JetBrains may change
+in any patch release, and a template is that hazard with a longer fuse — a convention is fixed once
+for everyone, a template is copied and never updated again. [B-16](B-16-static-image.md) carries the
+question, the measured prize (~4.5 MB on an image already 44 % under budget) and a recommendation.
