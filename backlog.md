@@ -147,7 +147,7 @@ budget stops being one.
 
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
-| [B-09](docs/backlog/B-09-first-consumer.md) `[ ]` | The webhook relay is built from keel, and every non-domain line the agent added is a defect | P0 | L | B-07, B-08 |
+| [B-09](docs/backlog/B-09-first-consumer.md) `[~]` | The webhook relay is built from keel, and every non-domain line the agent added is a defect | P0 | L | B-07, B-08 |
 | [B-11](docs/backlog/B-11-skill-points-at-keel.md) `[ ]` | native-service-bootstrap names keel as its reference project in Step 0 | P1 | S | B-09 |
 | [B-13](docs/backlog/B-13-first-measurement-on-the-stand.md) `[ ]` | The first measurement on the stand: readiness, RSS at ready, p95 at a fixed rate | P1 | M | B-04, B-05 |
 | [B-10](docs/backlog/B-10-draft-gate.md) `[ ]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
