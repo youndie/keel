@@ -1,7 +1,7 @@
 ---
 id: B-11
 title: "native-service-bootstrap names keel as its reference project in Step 0"
-status: wip
+status: done
 priority: P1
 size: S
 stage: m4-consumer
@@ -58,3 +58,16 @@ inventing one for somebody else's repository is not the loop's to do.
 `feat/kore-stage-concurrency` in kotlin-skills is pushed, one commit ahead of `main` — `b35c309`, the
 `stopAndJoin()` note — with **no open pull request**. It was not touched: this work branched from
 `main` beside it. Flagged in the pull request in case it was forgotten rather than parked.
+
+---
+
+## Closed 2026-09-16
+
+[kotlin-skills#6](https://github.com/youndie/kotlin-skills/pull/6) merged as `cdcc0e2`, and
+[#5](https://github.com/youndie/kotlin-skills/issues/5) closed with it. Verified in the file on
+`origin/main` rather than in the label: Step 0 is *"Start from keel"* with the clone line, and the
+TLS gotcha is in the gotchas list.
+
+**keel is the reference project for `native-service-bootstrap`.** Which makes the next change to keel
+somebody else's problem too — a clone that breaks is now a skill that broke, and B-17's convention
+adoption is the first thing that will test that.
