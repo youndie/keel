@@ -31,3 +31,16 @@ exist** — Kotlin/Native has no `linux_arm64` host, so the plugin never creates
   demonstrated not to cover the other.
 - Anchors: `.github/workflows/check.yaml`, `Makefile`,
   `kore/CLAUDE.md`
+
+## Note added 2026-09-16, after B-01 merged
+
+**There is no build job in CI at all**, so today a pull request that does not compile is green. B-01
+closed against its own acceptance — a build that runs on the Linux box — and left CI alone; the
+workflow's comment claimed the job had arrived with it, and that has been corrected.
+
+This item was sized against "prove a suite ran on each target". It now also carries "run the build in
+CI in the first place", which is the cheaper half and the one everything else waits on. **It became
+more urgent the moment the loop started merging its own pull requests on green CI** (`CLAUDE.md`, the
+loop section): green currently means the documentation gate passed and says nothing about the Kotlin.
+`renovate.json` declines `automerge-harness` for exactly this reason, and that preset can be added in
+the same change that closes this item.

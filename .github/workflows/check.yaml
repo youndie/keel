@@ -82,13 +82,22 @@ jobs:
       #   - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       #     run: python3 scripts/docs_check.py --on-main
 
-  # THE BUILD JOB ARRIVES WITH B-01, and it is named here rather than left to be remembered.
+  # THERE IS NO BUILD JOB, AND UNTIL B-06 THAT MEANS A PULL REQUEST THAT DOES NOT COMPILE IS GREEN.
   #
-  # `make build` exists already and says "no Gradle build yet"; the job that runs it belongs in the
-  # same commit as the wrapper, together with the two things kore's CI learned the hard way — every
-  # test result file printed with its counts, so that a suite which ran zero tests cannot pass, and
-  # the arm64 suite executed on an arm64 runner from a binary the x86-64 job cross-linked, because
-  # Kotlin/Native has no `linux_arm64` host and the test task is never created there. B-06.
+  # This comment used to say the job arrived with B-01. It did not: B-01 stopped at its own
+  # acceptance — a build that runs on the Linux box — and left CI alone, so the sentence was false
+  # from the moment that item merged. Corrected rather than deleted, because the gap is the point.
+  #
+  # What it costs is larger since the loop began merging its own pull requests on green CI: `check`
+  # is the documentation gate, python and seconds, and it says nothing about whether the Kotlin
+  # compiles. Green here is not evidence that the code builds, and anything reading it as such —
+  # a person, the loop, or Renovate's automerge — is reading it wrong. That is why `renovate.json`
+  # does not extend `automerge-harness`.
+  #
+  # B-06 adds the job, with the two things kore's CI learned the hard way: every test result file
+  # printed with its counts, so that a suite which ran zero tests cannot pass, and the arm64 suite
+  # executed on an arm64 runner from a binary the x86-64 job cross-linked, because Kotlin/Native has
+  # no `linux_arm64` host and the test task is never created there.
 
   # Separate from the gate, and on a schedule rather than on a pull request, because an anchor rots
   # when somebody refactors a **different** repository. A pull request here is the least likely
