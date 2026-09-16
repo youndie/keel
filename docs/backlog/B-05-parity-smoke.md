@@ -1,7 +1,7 @@
 ---
 id: B-05
 title: "The parity normaliser is written before the first parity run"
-status: open
+status: wip
 priority: P1
 size: S/M
 stage: m3-measured
