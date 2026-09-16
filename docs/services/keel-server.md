@@ -222,7 +222,7 @@ a credential.
 
 ## 8. Quirks
 
-Seventeen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Eighteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -292,7 +292,16 @@ And keel's own:
     release check keeps the real 25 MiB — `stageNativeImage` stages that binary and the image carries
     it — and the debug check is disabled in `server/build.gradle.kts`. It is the only line in this
     repository's build files that is not "apply a convention and set a name".
-17. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+17. **The AOT training run leaves a database inside `build/install/`, and `distTar` does not carry
+    it.** `KEEL_DB_PATH` defaults to the relative `keel.db` and the start script runs from the
+    installed directory, so `aotTrain` creates `build/install/distribution/keel.db` with whatever the
+    training workload wrote. The tar is built from the distribution spec rather than from that
+    directory, so the shipped archive is clean — checked, not assumed.
+    **The trap is for a clone**: zavarnik's guidance is "ship `installDist` **or** `distTar`", and a
+    Dockerfile that copies `build/install/distribution` after `check` picks the training database up
+    and ships it. A clone that does that either copies the tar instead or sets `KEEL_DB_PATH` to a
+    path outside the distribution.
+18. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.
