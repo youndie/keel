@@ -1,7 +1,7 @@
 ---
 id: B-07
 title: "kore's oracle runs against keel's binary, on both targets"
-status: open
+status: wip
 priority: P0
 size: M
 stage: m1-ships-twice
