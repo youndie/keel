@@ -224,6 +224,11 @@ This scenario is worded the way it is because a `401` from a static image was on
 * **When:** `k6/items.js` runs against each
 * **Then:** the recorded responses are identical after the declared normaliser, and the normaliser is
   the file that existed before the run
+* **And:** the comparison refuses to pass on nothing — it asserts both sides recorded the same
+  non-zero number of responses first, because the first run of this scenario diffed two empty files
+  and reported success
+* **Observed** in [B-05](../backlog/B-05-parity-smoke.md): 160 checks passed on each target, three
+  responses recorded on each, `diff` clean. Not automated — nothing runs it on a build yet
 
 ### Scenario: the clone builds on a machine that has never seen the portfolio
 
