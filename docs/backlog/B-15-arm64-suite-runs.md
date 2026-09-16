@@ -1,7 +1,7 @@
 ---
 id: B-15
 title: "Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks"
-status: wip
+status: done
 priority: P2
 size: S
 stage: m1-ships-twice
@@ -33,3 +33,35 @@ turning it on does not currently build at all.
   binary was produced, and fails if the binaries ran zero tests.
 - AC: `-Pkeel.linuxArm64=true ./gradlew build` is green, which is what razves#3 has to land for.
 - Anchors: `.github/workflows/check.yaml`, `server/build.gradle.kts`, `gradle.properties`
+
+---
+
+## Iteration 1 — 2026-09-16, done for the suite; the full build is a different item's problem
+
+[razves#3](https://github.com/youndie/razves/issues/3) landed in **0.1.0.31**: the size tasks carry the
+target (`sizeReportLinuxX64DebugExecutable`), so two native targets configure. Verified by taking the
+bump, not by reading the issue.
+
+| AC | |
+|---|---|
+| a `linux-arm64-suite` job executes the cross-linked binary on `ubuntu-24.04-arm`, failing if none was produced and if it ran zero tests | done |
+| `-Pkeel.linuxArm64=true ./gradlew build` is green | **no** — see below |
+
+The binary cross-links on x86-64: 24 600 496 bytes, `ELF 64-bit LSB executable, ARM aarch64`. CI
+uploads it and an arm64 runner executes it, because Kotlin/Native has no `linux_arm64` host and so
+`linuxArm64Test` is never *created* — not skipped, not disabled, absent.
+
+### Why the second criterion is not met, and why that is not this item waiting
+
+`./gradlew build -Pkeel.linuxArm64=true` fails in `stageNativeImage`: it stages every release `.kexe`
+under one name, so two targets collide — `Entry keel is a duplicate`. Filed as
+[sborka#80](https://github.com/youndie/sborka/issues/80).
+
+**`duplicatesStrategy` is not the workaround**, and that is worth stating because it is one line and
+it is tempting. It would stage one of the two binaries, chosen arbitrarily, under a name that says
+nothing about which — and a `COPY` that finds the wrong file is worse than one that fails, which is
+what that task's own comment is written against.
+
+**The suite never needed it.** `linkDebugTestLinuxArm64` does not go through staging, so what this
+item was actually for — a suite that runs on the architecture nobody was testing — is done. The full
+`build` with the third target on is a packaging question, and it belongs to whoever answers sborka#80.

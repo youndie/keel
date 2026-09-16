@@ -30,7 +30,7 @@ kore = "0.1.4"
 
 # The size gate `sborka.binaryBudget` is enforced by. Applied by `:server` rather than carried by the
 # convention — sborka's own comment says why.
-razves = "0.1.0.30"
+razves = "0.1.0.31"
 
 # The database. Two drivers behind one API — the Rust one on Kotlin/Native and `org.xerial:sqlite-jdbc`
 # on the JVM — which is why keel has ONE store implementation and not the two the brief priced in
