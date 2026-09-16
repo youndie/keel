@@ -1,26 +1,31 @@
 package io.github.youndie.keel.item
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 
 /**
- * `GET /items` — a constant, until B-02 puts a store behind it.
+ * `GET /items` and `POST /items` — the whole HTTP surface keel ships.
  *
- * Constant and not empty, deliberately: the value of this route today is that it **renders**, and a
- * response with no body crosses no charset. Every rendered byte on Kotlin/Native goes through glibc
- * `iconv`, which is `dlopen`ed, and an image that cannot do that answers a status code perfectly well
- * — which is how a `401` from a static image was once read as a pass.
+ * The route renders a body rather than answering a bare status, and that is load-bearing on
+ * Kotlin/Native: every rendered byte goes through glibc `iconv`, which is `dlopen`ed, so a status
+ * code crosses no charset. A `401` from a static image was once read as a pass for exactly that
+ * reason (`docs/research/research-architecture.md` §1.5).
  *
- * `POST /items` arrives with the store in B-02. One route returning a constant is what B-01 needs: it
- * proves Ktor CIO links and serves on both targets, which is the toolchain risk this item exists to
- * retire.
+ * The second endpoint in a service is already a feature, and features are `ktor-server-feature`'s:
+ * typed `@Resource`, a use case, the layers. keel stops here on purpose.
  */
-fun Application.itemRoutes() {
+fun Application.itemRoutes(store: ItemStore) {
     routing {
-        get("/items") { call.respond(SEED) }
+        get("/items") { call.respond(store.all()) }
+
+        post("/items") {
+            val item = call.receive<Item>()
+            call.respond(HttpStatusCode.Created, store.add(item))
+        }
     }
 }
-
-private val SEED = listOf(Item(id = "keel", name = "the first member laid down"))

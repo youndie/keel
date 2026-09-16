@@ -24,7 +24,7 @@ class ItemRoutesTest {
     @Test
     fun `GET items answers with the seeded item`() =
         testApplication {
-            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate()) }
+            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate(), InMemoryItemStore(SEED)) }
 
             val response = client.get("/items")
 
@@ -52,7 +52,7 @@ class ItemRoutesTest {
     @Test
     fun `startup with no named gates is started immediately`() =
         testApplication {
-            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate()) }
+            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate(), InMemoryItemStore(SEED)) }
 
             val response = client.get("/health/startup")
 
@@ -70,7 +70,7 @@ class ItemRoutesTest {
     fun `a named startup gate holds the probe at 503 until it completes`() =
         testApplication {
             val startup = StartupGate(gates = setOf("migrations"))
-            application { keelModule(startup, ReadinessGate(), LivenessGate()) }
+            application { keelModule(startup, ReadinessGate(), LivenessGate(), InMemoryItemStore()) }
 
             val waiting = client.get("/health/startup")
             assertEquals(HttpStatusCode.ServiceUnavailable, waiting.status)
@@ -92,7 +92,7 @@ class ItemRoutesTest {
     @Test
     fun `health is an alias for liveness and not for readiness`() =
         testApplication {
-            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate()) }
+            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate(), InMemoryItemStore(SEED)) }
 
             val health = client.get("/health")
             val live = client.get("/health/live")
@@ -106,11 +106,21 @@ class ItemRoutesTest {
     @Test
     fun `version names the build`() =
         testApplication {
-            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate()) }
+            application { keelModule(StartupGate(), ReadinessGate(), LivenessGate(), InMemoryItemStore(SEED)) }
 
             val response = client.get("/version")
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertContains(response.bodyAsText(), "version", message = "the body is key: value lines a shell can grep")
         }
+
+    private companion object {
+        /**
+         * The fixture the route used to carry as a constant.
+         *
+         * It moved here when B-02 put a store behind the route: a seed compiled into the service is
+         * a thing a clone deletes and forgets, and a seed in the test is one the test owns.
+         */
+        val SEED = listOf(Item(id = "keel", name = "the first member laid down"))
+    }
 }
