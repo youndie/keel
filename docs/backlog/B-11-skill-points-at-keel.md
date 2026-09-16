@@ -1,7 +1,7 @@
 ---
 id: B-11
 title: "native-service-bootstrap names keel as its reference project in Step 0"
-status: open
+status: wip
 priority: P1
 size: S
 stage: m4-consumer
@@ -34,3 +34,27 @@ names metrik and katcher.
   [B-08](B-08-clone-to-ready.md), not estimates.
 - Anchors: `kotlin-skills/plugins/kotlin-fullstack/skills/native-service-bootstrap/SKILL.md`,
   `kotlin-skills/plugins/kotlin-fullstack/skills/native-service-bootstrap/references/`
+
+---
+
+## Iteration 1 — 2026-09-16: written, and waiting on a repository this loop does not merge in
+
+[kotlin-skills#6](https://github.com/youndie/kotlin-skills/pull/6) rewrites Step 0 to clone keel, and
+closes [kotlin-skills#5](https://github.com/youndie/kotlin-skills/issues/5) with the TLS gotcha B-09
+found.
+
+| AC | |
+|---|---|
+| Step 0 names keel, with the clone line and what to rename | done |
+| the two services stay named as *where the idioms are newer* | done — "copy structure from keel, style from them", with the note that when they disagree the living service is usually right |
+| the paragraph carries the measured numbers rather than estimates | done — 249 renaming, 178 domain, 6 neither, and 3 min 48 s clone-to-ready |
+
+**The item stays `wip` until that pull request merges, and the loop does not merge it.** keel's
+`CLAUDE.md` authorises the loop to merge its own work *in keel*; kotlin-skills has no such policy and
+inventing one for somebody else's repository is not the loop's to do.
+
+### One thing found while working there
+
+`feat/kore-stage-concurrency` in kotlin-skills is pushed, one commit ahead of `main` — `b35c309`, the
+`stopAndJoin()` note — with **no open pull request**. It was not touched: this work branched from
+`main` beside it. Flagged in the pull request in case it was forgotten rather than parked.
