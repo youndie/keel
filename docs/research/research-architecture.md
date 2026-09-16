@@ -452,9 +452,15 @@ Why:
 - The price, honestly: a clone that wants `scratch` follows a recipe instead of passing a flag, and
   `scratch`'s other benefit — no shell to `kubectl exec` into — is not on offer by default.
 
-Settled by [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) rather than by preference: when
-`-static` means static without property overrides, the recipe is two lines and this decision
-dissolves. [B-18](../backlog/B-18-scratch-when-static-is-static.md) is the address.
+**Not settled by a ticket, and no longer waiting on one.** This decision first carried
+[KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) as its expiry, on the reasoning that a fixed
+`-static` would make the recipe two lines and reopen the question. The owner closed that on
+2026-09-16: keel ships on `distroless/cc-debian13`, full stop. The prize was ~4.5 MB on an image
+already 44 % under its budget, so the trade was never close enough for a ticket to swing it, and an
+open item implied otherwise. [B-18](../backlog/B-18-scratch-when-static-is-static.md) is `dropped`.
+
+§1.5 stays, because it records facts about Kotlin/Native and glibc rather than about this decision —
+anybody who wants `scratch` follows them deliberately.
 
 ### D7. The documentation tree carries drafts on `main`, with the gate off and addressed
 

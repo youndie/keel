@@ -220,10 +220,9 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 
 ### Scenario: the static image serves a rendered page, not a status code — *not shipped*
 
-**keel builds no static image**, so this scenario has nothing to run against. It is kept rather than
-deleted because it is the acceptance [B-18](../backlog/B-18-scratch-when-static-is-static.md) inherits
-the day [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) makes the recipe two lines, and
-because the reason it is worded this way is worth not losing:
+**keel builds no static image and will not**, so this scenario has nothing to run against and no item
+waiting to inherit it — B-18 is `dropped`. It is kept for the reason it was worded this way, which
+outlives the decision:
 
 * **Given:** a `scratch` image, if one is ever built
 * **When:** `POST /items` and then `GET /items` are called against it
@@ -231,8 +230,10 @@ because the reason it is worded this way is worth not losing:
 * **And:** no `Failed to open iconv for charset UTF-8 with error code 22` appears in the log
 
 A `401` from a static image was once read as a pass: a `401` is produced before any text crosses a
-charset, and every rendered byte goes through glibc `iconv`, which is `dlopen`ed. [B-16](../backlog/B-16-static-image.md)
-is why there is nothing to run it against today.
+charset, and every rendered byte goes through glibc `iconv`, which is `dlopen`ed. **That is the
+transferable half** — it is why the ordinary image's smoke asserts a rendered body, and it would be
+true of any image keel ever built. [B-16](../backlog/B-16-static-image.md) is why there is no static
+one.
 
 ### Scenario: parity — the same k6 scenario, no diff after the normaliser
 

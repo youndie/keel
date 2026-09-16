@@ -47,7 +47,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 |---|---|---|
 | clone → `/health/ready` on both targets, cold machine, including the toolchain fetch | under 1 h | **3 min 48 s**, 2026-09-16 — fresh container, no cache, cloned from GitHub. The image build is **not** in it: +2 min on a warm host, more on a cold one ([B-08](docs/backlog/B-08-clone-to-ready.md)) |
 | image, `distroless/cc` | under 25 MB | **13 972 497 bytes**, 2026-09-16 — `docker image inspect`, `linux/amd64` |
-| image, `STATIC=1` | under 12 MB | **not shipped, by decision** — [B-16](docs/backlog/B-16-static-image.md): the recipe pins five `konan.properties` keys JetBrains may change in any patch release, and a template is copied and never updated again. It is documented in the research; [B-18](docs/backlog/B-18-scratch-when-static-is-static.md) revisits it when [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) lands |
+| image, `STATIC=1` | under 12 MB | **not shipped, and not planned** — [B-16](docs/backlog/B-16-static-image.md). The prize was ~4.5 MB on an image already 44 % under budget, against a recipe that pins five `konan.properties` keys a Kotlin bump can change. keel ships on `distroless/cc-debian13`; the recipe is written down in the research for anyone who wants it deliberately |
 | Kotlin, main sources | under 500 lines | **214** code lines, 2026-09-16 |
 | Gradle across the repository | under 100 lines | **87** code lines of build logic (237 as written), 2026-09-16 |
 | the `linuxX64` release binary | — | **9 227 448 bytes**, declaring 7 shared libraries, 2026-09-16 (4 983 240 before the SQLite driver) |

@@ -1,7 +1,7 @@
 ---
 id: B-18
 title: "Ship the scratch image once -static needs no property overrides"
-status: open
+status: dropped
 priority: P3
 size: S
 stage: m2-image
@@ -31,3 +31,24 @@ copied and never updated again. That decision has an expiry, and this is it.
 - AC: research §2 D8 is amended at the point of divergence rather than deleted — the reasoning for
   not shipping it stays readable next to the reason it stopped applying.
 - Anchors: `Dockerfile`, `docs/research/research-architecture.md`, `README.md`
+
+---
+
+## Dropped 2026-09-16
+
+**keel ships on `gcr.io/distroless/cc-debian13`, and that is the end of the question rather than a
+position held until a ticket lands.** Decided by the owner.
+
+What changes is not the image — B-16 already chose it — but what this item was: an *expiry*. B-16's
+reasoning was "not now, because the recipe pins five `konan.properties` keys", which carries the
+implication that a fixed `-static` would reopen it. It would not. The `scratch` image was worth
+**~4.5 MB on an image that came in 44 % under its budget**, and that was the whole prize; the rest of
+what `scratch` offers — no shell to `kubectl exec` into — is a thing keel has no opinion about.
+
+So the trade was never close, and keeping an item open against a JetBrains ticket kept implying it
+was. [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362) is no longer keel's business.
+
+**What survives is the research**, and it should: §1.5 records the five paths, the build-stage rule
+and the rendered-page acceptance, because those are facts about Kotlin/Native and glibc rather than
+about this decision. Anybody who wants `scratch` follows them deliberately — which is exactly what
+B-16 said the alternative to shipping it was.
