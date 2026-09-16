@@ -49,7 +49,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 | image, `STATIC=1` | under 12 MB | **not shipped, and not planned** — [B-16](docs/backlog/B-16-static-image.md). The prize was ~4.5 MB on an image already 44 % under budget, against a recipe that pins five `konan.properties` keys a Kotlin bump can change. keel ships on `distroless/cc-debian13`; the recipe is written down in the research for anyone who wants it deliberately |
 | Kotlin, main sources | under 500 lines | **214** code lines, 2026-09-16 |
 | Gradle across the repository | under 100 lines | **87** code lines of build logic (237 as written), 2026-09-16 |
-| the `linuxX64` release binary | — | **9 227 448 bytes**, declaring 7 shared libraries, 2026-09-16 (4 983 240 before the SQLite driver) |
+| the `linuxX64` release binary | — | **9 228 056 bytes**, declaring 7 shared libraries, 2026-09-16 — the binary the stand measured. It was 9 227 448 when B-04 weighed the image and 4 983 240 before the SQLite driver |
 
 The image figure names its method because it had to: `docker images` reports **55.4MB** for the same
 image, counting every platform of the base manifest in the containerd store. `docker save | wc -c`
