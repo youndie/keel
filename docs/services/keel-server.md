@@ -283,8 +283,10 @@ And keel's own:
     not appear at all. CI links there and executes the test binary on an arm64 runner; a local green
     build proves nothing about it. Since B-06, CI names `jvmTest` and `linuxX64Test` and fails when
     either produces no result file or reports zero tests — `find | wc -l` would pass while one target
-    quietly stopped being wired, which is the brief's red list exactly. `linuxArm64` is still covered
-    by nobody: B-15, blocked on [razves#3](https://github.com/youndie/razves/issues/3).
+    quietly stopped being wired, which is the brief's red list exactly. Since B-15 `linuxArm64` is
+    covered too: the x86-64 job cross-links the test binary and an `ubuntu-24.04-arm` runner executes
+    it. What still does not work is `build` with that target on — `stageNativeImage` stages two
+    binaries under one name ([sborka#80](https://github.com/youndie/sborka/issues/80)).
 14. **keel's startup probe answers `200` immediately, and that is correct rather than broken.** A
     `StartupGate` with no named gates is started from birth — `started = gates.isEmpty()` — and keel
     names none, so `/health/startup` says "started" from the moment the module is installed. The probe
