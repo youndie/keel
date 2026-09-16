@@ -1,5 +1,7 @@
 package io.github.youndie.keel
 
+import io.github.youndie.kore.config.ConfigKey
+import io.github.youndie.kore.config.ConfigSchema
 import io.github.youndie.kore.config.ConfigurationException
 import io.github.youndie.kore.config.Environment
 import io.github.youndie.kore.config.Origin
@@ -22,15 +24,42 @@ class KeelConfigTest {
             "KEEL_DB_PATH" to "/var/lib/keel/keel.db",
         )
 
+    /**
+     * A fresh clone runs with nothing set, which is what the README promises.
+     *
+     * `KEEL_DB_PATH` was required until B-03, on the argument that a service inventing where its data
+     * lives serves wrong data. That is right for a service whose database is somewhere else and wrong
+     * for a template whose store is a file beside the process — and it made two things false: the
+     * README's `./gradlew run`, and zavarnik's training run, which inherits the build's environment
+     * and cannot be given one.
+     */
     @Test
-    fun `a missing required variable stops the process instead of a route`() {
-        val failure =
-            assertFailsWith<ConfigurationException> {
-                KeelConfig.SCHEMA.read(Environment.of(emptyMap()))
-            }
+    fun `the schema reads with nothing set at all`() {
+        val configuration = KeelConfig.SCHEMA.read(Environment.of(emptyMap()))
 
-        assertEquals(1, failure.problems.size, "only KEEL_DB_PATH is required")
-        assertEquals("KEEL_DB_PATH", failure.problems.single().variable)
+        assertEquals(8080, configuration[KeelConfig.PORT])
+        assertEquals("keel.db", configuration[KeelConfig.DB_PATH])
+        assertTrue(configuration.values().all { it.origin == Origin.DEFAULT })
+    }
+
+    /**
+     * A required key still refuses — keel just no longer has one.
+     *
+     * The schema demonstrates three of the four shapes a clone will need; this is the fourth, kept as
+     * a test rather than lost with the key. A real service's required key is a database address or a
+     * credential, and this is what it does when a deployment forgets it.
+     */
+    @Test
+    fun `a required key with no value stops the process instead of a route`() {
+        val schema =
+            ConfigSchema(
+                prefix = "KEEL",
+                keys = listOf(ConfigKey.required("DSN")),
+            )
+
+        val failure = assertFailsWith<ConfigurationException> { schema.read(Environment.of(emptyMap())) }
+
+        assertEquals("KEEL_DSN", failure.problems.single().variable)
         assertContains(failure.problems.single().message, "is required and is not set")
     }
 
@@ -57,10 +86,10 @@ class KeelConfigTest {
 
         val named = failure.problems.map { it.variable }.toSet()
         assertEquals(
-            setOf("KEEL_DB_PATH", "KEEL_PORT", "KEEL_TRACY_KEY"),
+            setOf("KEEL_PORT", "KEEL_TRACY_KEY"),
             named,
-            "the required one missing, the typed one unparseable and the half-set pair are three " +
-                "separate problems and all three have to arrive together",
+            "the unparseable value and the half-set pair are two separate problems and both have to " +
+                "arrive together, not one restart each",
         )
     }
 

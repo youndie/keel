@@ -42,6 +42,10 @@ sqlx4k = "1.13.1"
 # database file and has to delete a stale one first, on both targets from one source.
 okio = "3.18.2"
 
+# The Leyden AOT cache for the JVM distribution. JDK 25 or newer is a hard requirement — the one-step
+# training workflow is JEP 514 — which agrees with the toolchain kore already forces.
+zavarnik = "0.1.0"
+
 [libraries]
 kore-core = { module = "io.github.youndie:kore-core", version.ref = "kore" }
 kore-ktor = { module = "io.github.youndie:kore-ktor", version.ref = "kore" }
@@ -70,6 +74,7 @@ sqlx4k-sqlite = { module = "io.github.smyrgeorge:sqlx4k-sqlite", version.ref = "
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 [plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
@@ -83,3 +88,4 @@ sborkaNativeService = { id = "io.github.youndie.sborka.native-service", version.
 koreBuild = { id = "io.github.youndie.kore.build", version.ref = "kore" }
 
 razves = { id = "io.github.youndie.razves", version.ref = "razves" }
+zavarnik = { id = "io.github.youndie.zavarnik", version.ref = "zavarnik" }

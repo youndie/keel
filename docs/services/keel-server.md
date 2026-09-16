@@ -3,7 +3,7 @@ id: keel-server
 title: keel :server — the template service
 type: service
 repo_url: https://github.com/youndie/keel
-module: ":server and :server-jvm — see section 3"
+module: ":server and :distribution — see section 3"
 tech_stack: [Kotlin Multiplatform, Ktor CIO, sqlx4k-sqlite, kore, sborka, Docker]
 owner: unassigned
 status: draft
@@ -22,7 +22,7 @@ publishes:
 **The service runs; the packaging does not exist.** Since B-01 `:server` produces a JVM jar and a
 `linuxX64` executable with kore wired and the size gate running; since B-06 there are suites on both
 targets; since B-02 `GET`/`POST /items` go through a real SQLite database that survives a restart.
-`:server-jvm`, the `Dockerfile` and `k6/` are still descriptions —
+`:distribution`, the `Dockerfile` and `k6/` are still descriptions —
 [backlog.md](../../backlog.md) is the order they arrive in, and the paths in §2a are a mixture of real
 files and places code will live, which is why `code_anchors.py` still reports some of them rotten.
 
@@ -73,7 +73,9 @@ What it deliberately does **not** do:
 | `server/src/commonMain/kotlin/.../item/ItemStore.kt` | the port, the schema and `SqliteItemStore` — one implementation, both targets |
 | `server/src/commonMain/kotlin/.../item/ItemRoutes.kt` | `GET`/`POST /items` |
 | `server/src/jvmMain/kotlin/.../Main.kt`, `server/src/linuxX64Main/kotlin/.../Main.kt` | four lines each; the only thing that differs between the two builds |
-| `server-jvm/build.gradle.kts` | `application` + zavarnik, and the reason it exists (§3) |
+| `build.gradle.kts` | the root, and it exists for one reason — two Kotlin plugins in one build |
+| `distribution/build.gradle.kts` | `application` + zavarnik, and the reason it exists (§3) |
+| `distribution/src/main/kotlin/.../jvm/Main.kt` | one line; anything that grows here belongs in `:server` |
 | `Dockerfile` | two stages, `STATIC=1` behind a build arg |
 | `k6/items.js` | the scenario both binaries are driven with |
 | `.github/workflows/check.yaml` | the documentation gate and the build gate |
@@ -81,14 +83,22 @@ What it deliberately does **not** do:
 ## 3. How it is built
 
 **The module split, and why there are two.** `:server` is the multiplatform module and holds every
-line of Kotlin that matters. `:server-jvm` is `kotlin("jvm")`, applies `application` and zavarnik, and
-contains one `main` that calls into `:server`'s JVM target. It exists because zavarnik refuses a
-project without the `application` plugin, and `application` does not apply to a multiplatform module —
-the full argument and the two alternatives that were rejected are
-[research-architecture](../research/research-architecture.md) D5. A reader who finds this split
-surprising is reading it in the right order: it is the one structural concession in the repository,
-and if acceptance 6's Gradle budget breaks, the honest fix is dropping zavarnik rather than hiding
-the module.
+line of Kotlin that matters. `:distribution` is `kotlin("jvm")`, applies `application` and zavarnik,
+and contains one `main` that calls into `:server`'s JVM target. It exists because `application` and
+zavarnik are `kotlinJvm`-only and do not apply to a multiplatform module —
+[research-architecture](../research/research-architecture.md) D5.
+
+Three things about it are not obvious and each cost a red build:
+
+* **it is not called `:server-jvm`**, which is what every document called it until it was built.
+  Kotlin already names `:server`'s JVM artefact `server-jvm-0.1.0.jar`, so a module of that name puts
+  a duplicate in the distribution's `lib/` and `installDist` refuses;
+* **the root `build.gradle.kts` exists only for this.** Two sibling modules applying different Kotlin
+  plugins need both declared there with `apply false`, or each lands in its own classloader scope and
+  the Kotlin plugin's shared build service exists twice. The failure names two classloaders and
+  nothing about the cause;
+* **twelve of its lines are not keel's.** Any native service wanting a shipped JVM half needs the same
+  file — [sborka#78](https://github.com/youndie/sborka/issues/78), adopted by B-17.
 
 **The two allocators, one floor below the other.** `sborka.native-service` sets
 `fixedBlockPageSize=16` on the binary; the image sets `MALLOC_ARENA_MAX=2`. Kotlin/Native's allocator
@@ -163,7 +173,7 @@ repository configured — which is acceptance 1's precondition and the README's 
 ## 6. Local setup
 
 ```bash
-./gradlew :server-jvm:run                       # the JVM half, on the development machine
+./gradlew :distribution:run                     # the JVM half; works on a fresh clone, no config
 ./gradlew :server:linkReleaseExecutableLinuxX64 # the native binary; Linux only
 docker build -t keel .                          # distroless/cc
 docker build --build-arg STATIC=1 -t keel:static .
@@ -183,15 +193,15 @@ list is not copied here — `--print-config` prints every value with its origin,
 document would be the second schema that disagrees with the first.
 
 ```bash
-./gradlew :server-jvm:run --args="--print-config"
+./gradlew :distribution:run --args="--print-config"
 ```
 
-What the shape is for, and each key is a different shape rather than a different setting, so a clone
-deletes what it does not need and keeps an example of every kind:
+**keel declares no required key**, and that is a fact about a template rather than a lesson. Each key
+is still a different *shape*, so a clone deletes what it does not need and keeps an example:
 
 | Key | Shape | Why that shape |
 |---|---|---|
-| `KEEL_DB_PATH` | **required**, no default | a service that invents where its data lives starts happily and serves wrong data |
+| `KEEL_DB_PATH` | a **default** (`keel.db`) | it was required until B-03; see below |
 | `KEEL_PORT` | a **default** (8080) | a value a deployment should not have to repeat; `--print-config` still prints `DEFAULT` beside it |
 | `KEEL_TRACY_ENDPOINT` | **optional**, half of a pair | unset means "not observed", which is a decision |
 | `KEEL_TRACY_KEY` | **optional and secret**, the other half | masked by the declaration rather than by a list somebody keeps in sync |
@@ -199,6 +209,16 @@ deletes what it does not need and keeps an example of every kind:
 This section used to say "two have defaults", which was never true of the code — it described kore's
 sample, which the schema was modelled on and which has a `WORK_MS` keel does not. Nothing noticed
 until B-06 wrote a test against the schema and had to count the keys.
+
+**`KEEL_DB_PATH` was required and is not, decided in B-03.** The argument for requiring it — a service
+that invents where its data lives starts happily and serves wrong data — is right for a service whose
+database is somewhere else and wrong for a template whose store is a file beside the process. Two
+things made it false as written: the README promises `./gradlew run` works on a fresh clone, and
+zavarnik's training run inherits the build's environment and cannot be given one
+([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)), so a service that refuses without
+configuration cannot have its AOT cache trained by `check`. The required shape is kept in
+`KeelConfigTest` rather than lost with the key: a real service's required key is a database address or
+a credential.
 
 ## 8. Quirks
 

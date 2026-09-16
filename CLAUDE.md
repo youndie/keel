@@ -6,9 +6,10 @@ a Kotlin/Native binary, both runnable, both tested, one image. konekt with the d
 **The service runs and is tested.** `./gradlew build` produces a JVM jar and a `linuxX64` executable,
 `GET`/`POST /items` go through a real SQLite database that survives a restart, kore is wired, the size
 gate runs, and 22 tests run on each target from one source. CI names `jvmTest` and `linuxX64Test` and
-fails when either produces no result file or reports zero tests. The image builds and runs at 14 MB.
-There is no JVM distribution — B-03 is a `question` — and `linuxArm64` is built and tested by nobody
-(B-15, blocked on [razves#3](https://github.com/youndie/razves/issues/3)).
+fails when either produces no result file or reports zero tests. The image builds and runs at 14 MB,
+and `:distribution` ships the JVM half with an AOT cache verified on every `check`. `linuxArm64` is
+built and tested by nobody (B-15, blocked on
+[razves#3](https://github.com/youndie/razves/issues/3)).
 
 This paragraph said *"nothing is built"*, and then *"no test at all"*, each wrong one iteration
 later. A sentence about the state
@@ -25,8 +26,9 @@ is why it is worth naming here.
      `org.xerial:sqlite-jdbc` underneath, so the split the brief priced at two implementations is one
      the library already carries;
    - **zavarnik refuses a project without the `application` plugin, and `application` does not apply
-     to a multiplatform module** (§1.8, D5). That is why `:server-jvm` exists and why it must stay
-     ten lines;
+     to a multiplatform module** (§1.8, D5). That is why `:distribution` exists, why it is not called
+     `:server-jvm` (the jar name collides with `:server`'s own), and why the root `build.gradle.kts`
+     declares both Kotlin plugins with `apply false`;
    - **`scratch` needs five paths copied out of the build stage** (§1.5), and a static image's smoke
      test has to reach a *rendered page* — a `401` was once read as a pass, and every rendered byte
      goes through glibc `iconv`, which is `dlopen`ed;
@@ -111,6 +113,9 @@ repositories open. The full list with addresses is
   the JVM the line after the call never runs.
 - **`nativeService { }` goes above the `kotlin { }` block**, or the build fails with "property
   entryPoint has no value available" and names neither the ordering nor the place.
+- **Two sibling modules applying different Kotlin plugins need the root build to declare both with
+  `apply false`.** Otherwise the Kotlin plugin's shared build service exists under two classloaders
+  and the build fails naming two of them and nothing else.
 - **Exactly one sqlx4k driver.** Two do not link — `duplicate symbol: std::panicking::EMPTY_PANIC` —
   and it is a link error, not a resolution error.
 - **`ENTRYPOINT` in exec form, always.** Shell form makes `/bin/sh -c` PID 1, which does not forward

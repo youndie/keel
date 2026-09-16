@@ -32,7 +32,16 @@ plugins {
     id("io.github.youndie.sborka.settings") version "0.4.0.79"
 }
 
-// THE ONE MODULE. `:server-jvm` — ten lines, `application` and zavarnik — arrives with B-03, because
-// zavarnik refuses a project without the `application` plugin and `application` does not apply to a
-// multiplatform module. docs/research/research-architecture.md D5.
+// The whole service: one route, the kore wiring, two entry points.
 include(":server")
+
+// The JVM distribution, and nothing else — one `main`, `application` and the AOT cache. Separate
+// because `application` and zavarnik are `kotlinJvm`-only and cannot apply to a multiplatform
+// module: research D5, and B-03 for what it cost to fit.
+//
+// NOT `:server-jvm`, WHICH IS THE NAME THE DOCUMENTS USED UNTIL IT WAS BUILT. Kotlin names a
+// multiplatform module's JVM artefact `<module>-jvm-<version>.jar`, so `:server`'s is already
+// `server-jvm-0.1.0.jar` — and a module called `:server-jvm` produces a jar of exactly that name.
+// Both land in the distribution's `lib/` and `installDist` fails with "Entry lib/server-jvm-0.1.0.jar
+// is a duplicate". The rename removes the collision and the confusion in one go.
+include(":distribution")

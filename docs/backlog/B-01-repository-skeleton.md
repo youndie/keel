@@ -76,7 +76,7 @@ deleted when it lands rather than inherited by every clone.
 
 **Acceptance 6 had no definition, and the two readings differ by 2.5×.** 91 code lines against 225 as
 written. The measure is now code lines, with both reported at every reading, and the reasoning is in
-`backlog.md`. **Gradle is at 91 of 100 with one module**, so B-03's `:server-jvm` arrives against nine
+`backlog.md`. **Gradle is at 91 of 100 with one module**, so B-03's `:distribution` arrives against nine
 lines of headroom — which is the brief's signal working, and the answer it prescribes is dropping
 zavarnik rather than raising the number.
 

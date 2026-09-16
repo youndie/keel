@@ -10,8 +10,18 @@ import io.github.youndie.kore.config.ConfigSchema
  * Four keys, and each one is a different **shape** rather than a different setting — a clone deletes
  * the ones it does not need and has an example of every kind left:
  *
- * - [DB_PATH] is **required**. A service that invents where its data lives starts happily and serves
- *   wrong data, which is worse than not starting. Refusing at startup is the whole feature.
+ * - [DB_PATH] has a **default**, and it is the one entry here that was decided rather than chosen.
+ *   It was required, on the argument that a service inventing where its data lives starts happily and
+ *   serves wrong data — which is right for a service with a database somewhere else, and not for a
+ *   template whose store is a file beside the process. Two things made it a default: the README
+ *   promises `./gradlew run` works on a fresh clone, which a required key makes false; and zavarnik's
+ *   training run inherits the build's environment and cannot be given one
+ *   ([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)), so a service that refuses without
+ *   configuration cannot have its AOT cache trained by `check` at all.
+ *
+ *   **So keel declares no required key, and that is a fact about keel rather than a lesson.** A real
+ *   service's required key is a database address or a credential — `ConfigKey.required(...)`, the
+ *   shape this schema no longer demonstrates. B-03.
  * - [PORT] and [WORK_MS] have **defaults**, so a deployment does not repeat a value it has no
  *   opinion about — and `--print-config` still prints `DEFAULT` beside them, so nobody has to guess
  *   which happened.
@@ -29,8 +39,8 @@ import io.github.youndie.kore.config.ConfigSchema
 object KeelConfig {
     val PORT: ConfigKey<Int> = ConfigKey.int("PORT", default = 8080)
 
-    /** The one key with no sensible default. */
-    val DB_PATH: ConfigKey<String> = ConfigKey.required("DB_PATH")
+    /** Beside the process, so a fresh clone runs. See the class KDoc for what that replaced. */
+    val DB_PATH: ConfigKey<String> = ConfigKey.string("DB_PATH", default = "keel.db")
 
     /** Half of the observability pair. Unset means "not observed", which is a decision. */
     val TRACY_ENDPOINT: ConfigKey<String?> = ConfigKey.optional("TRACY_ENDPOINT")
