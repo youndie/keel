@@ -86,3 +86,67 @@ and a single run on one machine is not the property. The item stays `wip`.
 *Every request in flight at the signal receives its response* — the actual claim. It needs a route
 that takes longer than the signal-to-drain gap, which is what kore#81 is about. Until then acceptance
 3 is **unverified rather than failing**, and the distinction is the reason this entry exists.
+
+---
+
+## Iteration 2 — 2026-09-16: the oracle runs, and acceptance 3 is verified on the binary that ships
+
+[kore#81](https://github.com/youndie/kore/issues/81) landed — the oracle takes `--path` and leaves the
+probe paths fixed, which is the shape that was asked for. Verified in kore's source at `b4bb70b`
+before running anything, because closed and fixed are different claims.
+
+```
+./gradlew :samples:oracle:oracle --args="--image=keel:cc --path=/items --connections=32"
+
+PID 1: ["/app/keel"]
+exchanges: 4472, spanning the signal: 32, after it: 4315
+
+  PASS            G1 in flight at the signal — 32 of 32
+  PASS            G2 the load ran — 4472 exchanges against /items
+  PASS            G3 the signal was received — the process exited after it, 20568ms
+  PASS            A1 in-flight requests finished — 32 spanned the signal, all completed
+  PASS            A2 no 500 — every answered request was a normal status or 503
+  PASS            A3 503 carries Connection: close — 4089 refusals, all carrying it
+  FAIL            A4 readiness fell before the first refusal
+  NOT_APPLICABLE  A5 the pre-drain wait was honoured — --pre-drain not given
+  PASS            A6 exited itself inside the grace period — exit 0 after 20568ms of 30000ms
+```
+
+**A1 is acceptance 3 of the brief**, and it passes with the vacuity guard alongside it: 32 requests
+were in flight at the signal and all 32 completed. G1 is what stops that being a claim about a run
+that visited nothing.
+
+### A4 fails for a reason that is not keel's, and it is filed
+
+[kore#83](https://github.com/youndie/kore/issues/83). A4 compares `readinessFellAtNanos` — from a
+poller that samples every 100 ms — against the finish time of a real exchange. keel wires
+`installShutdownRefusal(isShuttingDown = { readiness.isShuttingDown })`, so refusal and readiness are
+**one flag**: a request cannot be refused before the flip, because being refused *is* the flip having
+happened. What the oracle saw is a sample up to 100 ms stale.
+
+Three runs, identical every time — deterministic rather than flaky, which is what the explanation
+predicts. It was unreachable before `--path`, because `/work?ms=3000` keeps every driver busy for
+three seconds after the signal and the poller has thirty samples of margin; against a route answering
+in a millisecond there is none.
+
+**Not worked around here.** Wiring the two flags apart to satisfy an assertion would be changing the
+service to fit the measurement.
+
+### Why this is still `wip`: "on both targets" needs an artefact keel does not ship
+
+The oracle drives a **container**. keel ships one image, carrying the native binary — the brief says
+"one image" — and the JVM half ships as a distribution, which is the normal shape for one. So there
+is nothing for the oracle to be pointed at on the JVM side.
+
+The options, none of them free:
+
+| | |
+|---|---|
+| **1. Add a JVM image** | contradicts the brief's "one image" and puts a test-only artefact in a template every clone inherits |
+| **2. Ask kore to drive a distribution as well as an image** | the right place if the oracle is meant for consumers, and a bigger ask than `--path` was |
+| **3. Narrow this item to the artefact that ships** | the native image is what deploys; the JVM half is covered by the parity run (B-05, no diff) and by its own smoke in B-03, neither of which asserts the shutdown |
+
+**A recommendation: 3, with 2 filed.** What acceptance 3 is about is the thing that runs in
+production, and that is now verified. The JVM half's shutdown was *observed* correct in B-03 — exit
+`143`, full transcript — but observed is not asserted, and saying so is the point of leaving this
+written down rather than closing on a pass that covers half of what the item's title claims.

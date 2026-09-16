@@ -119,13 +119,17 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 
 ### Scenario: `kill -TERM` under load finishes every in-flight request
 
-* **Given:** the binary under k6 load with requests in flight
+* **Given:** the binary under load with requests in flight
 * **When:** the container receives `SIGTERM`
 * **Then:** every request in flight at the signal receives its response
 * **And:** requests arriving after the announce receive `503` with `Connection: close`
 * **And:** the process ends itself — `0` on native, `143` on the JVM — and is not `SIGKILL`ed (`137`)
 * **And:** the run is **inconclusive**, not green, if fewer than the declared floor of requests were
   in flight at the signal
+* **Verified on the native image** by kore's oracle in [B-07](../backlog/B-07-shutdown-oracle.md):
+  4472 exchanges, **32 of 32 spanning the signal all completed**, 4089 refusals all carrying
+  `Connection: close`, exit `0`. Not automated, and not yet run against the JVM half, which ships as
+  a distribution rather than an image
 
 ### Scenario: readiness goes false before the drain starts
 
