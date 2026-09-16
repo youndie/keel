@@ -37,6 +37,17 @@ jvmDistribution {
 
 zavarnik {
     training {
+        // THE TRAINING RUN GETS ITS OWN DATABASE, and the line exists to stop the run leaving one
+        // where the distribution is assembled. `KEEL_DB_PATH` is relative by default, the start
+        // script runs from `build/install/distribution`, so training used to create a database
+        // inside the thing a Dockerfile might copy — and a clone shipping `installDist` would ship
+        // the training run's rows. zavarnik#13 is what made this expressible; before it the training
+        // run inherited the build's environment and nothing else.
+        // INTO `build/` ITSELF, not a subdirectory of it. `mode=rwc` creates the database FILE and
+        // not its parent, so a path through a directory that does not exist yet fails at startup with
+        // a raw JDBC stack trace and no mention of the directory — which is exactly how this line was
+        // first written and what it cost to find out.
+        environment("KEEL_DB_PATH", layout.buildDirectory.file("aot-train-keel.db").get().asFile.path)
         workload { get("http://127.0.0.1:8080/items") }
     }
 }

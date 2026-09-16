@@ -13,11 +13,13 @@ import io.github.youndie.kore.config.ConfigSchema
  * - [DB_PATH] has a **default**, and it is the one entry here that was decided rather than chosen.
  *   It was required, on the argument that a service inventing where its data lives starts happily and
  *   serves wrong data — which is right for a service with a database somewhere else, and not for a
- *   template whose store is a file beside the process. Two things made it a default: the README
- *   promises `./gradlew run` works on a fresh clone, which a required key makes false; and zavarnik's
- *   training run inherits the build's environment and cannot be given one
- *   ([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)), so a service that refuses without
- *   configuration cannot have its AOT cache trained by `check` at all.
+ *   template whose store is a file beside the process. **One reason stands and one has gone, and the
+ *   difference matters to whoever reads this next.** It stands because the README promises
+ *   `./gradlew run` works on a fresh clone, which a required key makes false. It has gone because
+ *   zavarnik's training run could not be given an environment — that was
+ *   [zavarnik#13](https://github.com/youndie/zavarnik/issues/13), it is fixed, and the training run
+ *   now has a database path of its own. Anyone checking that issue will find it closed; the decision
+ *   did not rest on it alone.
  *
  *   **So keel declares no required key, and that is a fact about keel rather than a lesson.** A real
  *   service's required key is a database address or a credential — `ConfigKey.required(...)`, the

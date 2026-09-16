@@ -282,7 +282,7 @@ budget stops being one.
 
 No open tasks.
 
-## Closed (19)
+## Closed (20)
 
 **Shape**
 
@@ -298,6 +298,7 @@ No open tasks.
 - [B-15](docs/backlog/B-15-arm64-suite-runs.md) `[x]` - Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks
 - [B-17](docs/backlog/B-17-adopt-the-jvm-distribution-convention.md) `[x]` - Adopt sborka's jvm-distribution convention once it exists
 - [B-19](docs/backlog/B-19-oracle-on-the-jvm-half.md) `[x]` - Assert the JVM half's shutdown, once the oracle can reach a distribution
+- [B-20](docs/backlog/B-20-training-environment.md) `[x]` - Give the training run its own database path, now that zavarnik can
 
 **The image**
 
