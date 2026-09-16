@@ -89,10 +89,11 @@ Not covered by this: a pull request a person opened. The loop merges what the lo
 
 ## The two rules
 
-- **`main` describes what exists.** Every layer document is `status: draft` because the code does
-  not. When something is built, its document becomes `active` **and is re-read against the code** —
-  not flipped. `docs_check.py --on-main` is the mechanical half and it is off with an address:
-  [B-10](docs/backlog/B-10-draft-gate.md), not a relaxed rule.
+- **`main` describes what exists.** Every layer document is `active` since B-10, and each was
+  **re-read against the code** rather than flipped — that re-reading found an instruction in the
+  service document that ran and silently produced the wrong artefact. `docs_check.py --on-main` is
+  the mechanical half and it is **on**. A new document is `draft` in its pull request and `active`
+  when somebody has checked it, in that order.
 - **What was verified is separated from what was assumed, explicitly.** Everything in research §1
   carries a file, a coordinate or a URL with the date it was read. Everything else says "decision" or
   "hypothesis", and a hypothesis names the item that settles it. A document that blurs the two is a

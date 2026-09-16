@@ -67,20 +67,15 @@ jobs:
 
       - run: make check
 
-      # THE DRAFT GATE IS OFF, AND IT HAS AN ADDRESS: B-10.
+      # THE DRAFT GATE, ON SINCE B-10.
       #
-      # Default branch only, and `status: draft` is legal in a pull request where it means "this
-      # branch will make it true" — a defect the moment it merges. It cannot pass here yet: keel is
-      # documentation-first, nothing outside `docs/research/` describes code that exists, and every
-      # layer document is a draft on purpose. Switching it on before the code arrives would mean
-      # marking the tree `active`, which is the exact failure the gate exists to catch.
-      #
-      # It is commented out rather than deleted so that turning it on is one line rather than an
-      # archaeology exercise. B-10 is the item that turns it on, after the documents have been
-      # re-read against the code they describe.
-      #
-      #   - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #     run: python3 scripts/docs_check.py --on-main
+      # Default branch only: `status: draft` is legal in a pull request, where it means "this branch
+      # will make it true", and a defect the moment it merges. It was off while the tree was
+      # documentation-first and every layer document described code nobody had written; it is on now
+      # because each of them has been re-read against the code rather than flipped, and B-10 records
+      # the four sentences that re-reading corrected.
+      - if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: python3 scripts/docs_check.py --on-main
 
   # THE CODE GATE. Until B-06 there was none, and a pull request that did not compile was green —
   # which stopped being only a reviewer's problem when the loop began merging on green CI.
