@@ -1,7 +1,7 @@
 ---
 id: B-17
 title: "Adopt sborka's jvm-distribution convention once it exists"
-status: open
+status: wip
 priority: P3
 size: XS
 stage: m1-ships-twice
