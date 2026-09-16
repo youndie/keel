@@ -1,7 +1,7 @@
 ---
 id: B-04
 title: "Two images from one Dockerfile, both measured against a budget declared first"
-status: open
+status: wip
 priority: P0
 size: M
 stage: m2-image
