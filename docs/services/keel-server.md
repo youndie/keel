@@ -179,14 +179,23 @@ document would be the second schema that disagrees with the first.
 ./gradlew :server-jvm:run --args="--print-config"
 ```
 
-What the shape is for: one key is **required** with no sensible default (a service that invents where
-its data lives starts happily and serves wrong data), two have defaults so a deployment does not
-repeat them, and the fourth is half of an optional **pair** — both set or neither, because one
-without the other is a deployment that believes it is observed and is not.
+What the shape is for, and each key is a different shape rather than a different setting, so a clone
+deletes what it does not need and keeps an example of every kind:
+
+| Key | Shape | Why that shape |
+|---|---|---|
+| `KEEL_DB_PATH` | **required**, no default | a service that invents where its data lives starts happily and serves wrong data |
+| `KEEL_PORT` | a **default** (8080) | a value a deployment should not have to repeat; `--print-config` still prints `DEFAULT` beside it |
+| `KEEL_TRACY_ENDPOINT` | **optional**, half of a pair | unset means "not observed", which is a decision |
+| `KEEL_TRACY_KEY` | **optional and secret**, the other half | masked by the declaration rather than by a list somebody keeps in sync |
+
+This section used to say "two have defaults", which was never true of the code — it described kore's
+sample, which the schema was modelled on and which has a `WORK_MS` keel does not. Nothing noticed
+until B-06 wrote a test against the schema and had to count the keys.
 
 ## 8. Quirks
 
-Fourteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
+Fifteen, and the first five are not keel's: they are the platform divergences every Kotlin/Native
 Ktor service inherits, verified by kore against the artefacts rather than against documentation
 ([research-architecture](../research/research-architecture.md) §1.2). They are here because a keel
 reader will not have kore's research open, and each one looks like a bug in the service.
@@ -232,9 +241,18 @@ And keel's own:
 13. **A green `build` on one host does not mean both targets were tested.** Kotlin/Native has no
     `linux_arm64` host, so `linuxArm64Test` is never *created* — it does not appear as skipped, it does
     not appear at all. CI links there and executes the test binary on an arm64 runner; a local green
-    build proves nothing about it. **Today it is worse than that:** there is no test anywhere, so
-    `./gradlew build` is green having run zero of them. B-06.
-14. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
+    build proves nothing about it. Since B-06, CI names `jvmTest` and `linuxX64Test` and fails when
+    either produces no result file or reports zero tests — `find | wc -l` would pass while one target
+    quietly stopped being wired, which is the brief's red list exactly. `linuxArm64` is still covered
+    by nobody: B-15, blocked on [razves#3](https://github.com/youndie/razves/issues/3).
+14. **keel's startup probe answers `200` immediately, and that is correct rather than broken.** A
+    `StartupGate` with no named gates is started from birth — `started = gates.isEmpty()` — and keel
+    names none, so `/health/startup` says "started" from the moment the module is installed. The probe
+    only means something once a service names what it is waiting for, so a clone that adds migrations
+    without adding a gate has a startup probe that lies. `StartupGate(gates = setOf("migrations"))`
+    and `completed("migrations")` are the two lines that fix it, and `ItemRoutesTest` guards both
+    halves so the behaviour is written down where someone will meet it.
+15. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.

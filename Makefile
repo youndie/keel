@@ -8,9 +8,6 @@
 # minutes. Separate, because a contributor editing a document should not need the second, and one
 # target that needed both would be one nobody ran.
 #
-# `build` does nothing yet: there is no Gradle build in this repository until B-01 closes. It is here
-# already so that CI's job and a contributor's command are one string in one place from the first
-# commit rather than from the commit that adds the build.
 #
 # Every script defaults to `docs` in the working directory, so the variables below exist to be
 # overridden rather than because anything needs them.
@@ -28,7 +25,7 @@ GRADLEFLAGS ?=
 
 help:
 	@echo "make check   - the documentation gate: blocking, exactly what CI's check job runs"
-	@echo "make build   - the code gate: blocking, exactly what CI's build job runs (nothing yet, B-01)"
+	@echo "make build   - the code gate: blocking, exactly what CI's build job runs"
 	@echo "make report  - non-blocking reports: BDD coverage, code anchors"
 	@echo "make fix     - regenerate the backlog index, fill in missing coverage-map lines"
 
@@ -56,10 +53,13 @@ report:
 	$(PY) scripts/bdd_report.py --docs $(DOCS) --repos $(REPOS)
 	$(PY) scripts/code_anchors.py --docs $(DOCS) --repos $(REPOS)
 
-# The code gate. One `build` for every target the project declares. Until B-01 there is no wrapper,
-# so this says so rather than failing with "no such file".
+# The code gate, and CI's `build` job runs exactly this. One `build` for every target the project
+# declares — which today is `jvm` and `linuxX64`; `linuxArm64` is behind `keel.linuxArm64` and is not
+# covered by CI yet (B-15, blocked on youndie/razves#3).
+#
+# What a green run here does NOT cover is in CLAUDE.md rather than assumed: a Mac cannot link an ELF,
+# so the native half of this only really runs on the Linux box.
 build:
-	@test -x $(GRADLE) || { echo "no Gradle build yet - see B-01 in backlog.md"; exit 0; }
 	$(GRADLE) build $(GRADLEFLAGS)
 
 fix:

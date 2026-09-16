@@ -27,9 +27,9 @@ starter.
 non-goal. A client template is a separate repository.
 
 The scenarios below **are** the acceptance criteria of the template. Six of them restate the brief's
-declared acceptance in a form a test can hold, and none carries an `**Automated:**` line yet, because
-no code exists — that absence is the honest signal and `bdd_report.py` counts every one of them as
-manual.
+declared acceptance in a form a test can hold. Six of the sixteen are automated since B-06; the rest
+are target behaviour, and the missing `**Automated:**` line is the honest signal rather than an
+oversight — `bdd_report.py` counts each of those as manual.
 
 ## 2. Business rules
 
@@ -75,8 +75,10 @@ authentication (see [endpoint-items](../api/endpoint-items.md)).
 
 ## 5. Scenarios (BDD / test cases)
 
-All **target** behaviour. A scenario gains an `**Automated:**` line when its test exists; until then
-the check is manual and is meant to look that way.
+A scenario carries an `**Automated:**` line when a test exercises it **as written**; the rest are
+target behaviour, and the absence is the honest signal. Six of sixteen are automated since B-06 —
+each on the JVM and on `linuxX64` from one source, which is the property worth having rather than
+the count.
 
 ### Scenario: an item survives the round trip, on both targets
 
@@ -85,6 +87,16 @@ the check is manual and is meant to look that way.
 * **Then:** the `POST` answers `201` with the stored item and the `GET` answers `200` with an array
   containing exactly it
 * **And:** the same two calls against the other target produce byte-identical bodies
+
+### Scenario: the route renders a body rather than only a status
+
+* **Given:** the module with no store behind the route yet
+* **When:** `GET /items` is called
+* **Then:** the body is the exact JSON, not merely a `200`
+* **And:** this is asserted on both targets, because every rendered byte on Kotlin/Native goes
+  through glibc `iconv` — a status code crosses no charset, which is how a `401` from a static image
+  was once read as a pass
+* **Automated:** `ItemRoutesTest`
 
 ### Scenario: the store is the same code on both targets
 
@@ -116,19 +128,57 @@ the check is manual and is meant to look that way.
 
 ### Scenario: a missing required variable stops the process instead of a route
 
-* **Given:** an environment with the required configuration key unset
-* **When:** the binary starts
-* **Then:** it refuses to start, printing every problem it found rather than the first one
-* **And:** `--print-config` answers the same verdict **without** starting the process, because it is
-  asked precisely when the process will not start
+* **Given:** an environment with `KEEL_DB_PATH` unset
+* **When:** the configuration is read
+* **Then:** it refuses, and reports **every** problem it found rather than the first one — a process
+  that fails one variable at a time costs one restart each, and a deployment being configured for the
+  first time has several
+* **Automated:** `KeelConfigTest`
+
+### Scenario: `--print-config` answers without starting the process
+
+* **Given:** the same unusable environment
+* **When:** the binary is run with `--print-config`
+* **Then:** it prints every value with its origin and exits with the verdict the start would have
+  given, **without** starting — because it is asked precisely when the process will not start
 
 ### Scenario: a misspelled variable is named rather than ignored
 
-* **Given:** `KEEL_WORK_MSEC` set where the schema declares `KEEL_WORK_MS`
-* **When:** the binary starts on a Linux target
+* **Given:** `KEEL_DB_PATHS` set where the schema declares `KEEL_DB_PATH`
+* **When:** the configuration is read on a target that can enumerate the environment
 * **Then:** it refuses, naming the declared variable the unknown one is probably a misspelling of
-* **And:** on macOS native the check reports that it **could not run**, never "nothing found" — the
-  environment cannot be enumerated there
+* **And:** where the environment **cannot** be enumerated the same variable is passed over in
+  silence, because reporting "no unknown variables" on a target that never looked is a deployment
+  reading an absent check as evidence
+* **Automated:** `KeelConfigTest`
+
+### Scenario: a secret is masked wherever the configuration is rendered
+
+* **Given:** `KEEL_TRACY_KEY` set
+* **When:** the configuration is rendered
+* **Then:** the value does not appear — masking follows the declaration rather than a list of names
+  somebody keeps in sync with the schema
+* **Automated:** `KeelConfigTest`
+
+### Scenario: `/health` is an alias for liveness and not for readiness
+
+* **Given:** a running module
+* **When:** `/health` and `/health/live` are both called
+* **Then:** they answer with the same status and the same body
+* **And:** that is the point rather than a detail: a chart pointing its readiness probe at `/health`
+  gets a probe that cannot fail while the process is alive, which is what three separate probes exist
+  to replace
+* **Automated:** `ItemRoutesTest`
+
+### Scenario: the startup probe is a latch, and means nothing until a gate is named
+
+* **Given:** a `StartupGate` with no named gates — which is what keel ships
+* **When:** `/health/startup` is called
+* **Then:** it answers `200` immediately, because a gate with nothing outstanding is started from
+  birth
+* **And:** with a named gate it answers `503` naming what is outstanding, and `200` once that gate
+  completes — never `503` again afterwards
+* **Automated:** `ItemRoutesTest`
 
 ### Scenario: the image starts with the binary and nothing beside it
 
