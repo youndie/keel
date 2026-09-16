@@ -20,7 +20,10 @@ one source; since B-04 an image that builds, serves a rendered page and stops cl
 B-03 a JVM distribution whose AOT cache is verified on every `check`.
 
 **keel now ships twice in the sense the brief meant it.** What is left is the measuring: parity
-(B-05), the shutdown oracle against the binary (B-07), clone-to-ready (B-08) and the stand (B-13).
+(B-05), clone-to-ready (B-08) and the stand (B-13). **B-07 is `wip` and blocked outside this
+repository** — kore's oracle hardcodes the route it drives, so it cannot be pointed at keel
+([kore#81](https://github.com/youndie/kore/issues/81)). The shutdown *ordering* is observed and
+recorded in that item; the in-flight guarantee is unverified rather than failing.
 **B-16 is answered**: keel documents the `scratch` recipe and does not ship it, because a convention
 that breaks on a Kotlin bump is fixed once for everyone and a template that breaks on one is copied
 and never updated again. B-18 is the expiry. `linuxArm64` is covered by nobody (B-15).
