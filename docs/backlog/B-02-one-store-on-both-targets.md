@@ -1,7 +1,7 @@
 ---
 id: B-02
 title: "One ItemStore implementation compiles and passes its contract suite on both targets"
-status: open
+status: wip
 priority: P0
 size: M
 stage: m1-ships-twice
