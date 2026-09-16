@@ -39,7 +39,7 @@ the number and puts it in the README with the date it was taken.
 ## Note added 2026-09-16: this needs B-03, and did not say so
 
 The acceptance above reads *"answers `/health/ready` on JVM and native"*. There is no way to run the
-JVM half: `application` lives in the `:server-jvm` module that B-03 would add, and B-03 is a
+JVM half: `application` lives in the `:distribution` module that B-03 would add, and B-03 is a
 `question` because that module does not fit acceptance 6's line budget. `jvm()` today produces a jar
 with no entry point wired and no start script.
 

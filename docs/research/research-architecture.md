@@ -365,7 +365,7 @@ Brief: one KMP module, `installDist` and `linkReleaseExecutable*` from it, zavar
 `check`.
 
 Decision: **`:server` is the KMP module (`jvm()` + `linuxX64`, `linuxArm64` behind a property), and
-`:server-jvm` is a tiny `kotlin("jvm")` module that applies `application` and zavarnik and depends on
+`:distribution` is a tiny `kotlin("jvm")` module that applies `application` and zavarnik and depends on
 `:server`'s JVM target.** The Kotlin in it is one `main` calling into `:server`.
 
 Why:
@@ -381,11 +381,35 @@ Why:
 - the price is one extra module and roughly ten lines of Gradle against acceptance 6's budget of 100.
   It is named here rather than discovered, and if the budget is what breaks, the honest answer is
   dropping zavarnik from the template — not hiding the module;
-- what this does **not** do is split the code. `:server-jvm` has no Kotlin beyond `main`; a starter
+- what this does **not** do is split the code. `:distribution` has no Kotlin beyond `main`; a starter
   whose logic lives in a JVM-only module has quietly stopped shipping twice.
 
-Settled by: [B-03](../backlog/B-03-jvm-half-ships.md), which is green when `installDist`'s start
-script runs with a verified cache and `/health/ready` answers from it.
+**Settled in B-03, and it cost more than the module.** `installDist` produces a start script that
+runs, `aotVerify` reports **2355 of 2355 application classes (100 %) from the cache**, and the
+distribution answers `/health/ready` and serves `GET`/`POST /items`. Four things had to be decided or
+found on the way, none of them visible from this decision as written:
+
+* **The budget had to be redefined before the module could exist at all** — 115 code lines against
+  100, counting the version catalog. It now counts build logic only, which is 87 with the module in.
+  The reasoning, and the fact that a criterion was edited by the work it constrained, is in
+  `backlog.md`.
+* **The module is `:distribution`, not `:server-jvm`.** Kotlin names a multiplatform module's JVM
+  artefact `<module>-jvm-<version>.jar`, so `:server`'s is already `server-jvm-0.1.0.jar`; a module of
+  that name produces a duplicate in `lib/` and `installDist` refuses.
+* **Two sibling modules applying different Kotlin plugins need a root build script with
+  `apply false`**, or each plugin lands in its own classloader scope and the Kotlin plugin's shared
+  `KotlinNativeBundleBuildService` exists twice. The failure names two classloaders and nothing about
+  the cause. keel had no root build file until this item; every clone that adds a second module meets
+  it.
+* **`KEEL_DB_PATH` stopped being required.** zavarnik's training run inherits the build's environment
+  and cannot be given one ([zavarnik#13](https://github.com/youndie/zavarnik/issues/13)), so a service
+  that refuses without configuration cannot have its cache trained by `check`. The README's
+  `./gradlew run` promise was already false for the same reason. keel now declares **no** required
+  key, which is a fact about a template whose store is a file beside the process rather than a lesson
+  — and `KeelConfigTest` keeps the required shape in a test so it is not lost with the key.
+
+Twelve of the module's lines are not keel's: [B-17](../backlog/B-17-adopt-the-jvm-distribution-convention.md)
+adopts them from sborka once [sborka#78](https://github.com/youndie/sborka/issues/78) exists.
 
 ### D6. Parity is asserted against a declared normaliser, and the normaliser is written before the first run
 

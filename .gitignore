@@ -13,3 +13,4 @@ build/
 # a local run writes nothing, so there is nothing to ignore here. See B-13.
 
 .DS_Store
+keel.db
