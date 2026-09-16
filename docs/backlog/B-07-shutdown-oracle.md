@@ -1,7 +1,7 @@
 ---
 id: B-07
 title: "kore's oracle runs against keel's binary, on both targets"
-status: wip
+status: done
 priority: P0
 size: M
 stage: m1-ships-twice
@@ -28,8 +28,9 @@ client's record**, never from the server's log. This item points it at keel.
 - If this run finds a defect in the shutdown, the defect goes to **kore**. keel's first consumer is
   the second real consumer kore has had, and the first found seven defects in two days.
 
-- AC: the oracle run is green on both targets with a non-zero in-flight count, and its transcript is
-  attached to the item.
+- AC: the oracle run is green **on the artefact that ships** — the native image — with a non-zero
+  in-flight count, and its transcript is attached to the item. *Narrowed from "on both targets" on
+  2026-09-16; the reason and what it costs are in iteration 3 below.*
 - AC: any finding is filed in kore's backlog with a link from here, not fixed in keel.
 - Anchors: `deploy/compose.oracle.yaml`, `Dockerfile`,
   `kore/samples/oracle/src/main/kotlin/io/github/youndie/kore/oracle/Oracle.kt`
@@ -150,3 +151,37 @@ The options, none of them free:
 production, and that is now verified. The JVM half's shutdown was *observed* correct in B-03 — exit
 `143`, full transcript — but observed is not asserted, and saying so is the point of leaving this
 written down rather than closing on a pass that covers half of what the item's title claims.
+
+---
+
+## Iteration 3 — 2026-09-16, done: narrowed to the artefact that ships
+
+**The item said "on both targets" and that cannot be met as written**, because the oracle drives a
+container and keel ships one image. The JVM half ships as a distribution — the brief's "one image" —
+so there is nothing on that side to point the oracle at.
+
+Narrowed, with the owner's decision, to the native image. The run in iteration 2 is the evidence:
+4472 exchanges, **32 of 32 spanning the signal all completed**, 4089 refusals every one carrying
+`Connection: close`, exit `0` inside the grace period. A4's failure is a measurement artefact in the
+oracle, filed as [kore#83](https://github.com/youndie/kore/issues/83) and not keel's.
+
+### What the narrowing costs, stated rather than left implicit
+
+**The JVM half's shutdown is observed, not asserted.** B-03's smoke saw it exit `143` with a full
+transcript, and B-05 compared the two targets' responses while both were healthy — neither asserts
+what happens to a request in flight when the signal arrives.
+
+That gap is not uniform with the native one, and this is the part worth remembering: kore exists
+because **`EmbeddedServer.stop` runs its steps in the opposite order on the two platforms**. The JVM
+half is therefore exactly where a shutdown defect could live that a green native run cannot see. keel
+registers nothing in `ApplicationStopping` — the wiring that would trip over it — so there is reason
+to think it is fine, but reason to think so is not a check.
+
+Filed as **[kore#85](https://github.com/youndie/kore/issues/85)**: should the oracle drive a
+distribution as well as an image? If the answer is yes, [B-19](B-19-oracle-on-the-jvm-half.md) points
+it at keel's. If the answer is no, that item closes as `dropped` with the reason, and this paragraph
+is the record of what keel chose not to cover.
+
+**What was refused:** adding a JVM image to keel so the oracle had something to run. It contradicts
+the brief's "one image" and puts a test-only artefact in a template every clone inherits — a service
+would ship it without noticing, the way clones inherit everything else.

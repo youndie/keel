@@ -20,11 +20,13 @@ one source; since B-04 an image that builds, serves a rendered page and stops cl
 B-03 a JVM distribution whose AOT cache is verified on every `check`.
 
 **keel now ships twice in the sense the brief meant it.** What is left is the measuring: parity
-(B-05), clone-to-ready (B-08) and the stand (B-13). **B-07 is `wip` and is a scope question now, not a blocked one.** kore#81 landed, the oracle runs
-against keel's image, and **acceptance 3 is verified**: 32 of 32 requests in flight at the signal all
-completed. One assertion fails for a measurement reason filed as
-[kore#83](https://github.com/youndie/kore/issues/83), and "on both targets" needs an artefact keel
-deliberately does not ship — the JVM half is a distribution, not an image. The item has the options.
+(B-05), clone-to-ready (B-08) and the stand (B-13). **Acceptance 3 is verified on the artefact that ships**: kore's oracle against keel's image, 32 of 32
+requests in flight at the signal all completed. B-07 was **narrowed** from "both targets" to that,
+because the oracle drives a container and the JVM half is a distribution — adding a JVM image would
+contradict the brief's "one image" and hand every clone a test-only artefact. What that costs is
+[B-19](docs/backlog/B-19-oracle-on-the-jvm-half.md): the JVM half's shutdown is observed and not
+asserted, on the platform where `EmbeddedServer.stop` runs its steps in the opposite order. Blocked on
+[kore#85](https://github.com/youndie/kore/issues/85).
 **B-16 is answered**: keel documents the `scratch` recipe and does not ship it, because a convention
 that breaks on a Kotlin bump is fixed once for everyone and a template that breaks on one is copied
 and never updated again. B-18 is the expiry. `linuxArm64` is covered by nobody (B-15).
@@ -145,7 +147,6 @@ budget stops being one.
 
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
-| [B-07](docs/backlog/B-07-shutdown-oracle.md) `[~]` | kore's oracle runs against keel's binary, on both targets | P0 | M | B-02, B-03, B-04 |
 | [B-09](docs/backlog/B-09-first-consumer.md) `[ ]` | The webhook relay is built from keel, and every non-domain line the agent added is a defect | P0 | L | B-07, B-08 |
 | [B-08](docs/backlog/B-08-clone-to-ready.md) `[ ]` | Clone to /health/ready on a machine that has never seen the portfolio, timed | P1 | S/M | B-04, B-03 |
 | [B-11](docs/backlog/B-11-skill-points-at-keel.md) `[ ]` | native-service-bootstrap names keel as its reference project in Step 0 | P1 | S | B-09 |
@@ -153,10 +154,11 @@ budget stops being one.
 | [B-10](docs/backlog/B-10-draft-gate.md) `[ ]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
 | [B-12](docs/backlog/B-12-skill-evals.md) `[ ]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
 | [B-15](docs/backlog/B-15-arm64-suite-runs.md) `[ ]` | Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks | P2 | S | - |
+| [B-19](docs/backlog/B-19-oracle-on-the-jvm-half.md) `[ ]` | Assert the JVM half's shutdown, once the oracle can reach a distribution | P2 | S | - |
 | [B-17](docs/backlog/B-17-adopt-the-jvm-distribution-convention.md) `[ ]` | Adopt sborka's jvm-distribution convention once it exists | P3 | XS | - |
 | [B-18](docs/backlog/B-18-scratch-when-static-is-static.md) `[ ]` | Ship the scratch image once -static needs no property overrides | P3 | S | - |
 
-## Closed (8)
+## Closed (9)
 
 **Shape**
 
@@ -168,6 +170,7 @@ budget stops being one.
 - [B-02](docs/backlog/B-02-one-store-on-both-targets.md) `[x]` - One ItemStore implementation compiles and passes its contract suite on both targets
 - [B-03](docs/backlog/B-03-jvm-half-ships.md) `[x]` - installDist runs with a verified AOT cache, and the split it costs is one module
 - [B-06](docs/backlog/B-06-both-targets-tested.md) `[x]` - CI proves a suite ran on each target, rather than proving the build was green
+- [B-07](docs/backlog/B-07-shutdown-oracle.md) `[x]` - kore's oracle runs against keel's binary, on both targets
 
 **The image**
 
