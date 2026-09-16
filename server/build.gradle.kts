@@ -41,6 +41,20 @@ nativeService {
 // so the next person deletes it instead of inheriting it.
 tasks.matching { it.name == "sizeBudgetCheckDebugExecutable" }.configureEach { enabled = false }
 
+// THE MEASUREMENT, AND THE LOGIC IS NOT HERE. `k6/measure.sh` holds it, because a measurement is a
+// procedure somebody reads and edits rather than a Gradle task, and because build logic is on a
+// budget this repository's acceptance actually counts.
+tasks.register<Exec>("measure") {
+    group = "verification"
+    description = "Time to ready, RSS at ready, p95. Refuses to write without --stand naming two hosts"
+    dependsOn("stageNativeImage")
+    // From the repository root, because that is where `k6/` is and where every path the script
+    // prints should be read from. An Exec task defaults to its own project's directory.
+    workingDir = rootProject.projectDir
+    commandLine("k6/measure.sh")
+    args(providers.gradleProperty("measureArgs").orNull?.split(" ") ?: emptyList<String>())
+}
+
 kotlin {
     // Development and tests, and — from B-03 — a distribution that actually ships. The parity
     // finding behind keel is that every service in this portfolio had this line and none had a

@@ -113,7 +113,7 @@ Measured on `feat/b-01-repository-skeleton`, 2026-09-16:
 
 | | code | as written | budget |
 |---|---|---|---|
-| Gradle — `settings.gradle.kts`, `gradle.properties`, `libs.versions.toml`, `server/build.gradle.kts` | **98** | 248 | 100 |
+| Gradle — build logic, catalog excluded (B-03) | **95** | — | 100 |
 | Kotlin under `server/`, main only | **211** | 407 | 500 |
 | Kotlin under `server/`, tests included | 541 | 1002 | — |
 
