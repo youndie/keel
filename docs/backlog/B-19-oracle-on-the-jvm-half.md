@@ -1,7 +1,7 @@
 ---
 id: B-19
 title: "Assert the JVM half's shutdown, once the oracle can reach a distribution"
-status: wip
+status: done
 priority: P2
 size: S
 stage: m1-ships-twice
