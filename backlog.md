@@ -16,8 +16,12 @@ keel.
 a JVM jar and a `linuxX64` executable, the kore wiring and the size gate; since B-06 a CI job that
 compiles the code and a report step that fails when a **named** target's suite goes missing; since
 B-02 two routes over a real SQLite database that survives a restart, and 22 tests on each target from
-one source. There is no JVM distribution (B-03) and no image (B-04), and `linuxArm64` is covered by
-nobody (B-15).
+one source; since B-04 an image that builds, serves a rendered page and stops cleanly at 14 MB.
+
+There is no JVM distribution: **B-03 is a `question`**, because the module it needs does not fit
+acceptance 6's line budget and the prescribed answer does not close the gap. **B-16 is a `question`**
+too — whether a template should ship the `scratch` recipe at all, given it pins keys JetBrains may
+change in any patch release. `linuxArm64` is covered by nobody (B-15).
 
 Every document outside `docs/research/` is still `status: draft`, because each of them describes more
 than exists. The research is `active`: the reading it records happened on 2026-09-16 against artefacts
@@ -114,7 +118,6 @@ budget stops being one.
 | Task | | Priority | Size | Blocked by |
 |---|---|---|---|---|
 | [B-03](docs/backlog/B-03-jvm-half-ships.md) `[?]` | installDist runs with a verified AOT cache, and the split it costs is one module | P0 | M | B-01 |
-| [B-04](docs/backlog/B-04-image-and-size-budget.md) `[~]` | Two images from one Dockerfile, both measured against a budget declared first | P0 | M | B-01 |
 | [B-07](docs/backlog/B-07-shutdown-oracle.md) `[ ]` | kore's oracle runs against keel's binary, on both targets | P0 | M | B-02, B-03, B-04 |
 | [B-09](docs/backlog/B-09-first-consumer.md) `[ ]` | The webhook relay is built from keel, and every non-domain line the agent added is a defect | P0 | L | B-07, B-08 |
 | [B-05](docs/backlog/B-05-parity-smoke.md) `[ ]` | The parity normaliser is written before the first parity run | P1 | S/M | B-02, B-03 |
@@ -124,8 +127,9 @@ budget stops being one.
 | [B-10](docs/backlog/B-10-draft-gate.md) `[ ]` | Turn docs_check.py --on-main on once the tree describes code that exists | P2 | XS | B-07 |
 | [B-12](docs/backlog/B-12-skill-evals.md) `[ ]` | An eval suite for native-service-bootstrap with checkable expectations | P2 | M | B-11 |
 | [B-15](docs/backlog/B-15-arm64-suite-runs.md) `[ ]` | Run the linuxArm64 suite on an arm64 runner, once razves can register its tasks | P2 | S | - |
+| [B-16](docs/backlog/B-16-static-image.md) `[?]` | Should the template ship the scratch recipe at all? | P2 | M | - |
 
-## Closed (4)
+## Closed (5)
 
 **Shape**
 
@@ -136,5 +140,9 @@ budget stops being one.
 
 - [B-02](docs/backlog/B-02-one-store-on-both-targets.md) `[x]` - One ItemStore implementation compiles and passes its contract suite on both targets
 - [B-06](docs/backlog/B-06-both-targets-tested.md) `[x]` - CI proves a suite ran on each target, rather than proving the build was green
+
+**The image**
+
+- [B-04](docs/backlog/B-04-image-and-size-budget.md) `[x]` - Two images from one Dockerfile, both measured against a budget declared first
 
 <!-- END INDEX -->

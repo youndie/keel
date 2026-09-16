@@ -144,8 +144,14 @@ repository configured — which is acceptance 1's precondition and the README's 
 
 ## 5. Infrastructure and deploy
 
-* **Image:** built from the repository root, two stages. Runtime `gcr.io/distroless/cc-debian13` by
-  default; `--build-arg STATIC=1` selects the `scratch` variant.
+* **Image:** built from the repository root, two stages, runtime `gcr.io/distroless/cc-debian13`.
+  **13 972 497 bytes**, measured 2026-09-16 with `docker image inspect` on `linux/amd64` — the method
+  is named because `docker images` reports 55.4MB for the same image, counting every platform of the
+  base manifest. There is no `STATIC=1` variant: [B-16](../backlog/B-16-static-image.md) asks whether
+  a template should carry that recipe at all.
+* **`.dockerignore` does not exclude `.git`**, deliberately. `/version` is served from an identity the
+  Gradle plugin reads out of git at build time, so excluding the directory — the obvious thing to do
+  for context size — answers `0.1.0+unknown` in the artefact where the question matters most.
 * **Probes:** `GET /health/startup`, `GET /health/ready`, `GET /health/live`. A chart must point
   readiness at `/health/ready` and **not** at `/health`, which is an alias for liveness — see §8.
 * **Version:** `GET /version`, `key: value` per line, read by deploy checks rather than by people.

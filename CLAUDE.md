@@ -6,9 +6,9 @@ a Kotlin/Native binary, both runnable, both tested, one image. konekt with the d
 **The service runs and is tested.** `./gradlew build` produces a JVM jar and a `linuxX64` executable,
 `GET`/`POST /items` go through a real SQLite database that survives a restart, kore is wired, the size
 gate runs, and 22 tests run on each target from one source. CI names `jvmTest` and `linuxX64Test` and
-fails when either produces no result file or reports zero tests. There is no JVM distribution and no
-image; `linuxArm64` is built and tested by nobody (B-15, blocked on
-[razves#3](https://github.com/youndie/razves/issues/3)).
+fails when either produces no result file or reports zero tests. The image builds and runs at 14 MB.
+There is no JVM distribution — B-03 is a `question` — and `linuxArm64` is built and tested by nobody
+(B-15, blocked on [razves#3](https://github.com/youndie/razves/issues/3)).
 
 This paragraph said *"nothing is built"*, and then *"no test at all"*, each wrong one iteration
 later. A sentence about the state
