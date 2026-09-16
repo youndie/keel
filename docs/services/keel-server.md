@@ -107,8 +107,10 @@ Three things about it are not obvious and each cost a red build:
   plugins need both declared there with `apply false`, or each lands in its own classloader scope and
   the Kotlin plugin's shared build service exists twice. The failure names two classloaders and
   nothing about the cause;
-* **twelve of its lines are not keel's.** Any native service wanting a shipped JVM half needs the same
-  file — [sborka#78](https://github.com/youndie/sborka/issues/78), adopted by B-17.
+* **most of it is not keel's any more.** `sborka.jvm-distribution` carries `application`, the JDK
+  floor, zavarnik's readiness default and the collision guard above; what is left here is the main
+  class and the training workload. B-17 — which bought **no lines at all**, and three decisions a
+  clone can no longer get wrong.
 
 **The two allocators, one floor below the other.** `sborka.native-service` sets
 `fixedBlockPageSize=16` on the binary; the image sets `MALLOC_ARENA_MAX=2`. Kotlin/Native's allocator

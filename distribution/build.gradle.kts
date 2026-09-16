@@ -17,27 +17,26 @@
 
 plugins {
     alias(libs.plugins.kotlinJvm)
-    application
+    alias(libs.plugins.sborkaJvmDistribution)
+
+    // APPLIED BY THE REPOSITORY, NOT BY THE CONVENTION, and for the reasons sborka gives: the version
+    // belongs to the repository whose build it is, and a convention that carried zavarnik would put
+    // it on the build classpath of every repository taking any sborka convention.
     alias(libs.plugins.zavarnik)
 }
 
-kotlin { jvmToolchain(25) }
-
 dependencies { implementation(project(":server")) }
 
-application { mainClass = "io.github.youndie.keel.jvm.MainKt" }
+// THE THREE LINES THAT ARE KEEL'S. Everything else this module used to say — `application`, the
+// toolchain, the module-name collision guard, zavarnik's readiness default — is
+// `sborka.jvm-distribution` now (B-17, sborka#78). The workload stays here because what is worth
+// training a cache on is a property of the service rather than of the shape.
+jvmDistribution {
+    mainClass = "io.github.youndie.keel.jvm.MainKt"
+}
 
-// THE CACHE IS TRAINED AGAINST THE ROUTE THAT MATTERS, not against the probe.
-//
-// A workload of `/health/ready` would train the cache on a handler that touches nothing; `/items`
-// goes through serialization, the store and the driver, which is where the class loading is.
-//
-// The training run inherits the build's environment and cannot be given one of its own
-// (youndie/zavarnik#13), so this only works because `KEEL_DB_PATH` has a default. A service that
-// requires it cannot be trained by `check` at all today.
 zavarnik {
     training {
-        readyWhen.url("http://127.0.0.1:8080/health/ready")
         workload { get("http://127.0.0.1:8080/items") }
     }
 }
