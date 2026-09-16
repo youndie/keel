@@ -1,7 +1,7 @@
 ---
 id: B-12
 title: "An eval suite for native-service-bootstrap with checkable expectations"
-status: open
+status: wip
 priority: P2
 size: M
 stage: m4-consumer
@@ -31,3 +31,45 @@ expectations. There is none: the plugin directory holds `skills/` and nothing el
 - AC: at least three cases are drawn from defects the first consumer actually hit.
 - Anchors: `kotlin-skills/plugins/kotlin-fullstack/skills/native-service-bootstrap/SKILL.md`,
   `docs/features/feature-item-round-trip.md`
+
+---
+
+## Iteration 1 — 2026-09-16: written, waiting on a repository this loop does not merge in
+
+[kotlin-skills#7](https://github.com/youndie/kotlin-skills/pull/7) adds
+`skills/native-service-bootstrap/evals/` — five cases in the shape the three sibling suites already
+use, plus a fixture script and a README saying where each case came from.
+
+| AC | |
+|---|---|
+| `evals/evals.json` exists, each case naming an observable | done — a route, a status, an ordering in a file, a line that must not appear |
+| at least three cases drawn from defects the first consumer actually hit | done — three of the five |
+
+The three, all from [B-09](B-09-first-consumer.md):
+
+* **`outbound-tls-decides-the-image`** — `ktor-client-cio` compiled, linked and resolved, and the
+  first `https` request failed at runtime. The case checks the agent says so *before* depending on it,
+  not as a caveat afterwards;
+* **`cancellation-is-not-swallowed`** — the relay's forwarder had `runCatching { sweep() }` in its
+  loop, and kapkan failed the build over it. Written by an agent, passed by a human reading;
+* **`nothing-closes-in-applicationstopping`** — the divergence kore exists for.
+
+### Two judgement calls that are the reviewer's to overturn
+
+**Several expectations check that a *reason* appears, not only that the code is right.** For a skill
+whose stated value is "gotchas already paid for", an agent that writes the right dependency without
+knowing why writes the wrong one when the context shifts. It is also the kind of expectation a grader
+scores loosely, and someone may prefer artefacts only.
+
+**The fixtures are deliberately not keel.** Handing the agent a finished service would let it copy an
+answer rather than reach one, and every case here is about a decision.
+
+### Not run, and not merged
+
+The suite has not been executed. `claude plugin eval` loads the plugin and runs it on this machine as
+the user — a different kind of action from writing the cases, and one nobody asked for. And the loop
+does not merge in kotlin-skills: keel's `CLAUDE.md` authorises it *here*, and that authorisation does
+not travel.
+
+The item closes when a person merges the pull request. **Until then, saying "the eval suite exists"
+would be the thing this whole backlog is written against.**
