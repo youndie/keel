@@ -78,6 +78,64 @@ Three things about this backlog that are not obvious from the items:
 A milestone closes as a whole and gets a line here saying what came out beyond the plan, and which
 research hypothesis was confirmed or refuted.
 
+**Two of the five are closed. The other three are each held open by one item blocked in another
+repository** — `m1-ships-twice` by B-15, B-17 and B-19, `m2-image` by B-18, `m4-consumer` by B-12 —
+which is worth naming because it is not the same as work remaining here.
+
+### Shape closed — 2026-09-16
+
+**The premise holds: keel's build files apply conventions and set names, and nothing else.** B-01 put
+`:server` on `sborka.native-service`, `sborka.kmp`, `sborka.lint` and razves without a single flag of
+its own, and B-14 removed the one line that was not — a workaround, after the thing it worked around
+was fixed.
+
+*Beyond the plan:* **the conventions had never been run with the configuration cache on.**
+`stageNativeImage` could not be serialised, and keel was the first build anywhere to meet it — sborka's
+own stand applies the convention without the cache, and the three services that run with the cache
+hand-write their native builds. Filed as [sborka#76](https://github.com/youndie/sborka/issues/76),
+fixed the same day, and the workaround deleted with the comment that made it findable. The round trip
+took one working day and it is the clearest evidence so far that the routing table works.
+
+*Confirmed:* research §1.3's claim that `--as-needed` drops three of the ten `NEEDED` entries — read
+off `keel.needed.txt` as **seven**, the first time that prediction has been checked on a binary
+outside sborka.
+
+*Refuted:* the unstated assumption that a convention working on its own stand works in a consumer.
+The second consumer is where a convention's edges are, and keel was the second consumer of three
+different ones.
+
+*Also out of it:* acceptance 6 had no definition. Counting every Gradle line or only build logic
+differed by 2.5x, and the question could not be deferred — B-03 could not fit until it was answered.
+
+### Measured closed — 2026-09-16
+
+**Every number the brief declared is now measured or explicitly refused, and the refusals are the
+better half.**
+
+| | declared | measured |
+|---|---|---|
+| clone → ready, cold machine | under 1 h | **3 min 48 s**, the build 82 % of it |
+| parity between the targets | no diff after the normaliser | no diff, with a control on the record count |
+| p95 at a fixed rate | — | **1.86 ms** at a delivered 499.95 req/s, on two hosts |
+
+*Beyond the plan:* **three of the four defects these items found were in the measuring, not in keel.**
+A parity comparison that diffed two empty files and passed. A normaliser that named `/version` fields
+which do not exist, so it normalised nothing while looking correct. A `handleSummary` that threw on a
+metric this k6 does not publish, so a run that had worked reported nothing at all — twice, in two
+different items, both times because that function runs in a context the rest of the script does not.
+
+*And one that was in keel:* `GET /items` has no limit. At 500 req/s it achieved 29.8 iterations a
+second, dropped 4 692 and moved 151 MB in ten seconds, every figure describing a response body growing
+by 500 rows a second. Quirk 18, and a denial of service any clone would inherit.
+
+*Confirmed:* research open question 1 — the hour holds, and the guess that the toolchain download
+dominates was right at 82 %.
+
+*Refuted, by me:* B-13 iteration 1 recorded that the stand hardware "is not available to this loop".
+`bench-a` and `bench-b` were in `~/.ssh/config` the whole time. The claim was written without
+checking, and it is the one entry in this backlog that was wrong for no reason other than not
+looking.
+
 ## What the numbers are, and where they come from
 
 The acceptance thresholds are the brief's, declared before the first commit — an hour to ready, 25 MB
