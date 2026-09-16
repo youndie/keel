@@ -64,4 +64,8 @@ what that task's own comment is written against.
 
 **The suite never needed it.** `linkDebugTestLinuxArm64` does not go through staging, so what this
 item was actually for — a suite that runs on the architecture nobody was testing — is done. The full
-`build` with the third target on is a packaging question, and it belongs to whoever answers sborka#80.
+`build` with the third target on is a packaging question.
+
+**Closed the same day by [B-21](B-21-build-with-both-native-targets.md):** sborka#80 was fixed and
+published as `0.4.0.82`, `build -Pkeel.linuxArm64=true` is green, and the staged layout's change of
+shape is handled at the `Dockerfile`'s `COPY` line where somebody will read it.

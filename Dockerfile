@@ -51,6 +51,18 @@ FROM gcr.io/distroless/cc-debian13
 # absence. What is not worth doing is leaving it unset because nobody measured: the default is the
 # number that gets a service killed under a limit.
 ENV MALLOC_ARENA_MAX=2
+# THE PATH CHANGES SHAPE IF A SECOND NATIVE TARGET IS TURNED ON, and this line is where that bites.
+#
+# `stageNativeImage` stages flat — `native-image/keel` — while the module declares one native target,
+# and per-target — `native-image/linux_x64/keel`, `native-image/linux_arm64/keel` — as soon as it
+# declares two. That is right: one binary per target under one name would be a `COPY` that finds a
+# file and the wrong one.
+#
+# keel ships with `keel.linuxArm64=false`, so the flat path is correct here. **A clone that turns it
+# on changes this line to `native-image/linux_x64/keel`** — or to `linux_arm64` with a builder stage
+# platform to match, since `FROM --platform=linux/amd64` above decides which binary this image wants.
+# Without that edit the image build fails with "not found" naming the path and nothing about the
+# property that moved it.
 COPY --from=build /app/server/build/native-image/keel /app/keel
 
 # EXEC FORM, ALWAYS. Shell form makes `/bin/sh -c` PID 1, and it does not forward `SIGTERM` — so the
