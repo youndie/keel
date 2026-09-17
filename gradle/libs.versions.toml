@@ -6,13 +6,15 @@
 [versions]
 
 # The shared build conventions. One number: every sborka plugin below takes its version from here.
-sborka = "0.4.0.82"
+sborka = "0.4.0.89"
 
-# NOT 2.4.20, which is the current release. It is what the portfolio's toolkits are built with, it is
-# the distribution kore's research addresses were dumped from, and it is what is already on both
-# machines — so a build here does not start with a gigabyte of download. Bumping it means re-running
-# those dumps, not just editing this line.
-kotlin = "2.4.10"
+# NOT HERE ANY MORE. The compiler comes from `wip`, the catalog a sborka release publishes.
+#
+# This line's reason was never this repository's: it pinned 2.4.10 because kore's verification
+# addresses were dumps of that distribution. kore re-ran those dumps against 2.4.20 and every
+# address held (youndie/kore#88), so the reason is discharged rather than ignored — and with it the
+# two that came along: the portfolio's toolkits are on 2.4.20 now, and that distribution is already
+# on both machines.
 
 # The exact artefact kore's five platform divergences were read in: EmbeddedServerJvm.kt,
 # EmbeddedServerNix.kt, CIOApplicationEngine.kt, ServerPipeline.kt. A bump is a re-read of those four
@@ -74,9 +76,6 @@ sqlx4k-sqlite = { module = "io.github.smyrgeorge:sqlx4k-sqlite", version.ref = "
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 [plugins]
-kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 sborkaKmp = { id = "io.github.youndie.sborka.kmp", version.ref = "sborka" }
 sborkaLint = { id = "io.github.youndie.sborka.lint", version.ref = "sborka" }

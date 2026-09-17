@@ -17,6 +17,6 @@
 // root build file. Every clone that adds a second module meets it.
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.kotlinJvm) apply false
+    alias(wip.plugins.kotlinMultiplatform) apply false
+    alias(wip.plugins.kotlinJvm) apply false
 }

@@ -16,7 +16,7 @@
 // half needs this same file, which is the definition of something belonging in sborka.
 
 plugins {
-    alias(libs.plugins.kotlinJvm)
+    alias(wip.plugins.kotlinJvm)
     alias(libs.plugins.sborkaJvmDistribution)
 
     // APPLIED BY THE REPOSITORY, NOT BY THE CONVENTION, and for the reasons sborka gives: the version
