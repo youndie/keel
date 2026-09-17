@@ -4,8 +4,8 @@
 // multiplatform module — `:server-jvm`, B-03), the store (B-02) and the image (B-04).
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.kotlinSerialization)
+    alias(wip.plugins.kotlinMultiplatform)
+    alias(wip.plugins.kotlinSerialization)
     alias(libs.plugins.sborkaKmp)
     alias(libs.plugins.sborkaLint)
     alias(libs.plugins.sborkaNativeService)
