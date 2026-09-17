@@ -46,7 +46,7 @@ than quoted here.
 
 What *is* verified is [research-architecture](research/research-architecture.md) §1: eleven groups of
 facts, each read on 2026-09-16 in a published artefact (`sqlx4k-sqlite:1.13.1`'s Gradle metadata and
-JVM jar, Ktor 3.5.2's sources, the Kotlin/Native 2.4.10 platform klibs), in a portfolio repository's
+JVM jar, Ktor 3.6.0's sources, the Kotlin/Native 2.4.20 platform klibs), in a portfolio repository's
 source (kore, sborka, zavarnik, chronik), or in a registry listing. Two of the brief's four open
 decisions came out differently from what it assumed, and one decision is new and contradicts the
 brief's own contents table — §2, D1, D3 and D5.
@@ -69,7 +69,7 @@ defect worth a backlog item, because both halves then look equally authoritative
   `bdd_report.py` counts every one of them as manual.
 - **The primary consumer is a coding agent.** Every document carries code anchors. Addresses inside a
   dependency's artefact are written with the separator a jar URL uses —
-  `ktor-server-core-3.5.2!/nixMain/io/ktor/server/engine/EmbeddedServerNix.kt` — because no search
+  `ktor-server-core-3.6.0!/posixMain/io/ktor/server/engine/EmbeddedServer.posix.kt` — because no search
   over sibling repositories can ever resolve them, and a permanently non-zero rot list is a list
   nobody reads.
 - `keel-server.md` carries `repo_url` since B-01, and not before: the repository did not exist when

@@ -69,10 +69,10 @@ not have kore's research open.
 
 | Divergence | Where kore verified it |
 |---|---|
-| `EmbeddedServer.stop` runs its steps in **opposite order** on JVM and Kotlin/Native, so `ApplicationStopping` fires *after* the drain on one and *before* it on the other, from identical source | `ktor-server-core-3.5.2!/jvmMain/io/ktor/server/engine/EmbeddedServerJvm.kt`, `ktor-server-core-3.5.2!/nixMain/io/ktor/server/engine/EmbeddedServerNix.kt` |
-| `ApplicationStopPreparing` fires **after** the socket has stopped accepting on CIO, so it cannot be used to flip readiness — which is the one thing its name suggests | `ktor-server-cio-3.5.2!/commonMain/io/ktor/server/cio/CIOApplicationEngine.kt` |
-| the Kotlin/Native shutdown hook is **one global slot**, last registration wins, and the callback runs on the POSIX signal-handler stack — `runBlocking` and all | Kotlin/Native 2.4.10 platform klibs; `kore/kore-core/src/nativeMain/kotlin/io/github/youndie/kore/signal/ShutdownSignalWatch.native.kt` is the answer |
-| `Connection: close` on a **response** does not close a CIO connection — the engine reads keep-alive from the *request's* header | `ktor-server-cio-3.5.2!/commonMain/io/ktor/server/cio/backend/ServerPipeline.kt` |
+| `EmbeddedServer.stop` runs its steps in **opposite order** on JVM and Kotlin/Native, so `ApplicationStopping` fires *after* the drain on one and *before* it on the other, from identical source | `ktor-server-core-3.6.0!/jvmMain/io/ktor/server/engine/EmbeddedServerJvm.kt`, `ktor-server-core-3.6.0!/posixMain/io/ktor/server/engine/EmbeddedServer.posix.kt` |
+| `ApplicationStopPreparing` fires **after** the socket has stopped accepting on CIO, so it cannot be used to flip readiness — which is the one thing its name suggests | `ktor-server-cio-3.6.0!/commonMain/io/ktor/server/cio/CIOApplicationEngine.kt` |
+| the Kotlin/Native shutdown hook is **one global slot**, last registration wins, and the callback runs on the POSIX signal-handler stack — `runBlocking` and all | Kotlin/Native 2.4.20 platform klibs; `kore/kore-core/src/nativeMain/kotlin/io/github/youndie/kore/signal/ShutdownSignalWatch.native.kt` is the answer |
+| `Connection: close` on a **response** does not close a CIO connection — the engine reads keep-alive from the *request's* header | `ktor-server-cio-3.6.0!/commonMain/io/ktor/server/cio/backend/ServerPipeline.kt` |
 | enumerating the environment is `__environ` on Linux and **does not exist** on macOS native, so the unknown-variable check is a declared capability rather than a universal one | `kore/kore-core/src/linuxMain/kotlin/io/github/youndie/kore/config/Environment.linux.kt`, `.../macosMain/.../Environment.macos.kt` |
 
 **Consequence — keel documents them and implements none of them.** They are the argument for taking
@@ -269,7 +269,7 @@ survives the correction and its address changes; see D3 below.
 
 | Fact | Where verified |
 |---|---|
-| Kotlin `2.4.10`, coroutines `1.11.0`, serialization `1.11.0`, Ktor `3.5.2`, JUnit `6.1.3` are what the portfolio's shared catalog carries | `sborka/catalog/sborka.versions.toml` |
+| Kotlin `2.4.20`, coroutines `1.11.0`, serialization `1.11.0`, Ktor `3.6.0`, JUnit `6.1.3` are what the portfolio's shared catalog carries | `sborka/catalog/sborka.versions.toml` |
 | Kotlin comes from the shared `wip` catalog rather than being pinned here. It was held at 2.4.10 while kore's verification addresses were dumps of that distribution; kore re-ran them against 2.4.20 and every address held | `kore/gradle/libs.versions.toml`, youndie/kore#88 |
 | kore compiles its JVM half at toolchain **25**, and a library published at 25 cannot be consumed below 25 | same file |
 | `sborka` `0.4.0.79`, `kore-core` `0.1.4`, `razves` `0.1.0.30`, all on `https://reposilite.kotlin.website/snapshots` and none on Maven Central | the three `maven-metadata.xml` listings, read 2026-09-16 |
