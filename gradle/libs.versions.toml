@@ -17,10 +17,11 @@ sborka = "0.4.0.89"
 # on both machines.
 
 # The exact artefact kore's five platform divergences were read in: EmbeddedServerJvm.kt,
-# EmbeddedServerNix.kt, CIOApplicationEngine.kt, ServerPipeline.kt. A bump is a re-read of those four
+# EmbeddedServer.posix.kt (was EmbeddedServerNix.kt before 3.6.0 renamed the posix sources),
+# CIOApplicationEngine.kt, ServerPipeline.kt. A bump is a re-read of those four
 # places before anything else. CIO because it is the only engine on Kotlin/Native — Netty and Jetty
 # are Java libraries.
-ktor = "3.5.2"
+ktor = "3.6.0"
 
 coroutines = "1.11.0"
 serialization = "1.11.0"
