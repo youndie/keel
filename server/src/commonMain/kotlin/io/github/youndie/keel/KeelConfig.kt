@@ -9,7 +9,8 @@ import io.github.youndie.kore.config.ConfigSchema
  *
  * Four keys, and each one is a different **shape** rather than a different setting — a clone deletes
  * the ones it does not need and has an example of every kind left. A service with no database at
- * all removes more than [DB_PATH]; docs/services/keel-server.md §9 lists every place:
+ * all removes more than [DB_PATH], and the template's service document lists every place, §9 of
+ * https://github.com/youndie/keel/blob/main/docs/services/keel-server.md
  *
  * - [DB_PATH] has a **default**, and it is the one entry here that was decided rather than chosen.
  *   It was required, on the argument that a service inventing where its data lives starts happily and

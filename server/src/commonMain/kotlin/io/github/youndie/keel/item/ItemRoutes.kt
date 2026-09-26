@@ -14,7 +14,7 @@ import io.ktor.server.routing.routing
  * The route renders a body rather than answering a bare status, and that is load-bearing on
  * Kotlin/Native: every rendered byte goes through glibc `iconv`, which is `dlopen`ed, so a status
  * code crosses no charset. A `401` from a static image was once read as a pass for exactly that
- * reason (`docs/research/research-architecture.md` §1.5).
+ * reason: §1.5 of https://github.com/youndie/keel/blob/main/docs/research/research-architecture.md
  *
  * The second endpoint in a service is already a feature, and features are `ktor-server-feature`'s:
  * typed `@Resource`, a use case, the layers. keel stops here on purpose.

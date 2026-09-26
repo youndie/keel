@@ -106,7 +106,8 @@ fun startKeel(settings: KeelSettings) {
             //
             // A service without a database deletes this participant and keeps its position: whatever
             // it forwards to (a producer, a client) is released here, a producer with `consumer(...)`
-            // so it flushes first. docs/services/keel-server.md §9.
+            // so it flushes first. The template's service document, §9:
+            // https://github.com/youndie/keel/blob/main/docs/services/keel-server.md
             pool(
                 object : ShutdownParticipant {
                     override val name = "sqlite"

@@ -97,13 +97,18 @@ done
 export OLD_PACKAGE OLD_DIR=$old_dir PACKAGE=$package NEW_DIR=$new_dir \
   UPPER=$upper PASCAL=$pascal CAMEL=$camel NAME=$name
 # shellcheck disable=SC2016 # perl reads $ENV{...}; the shell must not expand it
+# The template's address is the one spelling that is NOT rewritten: a comment pointing at
+# https://github.com/youndie/keel/... is a link to documentation the clone no longer carries, and
+# rewriting it would point at a repository that does not exist. It is set aside first and put back.
 RULES='
+  my @kept; s{(https://github\.com/youndie/keel[^\s)>\]]*)}{push @kept, $1; "\0" . $#kept . "\0"}ge;
   s/\Q$ENV{OLD_PACKAGE}\E/$ENV{PACKAGE}/g;
   s/\Q$ENV{OLD_DIR}\E/$ENV{NEW_DIR}/g;
   s/KEEL/$ENV{UPPER}/g;
   s/Keel/$ENV{PASCAL}/g;
   s/keel(?=[A-Z])/$ENV{CAMEL}/g;
   s/keel/$ENV{NAME}/g;
+  s{\0(\d+)\0}{$kept[$1]}g;
 '
 
 git ls-files -- "${rewrite_exclude[@]}" | grep -i 'keel[^/]*$' | while read -r file; do
