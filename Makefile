@@ -31,7 +31,7 @@ GRADLE ?= ./gradlew
 # two, which is the point.
 GRADLEFLAGS ?=
 
-.PHONY: check gate report fix build help
+.PHONY: check guard gate report fix build help
 
 help:
 	@echo "make check   - the documentation gate: blocking, exactly what CI's check job runs"
@@ -47,10 +47,22 @@ check: gate report
 # NOT here: `docs_check.py --on-main`, which makes `status: draft` an error on the default branch. It
 # is off with an address — B-10 — rather than relaxed, and it is branch-specific in any case: a draft
 # is legal in a pull request, where it means "this branch will make it true".
-gate:
+gate: guard
 	$(PY) scripts/backlog_index.py --check --docs $(DOCS) --backlog $(BACKLOG)
 	$(PY) scripts/docs_check.py --docs $(DOCS) --backlog $(BACKLOG)
 	$(PY) scripts/coverage_map.py --check --docs $(DOCS)
+
+# THE SUBJECT HAS TO EXIST BEFORE ANY VERDICT ABOUT IT MEANS ANYTHING. Each script in `gate` prints
+# "nothing checked" or "0 documents" and exits zero on an empty tree, so without this a deleted docs/
+# or an empty backlog is a green run. It matters most in a clone, whose backlog starts as one item:
+# the day that item is deleted rather than closed, this is the only thing that notices. Taken from
+# kafkakn's Makefile; upstream it belongs in docs-bootstrap, whose reference Makefile has no guard
+# (youndie/docs-bootstrap#9).
+guard:
+	@test -d $(DOCS) || { echo "no $(DOCS)/ tree - the gate has no subject"; exit 1; }
+	@n=$$(ls $(DOCS)/backlog/B-*.md 2>/dev/null | wc -l | tr -d ' '); \
+	  test "$$n" -gt 0 || { echo "no backlog items - the index check would pass vacuously"; exit 1; }; \
+	  echo "guard: $(DOCS)/ present, $$n backlog items"
 
 # Non-blocking, on purpose — AND THE `-` IS WHAT MAKES THAT TRUE.
 #
