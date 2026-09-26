@@ -8,7 +8,8 @@ import io.github.youndie.kore.config.ConfigSchema
  * What this service is configured as, under the prefix `KEEL`.
  *
  * Four keys, and each one is a different **shape** rather than a different setting — a clone deletes
- * the ones it does not need and has an example of every kind left:
+ * the ones it does not need and has an example of every kind left. A service with no database at
+ * all removes more than [DB_PATH]; docs/services/keel-server.md §9 lists every place:
  *
  * - [DB_PATH] has a **default**, and it is the one entry here that was decided rather than chosen.
  *   It was required, on the argument that a service inventing where its data lives starts happily and
@@ -24,9 +25,8 @@ import io.github.youndie.kore.config.ConfigSchema
  *   **So keel declares no required key, and that is a fact about keel rather than a lesson.** A real
  *   service's required key is a database address or a credential — `ConfigKey.required(...)`, the
  *   shape this schema no longer demonstrates. B-03.
- * - [PORT] and [WORK_MS] have **defaults**, so a deployment does not repeat a value it has no
- *   opinion about — and `--print-config` still prints `DEFAULT` beside them, so nobody has to guess
- *   which happened.
+ * - [PORT] has a **default** too, so a deployment does not repeat a value it has no opinion about —
+ *   and `--print-config` still prints `DEFAULT` beside it, so nobody has to guess which happened.
  * - [TRACY_KEY] is a **secret**, masked wherever the configuration is rendered. A property of the
  *   declaration rather than a list of names somebody keeps in sync with the schema: a list is a
  *   second schema, and the day it disagrees with the first is the day a secret is printed.
