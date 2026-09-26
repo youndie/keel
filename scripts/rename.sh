@@ -111,13 +111,15 @@ RULES='
   s{\0(\d+)\0}{$kept[$1]}g;
 '
 
-git ls-files -- "${rewrite_exclude[@]}" | grep -i 'keel[^/]*$' | while read -r file; do
+# `|| true` on the searches and not on the loops: finding nothing is how a second run looks, while a
+# `git mv` failing inside a loop is an error and has to stop the script.
+git ls-files -- "${rewrite_exclude[@]}" | { grep -i 'keel[^/]*$' || true; } | while read -r file; do
   renamed="$(dirname "$file")/$(basename "$file" | perl -pe "$RULES")"
   # A spelling no rule knows leaves the name as it was; the check below names it.
   [ "$renamed" = "$file" ] || git mv "$file" "$renamed"
 done
 
-git grep -Il -i keel -- "${rewrite_exclude[@]}" | while read -r file; do
+{ git grep -Il -i keel -- "${rewrite_exclude[@]}" || true; } | while read -r file; do
   perl -pi -e "$RULES" "$file"
 done
 
@@ -147,7 +149,7 @@ if [ -d skeleton ]; then
   # `docs/backlog/` still says which file each number is. Left bare, "Found by B-08" names an item the
   # clone does not have, and "from B-01 onwards" names the clone's own seed item, which is false.
   items=$(git ls-files 'docs/backlog/B-*.md' | sed 's|.*/||' | tr '\n' ' ')
-  git grep -l -E 'B-[0-9]{2}' -- "${rewrite_exclude[@]}" | while read -r file; do
+  { git grep -l -E 'B-[0-9]{2}' -- "${rewrite_exclude[@]}" || true; } | while read -r file; do
     ITEMS=$items perl -pi -e '
       BEGIN { %item = map { /^(B-\d+)-/ ? ($1 => $_) : () } split " ", $ENV{ITEMS} }
       my @kept; s{(https://github\.com/youndie/keel[^\s)>\]"]*)}{push @kept, $1; "\0" . $#kept . "\0"}ge;
