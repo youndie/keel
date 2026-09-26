@@ -25,7 +25,8 @@ import io.github.youndie.kore.config.ConfigSchema
  *
  *   **So keel declares no required key, and that is a fact about keel rather than a lesson.** A real
  *   service's required key is a database address or a credential — `ConfigKey.required(...)`, the
- *   shape this schema no longer demonstrates. B-03.
+ *   shape this schema no longer demonstrates. The decision:
+ *   https://github.com/youndie/keel/blob/main/docs/backlog/B-03-jvm-half-ships.md
  * - [PORT] has a **default** too, so a deployment does not repeat a value it has no opinion about —
  *   and `--print-config` still prints `DEFAULT` beside it, so nobody has to guess which happened.
  * - [TRACY_KEY] is a **secret**, masked wherever the configuration is rendered. A property of the

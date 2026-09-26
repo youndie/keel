@@ -139,7 +139,27 @@ perl -pi -e "s|^sborka\\.repository=.*|sborka.repository=$repository|" gradle.pr
 
 # ---- the documentation ---------------------------------------------------------------------------
 # First run only: afterwards there is no `skeleton/`, and the documentation is the clone's own.
+first_run=false
 if [ -d skeleton ]; then
+  first_run=true
+
+  # A COMMENT CITING ONE OF KEEL'S ITEMS BECOMES ITS ADDRESS, and it has to happen now, while
+  # `docs/backlog/` still says which file each number is. Left bare, "Found by B-08" names an item the
+  # clone does not have, and "from B-01 onwards" names the clone's own seed item, which is false.
+  items=$(git ls-files 'docs/backlog/B-*.md' | sed 's|.*/||' | tr '\n' ' ')
+  git grep -l -E 'B-[0-9]{2}' -- "${rewrite_exclude[@]}" | while read -r file; do
+    ITEMS=$items perl -pi -e '
+      BEGIN { %item = map { /^(B-\d+)-/ ? ($1 => $_) : () } split " ", $ENV{ITEMS} }
+      my @kept; s{(https://github\.com/youndie/keel[^\s)>\]"]*)}{push @kept, $1; "\0" . $#kept . "\0"}ge;
+      s{\b(B-\d{2})\b}{exists $item{$1} ? "https://github.com/youndie/keel/blob/main/docs/backlog/$item{$1}" : $1}ge;
+      s{\0(\d+)\0}{$kept[$1]}g;
+    ' "$file"
+  done
+
+  # What the skeleton installs cites the clone's own items, B-01 first, so the check below skips it.
+  installed=()
+  while read -r file; do installed+=(":(exclude)${file#skeleton/}"); done < <(git ls-files skeleton)
+
   git rm -r -q --ignore-unmatch -- "${KEEL_DOCS[@]}"
   git ls-files skeleton | while read -r file; do
     target=${file#skeleton/}
@@ -159,8 +179,16 @@ left=$(git grep -n -i -e keel -e '{{[A-Za-z]*}}' -- "${exclude[@]}" |
     $text =~ s{https://github\.com/youndie/keel[^\s)>\]]*}{}g;
     print "  $loc: $text\n" if $text =~ /keel|\{\{[A-Za-z]*\}\}/i' || true)
 named=$(git ls-files -- "${exclude[@]}" | grep -i keel || true)
+# On the first run only: afterwards the clone cites its own items, and that is what they are for.
+if $first_run; then
+  cited=$(git grep -n -E 'B-[0-9]{2}' -- "${exclude[@]}" "${installed[@]}" |
+    perl -ne '($loc, $text) = /^([^:]+:\d+):(.*)$/ or next;
+      $text =~ s{https://github\.com/youndie/keel[^\s)>\]"]*}{}g;
+      print "  $loc: $text  (a template item, cited by number)\n" if $text =~ /\bB-\d{2}\b/' || true)
+  left="$left${left:+${cited:+$'\n'}}$cited"
+fi
 if [ -n "$left$named" ]; then
-  echo "rename: 'keel' is still here, outside the allowlist:" >&2
+  echo "rename: the template is still named here, outside the allowlist:" >&2
   [ -z "$left" ] || printf '%s\n' "$left" >&2
   [ -z "$named" ] || printf '%s\n' "$named" | sed 's/^/  file name: /' >&2
   exit 1

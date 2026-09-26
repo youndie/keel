@@ -1,7 +1,8 @@
 // The whole service: one route, the kore wiring, two entry points. Everything that ships is here.
 //
-// What is deliberately NOT here: the `application` plugin and the AOT cache (they cannot apply to a
-// multiplatform module — `:server-jvm`, B-03), the store (B-02) and the image (B-04).
+// What is deliberately NOT here: the `application` plugin and the AOT cache. They cannot apply to a
+// multiplatform module, so they live in `:distribution`:
+// https://github.com/youndie/keel/blob/main/docs/backlog/B-03-jvm-half-ships.md
 
 plugins {
     alias(wip.plugins.kotlinMultiplatform)
@@ -56,7 +57,7 @@ tasks.register<Exec>("measure") {
 }
 
 kotlin {
-    // Development and tests, and — from B-03 — a distribution that actually ships. The parity
+    // Development and tests, and a distribution that actually ships (`:distribution`). The parity
     // finding behind keel is that every service in this portfolio had this line and none had a
     // runnable JVM.
     jvm()
