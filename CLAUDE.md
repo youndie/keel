@@ -62,6 +62,10 @@ a defect somewhere else, and it has a destination:
 | lifecycle, probes, config, shutdown | [kore](https://github.com/youndie/kore) |
 | a procedure that had to be worked out | the `native-service-bootstrap` skill |
 
+**What a clone gets is not this documentation.** `scripts/rename.sh` deletes it and installs
+[`skeleton/`](skeleton/), so a rule a clone needs has to be in `skeleton/CLAUDE.md` as well as here,
+and CI checks the skeleton by renaming a copy of this repository and running the gate on it.
+
 If keel accumulates fixes, it is turning back into konekt. The mechanical half of the rule is the two
 line budgets — 500 lines of Kotlin under `server/`, 100 of Gradle across the repository — and going
 over either is the signal, not the failure.
