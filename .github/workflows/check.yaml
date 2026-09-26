@@ -67,6 +67,19 @@ jobs:
 
       - run: make check
 
+      # THE RENAME, ON A COPY. `scripts/rename.sh` ends by failing if the template's name is left
+      # anywhere outside its allowlist, and that check is only worth something if it runs whenever a
+      # line is added here. A new file that spells the name in a form the script's rules do not know
+      # turns this red in the pull request that adds it, rather than in the next clone. Seconds: no
+      # Gradle, only the rewrite and the grep. The copy carries `.git` because the script reads the
+      # tracked files. In a clone that has already been renamed there is nothing left to rewrite, and
+      # the step passes.
+      - run: |
+          cp -a . "$RUNNER_TEMP/renamed"
+          cd "$RUNNER_TEMP/renamed"
+          scripts/rename.sh demo
+          make gate
+
       # THE DRAFT GATE, ON SINCE B-10.
       #
       # Default branch only: `status: draft` is legal in a pull request, where it means "this branch
