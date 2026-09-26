@@ -11,7 +11,7 @@ import io.github.smyrgeorge.sqlx4k.Statement
  * this interface: sqlx4k on native, Exposed or JDBC on the JVM. That is not needed. `sqlx4k-sqlite`
  * publishes both halves itself — the Rust driver on Kotlin/Native and `org.xerial:sqlite-jdbc` on
  * the JVM — so [SqliteItemStore] below is one implementation in `commonMain` that compiles and runs
- * on both. See `docs/research/research-architecture.md` §1.6 and D1.
+ * on both. See §1.6 and D1 of https://github.com/youndie/keel/blob/main/docs/research/research-architecture.md
  *
  * What the port still buys is what the `ktor-server-feature` skill actually asks for: the route's
  * tests run against an in-memory implementation and say nothing about SQL, while the SQL is tested
