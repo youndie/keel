@@ -7,7 +7,7 @@ import io.github.smyrgeorge.sqlx4k.sqlite.sqlite
 import io.github.youndie.keel.keelDatabaseUrl
 import kotlinx.coroutines.runBlocking
 import okio.FileSystem
-import okio.Path.Companion.toPath
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -186,20 +186,26 @@ private fun withStore(
 }
 
 /**
- * A database file per test, deleted first rather than after.
+ * A database file per test and per run, which nothing else can be holding.
  *
- * Deleted first because a run that failed leaves its file behind to be read, and the next run starts
- * from an empty one either way. The write-ahead log and the journal are separate files, and a stale
- * one beside a fresh database is a different database than the one this test means to open.
+ * **The directory is this run's own, and it has to be.** It was one fixed path, and the JVM and
+ * `linuxX64` suites run at the same time under `org.gradle.parallel`: one target deleting its
+ * `reopen.db` between the other's close and reopen made the durability case report "never on disk"
+ * about a database that was. That is the one failure the case exists to report, so a shared file
+ * turned a race into a false alarm about persistence: https://github.com/youndie/keel/issues/47
+ *
+ * The write-ahead log and the journal are separate files, and a stale one beside a fresh database is
+ * a different database than the one a test means to open. A directory nobody has used rules that out
+ * without deleting anything.
  */
 private fun freshDatabase(name: String): String {
-    val directory = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "keel-store-tests"
+    val directory = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "keel-store-tests" / RUN
     FileSystem.SYSTEM.createDirectories(directory)
-    val path = directory / "$name.db"
-    listOf(path, "$path-wal".toPath(), "$path-shm".toPath(), "$path-journal".toPath())
-        .forEach { FileSystem.SYSTEM.delete(it, mustExist = false) }
-    return path.toString()
+    return (directory / "$name.db").toString()
 }
+
+/** One per test process, so the two targets and two builds on one host never share a file. */
+private val RUN = "run-${Random.nextLong().toULong().toString(16)}"
 
 /** Opened the way the service opens it — [keelDatabaseUrl], not a URL this suite made up. */
 private fun openDriver(path: String): Driver {
