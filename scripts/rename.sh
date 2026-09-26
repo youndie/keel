@@ -17,6 +17,12 @@
 # <package> defaults to io.github.<owner>.<name without hyphens>, where <owner> comes from the
 # `origin` remote when it is a GitHub repository other than keel itself, and is `youndie` otherwise.
 #
+# The documentation is not rewritten: it is REPLACED. keel's own documents describe keel, and a rename
+# turns them into sentences that are false and look authoritative, which is what the relay's CLAUDE.md
+# ended up with ("A GitHub template repository for..."). On the first run the script deletes them and
+# installs `skeleton/`: a CLAUDE.md with the rules and no claims, a README, a backlog holding one seed
+# item, and an empty coverage map. keel's history stays readable at https://github.com/youndie/keel.
+#
 # THE CHECK AT THE END IS THE POINT OF THIS SCRIPT. The rewrite is what B-09 did by hand in 32 files,
 # and the hand-renamed relay still carries "keel" in renovate.json. The script ends with
 # `git grep -il keel` over everything outside the allowlist and fails if anything is left, so an
@@ -26,19 +32,15 @@ set -euo pipefail
 
 OLD_PACKAGE="io.github.youndie.keel"
 
-# WHAT THE CHECK DOES NOT READ, AND WHY EACH LINE IS HERE.
-#
-# - this script, because it has to know the old name;
-# - keel's own documentation, because it describes keel. Rewriting its prose produces sentences that
-#   are false and look authoritative, which is what the relay's CLAUDE.md ended up with (#39). Until
-#   #39 separates what keel is from what a clone gets, these files are left exactly as they are.
-ALLOW=(
-  scripts/rename.sh
-  CLAUDE.md
-  README.md
-  backlog.md
-  docs
-)
+# keel's documentation, deleted rather than rewritten when the skeleton is installed. `docs/templates/`
+# is not on the list: it describes no project and the clone keeps it.
+KEEL_DOCS=(CLAUDE.md README.md backlog.md docs/README.md docs/research docs/backlog docs/features
+  docs/api docs/services)
+
+# WHAT THE CHECK DOES NOT READ: this script, because it has to know the old name. Nothing else.
+# A line elsewhere may still name the template, but only as an address, `https://github.com/youndie/keel...`:
+# the check strips those before it looks, so "started from <link>" passes and "keel is ..." does not.
+ALLOW=(scripts/rename.sh)
 
 die() { printf 'rename: %s\n' "$*" >&2; exit 2; }
 
@@ -70,13 +72,19 @@ package=${2:-io.github.$(printf '%s' "$owner" | tr '[:upper:]' '[:lower:]' | tr 
 
 exclude=()
 for path in "${ALLOW[@]}"; do exclude+=(":(exclude)$path"); done
+# The rewrite also leaves alone what the skeleton is about to replace, and the skeleton itself, whose
+# placeholders are filled in when it is installed.
+rewrite_exclude=("${exclude[@]}" ":(exclude)skeleton")
+if [ -d skeleton ]; then
+  for path in "${KEEL_DOCS[@]}"; do rewrite_exclude+=(":(exclude)$path"); done
+fi
 
 # ---- the rewrite ---------------------------------------------------------------------------------
 old_dir=${OLD_PACKAGE//.//}
 new_dir=${package//.//}
 
 # Package directories first, so the file renames below find their files at the new address.
-for root in $(git ls-files -- "${exclude[@]}" | grep "/$old_dir/" | sed "s|/$old_dir/.*||" | sort -u); do
+for root in $(git ls-files -- "${rewrite_exclude[@]}" | grep "/$old_dir/" | sed "s|/$old_dir/.*||" | sort -u); do
   mkdir -p "$(dirname "$root/$new_dir")"
   git mv "$root/$old_dir" "$root/$new_dir"
   # git tracks no directories, so `io/github/youndie` stays behind empty when the package moves away.
@@ -98,13 +106,13 @@ RULES='
   s/keel/$ENV{NAME}/g;
 '
 
-git ls-files -- "${exclude[@]}" | grep -i 'keel[^/]*$' | while read -r file; do
+git ls-files -- "${rewrite_exclude[@]}" | grep -i 'keel[^/]*$' | while read -r file; do
   renamed="$(dirname "$file")/$(basename "$file" | perl -pe "$RULES")"
   # A spelling no rule knows leaves the name as it was; the check below names it.
   [ "$renamed" = "$file" ] || git mv "$file" "$renamed"
 done
 
-git grep -Il -i keel -- "${exclude[@]}" | while read -r file; do
+git grep -Il -i keel -- "${rewrite_exclude[@]}" | while read -r file; do
   perl -pi -e "$RULES" "$file"
 done
 
@@ -112,7 +120,7 @@ done
 # `io.github.youndie.keel` sorts after `io.github.smyrgeorge`, a clone's `com.example.relay` sorts
 # before it, and ktlint fails the build on the order: found by building a clone renamed that way.
 # The layout is ktlint_official's: everything else, then java, javax, kotlin, then aliases.
-git ls-files -- '*.kt' '*.kts' "${exclude[@]}" | while read -r file; do
+git ls-files -- '*.kt' '*.kts' "${rewrite_exclude[@]}" | while read -r file; do
   perl -0777 -pi -e '
     sub group { my $i = shift; return 4 if $i =~ / as /; return 3 if $i =~ /^import kotlin\./;
       return 2 if $i =~ /^import javax\./; return 1 if $i =~ /^import java\./; return 0 }
@@ -124,12 +132,31 @@ done
 # live in `webhook-relay`, which the relay from B-09 does.
 perl -pi -e "s|^sborka\\.repository=.*|sborka.repository=$repository|" gradle.properties
 
+# ---- the documentation ---------------------------------------------------------------------------
+# First run only: afterwards there is no `skeleton/`, and the documentation is the clone's own.
+if [ -d skeleton ]; then
+  git rm -r -q --ignore-unmatch -- "${KEEL_DOCS[@]}"
+  git ls-files skeleton | while read -r file; do
+    target=${file#skeleton/}
+    mkdir -p "$(dirname "$target")"
+    git mv "$file" "$target"
+    NAME=$name PREFIX=$upper PACKAGE=$package perl -pi -e '
+      s/\{\{name\}\}/$ENV{NAME}/g; s/\{\{PREFIX\}\}/$ENV{PREFIX}/g; s/\{\{package\}\}/$ENV{PACKAGE}/g;
+    ' "$target"
+  done
+  rm -rf skeleton
+fi
+
 # ---- the check -----------------------------------------------------------------------------------
-left=$(git grep -il keel -- "${exclude[@]}" || true)
+# A placeholder nobody filled is a sentence the clone did not write, so it counts as a leftover too.
+left=$(git grep -n -i -e keel -e '{{[A-Za-z]*}}' -- "${exclude[@]}" |
+  perl -ne '($loc, $text) = /^([^:]+:\d+):(.*)$/ or next;
+    $text =~ s{https://github\.com/youndie/keel[^\s)>\]]*}{}g;
+    print "  $loc: $text\n" if $text =~ /keel|\{\{[A-Za-z]*\}\}/i' || true)
 named=$(git ls-files -- "${exclude[@]}" | grep -i keel || true)
 if [ -n "$left$named" ]; then
   echo "rename: 'keel' is still here, outside the allowlist:" >&2
-  [ -z "$left" ] || git grep -n -i keel -- "${exclude[@]}" >&2 || true
+  [ -z "$left" ] || printf '%s\n' "$left" >&2
   [ -z "$named" ] || printf '%s\n' "$named" | sed 's/^/  file name: /' >&2
   exit 1
 fi
@@ -141,7 +168,7 @@ renamed keel -> $name
   types          ${pascal}Config, ${pascal}Settings, ${camel}Module
   binary         $name   (server/build/native-image/$name, /app/$name in the image)
   repository     $repository   (gradle.properties: sborka.repository)
-no 'keel' left outside: ${ALLOW[*]}
+no 'keel' left outside ${ALLOW[*]}, except as the template's address
 EOF
 
 # A LONGER NAME MAKES LONGER LINES, and ktlint fails the build past 120 columns. keel's own lines
