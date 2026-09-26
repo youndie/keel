@@ -27,7 +27,7 @@ class KeelConfigTest {
     /**
      * A fresh clone runs with nothing set, which is what the README promises.
      *
-     * `KEEL_DB_PATH` was required until B-03, on the argument that a service inventing where its data
+     * `KEEL_DB_PATH` was required until the JVM half shipped, on the argument that a service inventing where its data
      * lives serves wrong data. That is right for a service whose database is somewhere else and wrong
      * for a template whose store is a file beside the process — and it made two things false: the
      * README's `./gradlew run`, and zavarnik's training run, which inherits the build's environment

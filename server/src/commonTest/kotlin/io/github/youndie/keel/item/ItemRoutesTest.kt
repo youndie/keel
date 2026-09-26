@@ -118,7 +118,7 @@ class ItemRoutesTest {
         /**
          * The fixture the route used to carry as a constant.
          *
-         * It moved here when B-02 put a store behind the route: a seed compiled into the service is
+         * It moved here when a store went behind the route: a seed compiled into the service is
          * a thing a clone deletes and forgets, and a seed in the test is one the test owns.
          */
         val SEED = listOf(Item(id = "keel", name = "the first member laid down"))
