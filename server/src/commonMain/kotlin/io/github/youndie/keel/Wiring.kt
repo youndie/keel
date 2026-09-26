@@ -103,6 +103,10 @@ fun startKeel(settings: KeelSettings) {
             // Kotlin/Native and after it on the JVM, from identical source. Closing the pool there
             // takes the connection out from under a request still being served on one of the two
             // platforms, and the code looks the same on both.
+            //
+            // A service without a database deletes this participant and keeps its position: whatever
+            // it forwards to (a producer, a client) is released here, a producer with `consumer(...)`
+            // so it flushes first. docs/services/keel-server.md §9.
             pool(
                 object : ShutdownParticipant {
                     override val name = "sqlite"

@@ -109,7 +109,7 @@ the machine only guards the membership.
 
 ### Services (1)
 
-- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and twenty quirks
+- [x] [keel-server](services/keel-server.md) — the template service: two modules, how it is built, where a defect goes, and twenty quirks, and what to remove for a service without a database
 
 ### Features (1)
 

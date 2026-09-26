@@ -333,3 +333,59 @@ And keel's own:
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
     all.
+
+## 9. A service without a database
+
+keel's example domain is an item store over SQLite, so the database runs through the whole wiring.
+A clone that has none (a bridge, a relay, a gateway) removes it from **these places, and only
+these**. The list was checked by doing it: on 2026-09-27, at `6be238d`, a copy with every item below
+removed built with `./gradlew build` on the Linux box, ran 12 tests on each of `jvm` and `linuxX64`,
+trained the AOT cache, served `/health/ready`, and on `SIGTERM` went through every stage and exited
+`0`. Its release binary was **4 163 328 bytes**, against 9.2 MB with the driver.
+
+| Where | What goes |
+|---|---|
+| `gradle/libs.versions.toml` | `sqlx4k` and `sqlx4k-sqlite`; `okio` too, which only the store suite uses |
+| `server/build.gradle.kts` | `implementation(libs.sqlx4k.sqlite)` and the test-only `implementation(libs.okio)` |
+| `distribution/build.gradle.kts` | the training run's `environment("KEEL_DB_PATH", …)`, and the workload's `GET /items`, which has to name a route the clone still serves |
+| `server/src/commonMain/.../Wiring.kt` | the pool opened before serving, the schema applied, `keelDatabaseUrl`, `POOL_SIZE`, the `sqlite` participant, and `keelModule`'s `store` parameter. `ContentNegotiation` stays if the routes still speak JSON |
+| `server/src/commonMain/.../KeelConfig.kt` | `DB_PATH`, `KeelSettings.dbPath` and `db=` in `describe()` |
+| `server/src/commonMain/.../KeelMain.kt` | the `dbPath =` line |
+| `server/src/commonMain/.../item/` | the whole package |
+| `server/src/commonTest/.../item/` | `ItemStoreContractTest`, `InMemoryItemStore`, and the `GET /items` case of `ItemRoutesTest`. **The other four cases stay** (see below) |
+| `server/src/commonTest/.../KeelDatabaseUrlTest.kt` | the whole file |
+| `server/src/commonTest/.../KeelConfigTest.kt` | rewritten, not deleted (see below) |
+| `k6/measure.sh`, `k6/items.js` | `KEEL_DB_PATH` and `DB=` in the first; the second is a scenario about `/items` and is rewritten for the clone's own route |
+| `CLAUDE.md`, this document | the rule "exactly one sqlx4k driver", quirks 10, 15 and 17, §4's database row, and `endpoint-items` and `feature-item-round-trip` in `docs/` |
+
+**The shutdown slot stays, with something else in it.** The `sqlite` participant is registered
+after `drain(EngineDrain(...))`, in the release stages, and that position is the part to keep. A
+service without a database still holds an outbound resource: a producer, a client, a connection to
+whatever it forwards to. It is closed there, and **never in `ApplicationStopping`**, which runs
+before the drain on Kotlin/Native and after it on the JVM (quirk 1). Closing it there takes the
+producer away from a request that is still being served, on one of the two targets, from code that
+looks the same on both. Which registration to use is kore's distinction:
+
+* `consumer(...)` for anything that holds data or a position: **flush, then close**. A Kafka
+  producer goes here. kore runs this stage first, and it is the one whose `flush` everyone omits;
+* `pool(...)` for a connection pool: close. This is the stage `sqlite` was in, and it runs after
+  the consumers that were still using the pool.
+
+A clone that removes the participant without putting anything in its place still shuts down
+cleanly: the stages run empty. That is why the removal is safe to get wrong, and why nothing but
+this section says so.
+
+**Four module tests live in `ItemRoutesTest` and are not about items.** The startup probe with no
+named gate, a named gate holding it at `503`, `/health` as an alias for liveness, and `/version`
+test `keelModule`, not the route. Deleting `item/` wholesale deletes them. In the check above they
+moved to a `KeelModuleTest` beside `Wiring.kt`, with the store argument dropped.
+
+**`KeelConfigTest` uses `DB_PATH` three ways**: as the one key in its `complete` environment, as the
+near miss in the misspelling test (`KEEL_DB_PATHS`), and as the value read back in the unlistable
+environment test. With no required key, `complete` becomes an empty map and `PORT` takes the other
+two roles. Replacing `DB_PATH` with `PORT` mechanically breaks
+`a default is used and is reported as a default`, because it asserts `PORT`'s default.
+
+**`MALLOC_ARENA_MAX=2` is measured on a service with a database.** The `Dockerfile` records that on
+a service without one it went the other way. A clone that removes the database measures that line
+again or deletes it (§3).

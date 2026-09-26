@@ -124,7 +124,9 @@ repositories open. The full list with addresses is
   `apply false`.** Otherwise the Kotlin plugin's shared build service exists under two classloaders
   and the build fails naming two of them and nothing else.
 - **Exactly one sqlx4k driver.** Two do not link — `duplicate symbol: std::panicking::EMPTY_PANIC` —
-  and it is a link error, not a resolution error.
+  and it is a link error, not a resolution error. A service with **no** database removes the driver
+  and keeps the shutdown slot the pool was in:
+  [keel-server](docs/services/keel-server.md) §9 lists every place and names the slot.
 - **`ENTRYPOINT` in exec form, always.** Shell form makes `/bin/sh -c` PID 1, which does not forward
   `SIGTERM`; the run then looks like an instant clean shutdown.
 - **Never assert an exit code across the two targets.** A clean `SIGTERM` exits `0` on Native and
