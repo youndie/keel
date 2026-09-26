@@ -70,11 +70,13 @@ rather than fixed here — [sborka#78](https://github.com/youndie/sborka/issues/
 scripts/rename.sh relay                    # or: scripts/rename.sh webhook-relay com.example.relay
 ```
 
-It rewrites every spelling of the name outside the documentation (the package and its directories,
-the `KEEL_` configuration prefix, the types, the binary, the Docker paths, the Gradle property and
-the workflow), and then **fails if `git grep -il keel` still finds anything** outside its allowlist.
-The documentation is left alone, because it describes keel rather than the clone. The script's header
-lists what it rewrites into what. A name longer than `keel` can push a Kotlin line past ktlint's 120
+It rewrites every spelling of the name in the code (the package and its directories, the `KEEL_`
+configuration prefix, the types, the binary, the Docker paths, the Gradle property and the workflow).
+**The documentation is replaced rather than rewritten**: keel's describes keel, so the clone gets
+[`skeleton/`](skeleton/) instead, a `CLAUDE.md` that keeps the kore and sborka rules and claims
+nothing about the service, a README, a backlog holding one seed item, and an empty coverage map.
+Then it **fails if `git grep -il keel` still finds anything** except the script itself and links to
+this repository. The script's header lists what it rewrites into what. A name longer than `keel` can push a Kotlin line past ktlint's 120
 columns; the script lists those lines and says to run `./gradlew ktlintFormat`, which fixed every one
 on a clone renamed `webhook-relay`.
 

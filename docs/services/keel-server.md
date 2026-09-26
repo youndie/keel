@@ -90,6 +90,7 @@ What it deliberately does **not** do:
 | `k6/measure.sh` | the three numbers, and the refusal to write them without a stand |
 | `.github/workflows/check.yaml` | the documentation gate and the build gate |
 | `scripts/rename.sh` | the rename a clone starts with, and the `git grep` that fails when it missed a spelling |
+| `skeleton/` | the documentation a clone gets in place of this tree, installed by `scripts/rename.sh` |
 
 ## 3. How it is built
 

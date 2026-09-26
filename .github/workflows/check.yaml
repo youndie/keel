@@ -74,6 +74,10 @@ jobs:
       # Gradle, only the rewrite and the grep. The copy carries `.git` because the script reads the
       # tracked files. In a clone that has already been renamed there is nothing left to rewrite, and
       # the step passes.
+      #
+      # `make gate` afterwards runs on what the clone gets: the skeleton from `skeleton/`, with its one
+      # seed item. That is the only place the skeleton is checked, since this repository's own gate
+      # reads `docs/`.
       - run: |
           cp -a . "$RUNNER_TEMP/renamed"
           cd "$RUNNER_TEMP/renamed"
