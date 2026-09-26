@@ -64,6 +64,20 @@ Going over is the signal that something belongs in sborka or kore instead, and i
 rather than fixed here — [sborka#78](https://github.com/youndie/sborka/issues/78) is twelve of
 `:distribution`'s lines on their way out.
 
+## Starting a service from it
+
+```bash
+scripts/rename.sh relay                    # or: scripts/rename.sh webhook-relay com.example.relay
+```
+
+It rewrites every spelling of the name outside the documentation (the package and its directories,
+the `KEEL_` configuration prefix, the types, the binary, the Docker paths, the Gradle property and
+the workflow), and then **fails if `git grep -il keel` still finds anything** outside its allowlist.
+The documentation is left alone, because it describes keel rather than the clone. The script's header
+lists what it rewrites into what. A name longer than `keel` can push a Kotlin line past ktlint's 120
+columns; the script lists those lines and says to run `./gradlew ktlintFormat`, which fixed every one
+on a clone renamed `webhook-relay`.
+
 ## Resolving the dependencies
 
 **kore, sborka and razves are not on Maven Central.** Until they are, a clone needs the portfolio's

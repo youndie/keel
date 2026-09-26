@@ -89,6 +89,7 @@ What it deliberately does **not** do:
 | `k6/items.js` | the scenario both binaries are driven with; `KEEL_MEASURE=1` gives it a constant-work profile |
 | `k6/measure.sh` | the three numbers, and the refusal to write them without a stand |
 | `.github/workflows/check.yaml` | the documentation gate and the build gate |
+| `scripts/rename.sh` | the rename a clone starts with, and the `git grep` that fails when it missed a spelling |
 
 ## 3. How it is built
 
