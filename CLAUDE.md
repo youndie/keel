@@ -122,6 +122,9 @@ repositories open. The full list with addresses is
 - **Start the server with `server.startForKore()`, never `start()`.** On the JVM `start()` adds Ktor's
   own shutdown hook, the JVM runs it beside kore's, and it closes the listener at the signal — a
   readiness probe then gets a refused connection instead of a `503` (kore#90).
+- **One `DrainGate`, handed to both `installShutdownRefusal` and `EngineDrain`.** The refusal opens at
+  the drain, never at the announce, which goes on serving while the news travels; two instances
+  compile and never refuse (kore#94).
 - **`runUntilSignal` goes after `server.startForKore()`**, because its default `watch` argument
   installs the handler at the moment of the call. Print the transcript **inside** `onFinished`: on
   the JVM the line after the call never runs.

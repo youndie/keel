@@ -72,7 +72,7 @@ and there is a check for the path.
 | readiness has not been reached | `503` on `/health/ready` | the failing check, **with the age of its answer** | kore: a stale healthy answer and a fresh one are different facts |
 | startup has not completed | `503` on `/health/startup` | `starting — waiting for: <names>` | kore, read in `ProbeRoutes.kt` |
 | the process is wedged | `503` on `/health/live` | `wedged — <reason>` | kore, read in `ProbeRoutes.kt` |
-| any request arriving after the shutdown announce | `503` + `Connection: close` | — | kore's `installShutdownRefusal`, mounted **before** the probes so it cannot miss the first request after the announce |
+| any request arriving once the shutdown **drain** has begun — the announce before it still serves | `503` + `Connection: close` | — | kore's `installShutdownRefusal(draining)`, mounted **before** the probes so it cannot miss the first request after the drain opens; the same `DrainGate` goes to `EngineDrain`, which opens it |
 | `KORE_VERSION_REDUCED` is on and the release still names the commit | the process **refuses to start** | the reason, at startup | `VersionRoute.kt` — a `404` would be indistinguishable from a broken deployment |
 
 **`Connection: close` is a promise about the header, not about the socket.** CIO reads keep-alive

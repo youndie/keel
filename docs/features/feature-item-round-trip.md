@@ -43,8 +43,9 @@ signal in every case: `bdd_report.py` counts each of them as manual, and it is r
   tests run against an in-memory implementation and say nothing about SQLite.
 * **Exactly one sqlx4k driver is on the classpath.** Adding a second is a link failure on native, not
   a resolution failure — a clone that wants Postgres replaces SQLite rather than adding to it.
-* A request in flight when `SIGTERM` arrives is finished, not dropped. A request arriving after the
-  announce gets `503` and `Connection: close`.
+* A request in flight when `SIGTERM` arrives is finished, not dropped. A request arriving during the
+  announce is **served** — it was routed here by a node that has not heard yet — and one arriving
+  once the drain has begun gets `503` and `Connection: close`.
 * Both targets answer identically, except for what the parity normaliser declares (the exit code, the
   `Server` and `Date` headers, and `/version`'s build time). The normaliser is written **before** the
   first parity run, so that it cannot become a list of whatever happened to differ.
@@ -126,7 +127,8 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **Given:** the binary under load with requests in flight
 * **When:** the container receives `SIGTERM`
 * **Then:** every request in flight at the signal receives its response
-* **And:** requests arriving after the announce receive `503` with `Connection: close`
+* **And:** requests arriving during the announce are served, and requests arriving once the drain has
+  begun receive `503` with `Connection: close`
 * **And:** the process ends itself — `0` on native, `143` on the JVM — and is not `SIGKILL`ed (`137`)
 * **And:** the run is **inconclusive**, not green, if fewer than the declared floor of requests were
   in flight at the signal
@@ -138,6 +140,12 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **The asymmetry is closed**, and it mattered: `EmbeddedServer.stop` runs its steps in the opposite
   order on the two platforms, so the JVM half was where a defect could hide from a green native run.
   Not automated — nothing runs the oracle on a build
+* **Re-run on kore 0.1.7 with `--pre-drain=5000`**, which also asks A5 and A8: **10 of 10 on each of
+  three alternating runs per half** — 32 of 32 spanning the signal completed, 44–46 new connections
+  inside the announce all answered, the first `503` between 4 905 and 5 042 ms after readiness fell,
+  exit `143` JVM and `0` native. On 0.1.4 the same command failed A5 on both halves and A8 on the JVM
+  (47 of 47 new connections refused, kore#90); on 0.1.6, A5 on both
+  ([kore#94](https://github.com/youndie/kore/issues/94)). Still by hand
 
 ### Scenario: readiness goes false before the drain starts
 
@@ -145,13 +153,16 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 * **When:** `SIGTERM` arrives
 * **Then:** `/health/ready` answers `503` while the socket is still accepting, and only then does the
   drain begin
-* **And:** new arrivals get `503` for the whole announce window rather than being refused at the
-  socket
+* **And:** new arrivals are **served** for the whole announce window, and get `503` — not a refused
+  connection — from the start of the drain
 * **And:** nothing is closed in `ApplicationStopping`, which runs on the wrong side of the drain on
   one of the two platforms
 * **Observed** against the image in [B-07](../backlog/B-07-shutdown-oracle.md) — `503` from 0.0 s to
-  4.6 s, connection refused from 5.1 s, exit `0`. Not automated: kore's oracle cannot yet be pointed
-  at keel ([kore#81](https://github.com/youndie/kore/issues/81))
+  4.6 s, connection refused from 5.1 s, exit `0`. **That was the defect**, not the behaviour: the
+  refusal was gated on readiness, so the announce refused what it exists to serve. Since kore 0.1.7
+  one `DrainGate` is read by the refusal and opened by `EngineDrain`, and the oracle's A5 and A8 pass
+  on both halves (the scenario above). `ItemRoutesTest` — `the announce still serves and the drain
+  refuses` — holds the wiring
 
 ### Scenario: a missing required variable stops the process instead of a route
 

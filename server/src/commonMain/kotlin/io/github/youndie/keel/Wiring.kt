@@ -42,7 +42,7 @@ fun startKeel(settings: KeelSettings) {
     val liveness = LivenessGate()
     // ONE INSTANCE, read by the refusal and opened by the drain. Two instances compile and never
     // refuse. Not readiness: readiness falls at the announce, which goes on SERVING while the news
-    // travels, and a 503 then is the dropped request the wait exists to prevent (kore B-61).
+    // travels, and a 503 then is the dropped request the wait exists to prevent (kore#94).
     val draining = DrainGate()
     val deadlines = ShutdownDeadlines()
 

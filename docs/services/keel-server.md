@@ -156,7 +156,7 @@ Nothing goes to keel except renaming.
 
 | Kind | Name | What for |
 |---|---|---|
-| Library | `io.github.youndie:kore-core`, `kore-ktor` | the shutdown sequence, the probes, the typed config, `/version`, the port check. `0.1.6` on the portfolio's repository — the first with `requireListenable` and `startForKore` |
+| Library | `io.github.youndie:kore-core`, `kore-ktor` | the shutdown sequence, the probes, the typed config, `/version`, the port check. `0.1.7` on the portfolio's repository — `requireListenable` and `startForKore` since 0.1.6, `DrainGate` since 0.1.7 |
 | Gradle | `io.github.youndie.sborka.native-service`, `.kmp`, `.lint`, `.settings` | the binary's name and staging, `fixedBlockPageSize`, `--as-needed`, ktlint. `0.4.0.79` |
 | Gradle | `io.github.youndie.razves` | the size budget `sborka.binaryBudget` is enforced by; the convention fails configuration if the property is set and this is absent |
 | Gradle | `io.github.youndie.zavarnik` | the AOT cache for the JVM distribution, and `aotVerify` on `check` |
