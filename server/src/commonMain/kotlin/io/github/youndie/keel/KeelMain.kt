@@ -20,7 +20,7 @@ import io.github.youndie.kore.ktor.requireListenable
  * 4. **A port something else holds is one of those refusals.** Left to the engine it is `SIGABRT` on
  *    Kotlin/Native — CIO binds in a coroutine of its own, after `start` has returned. kore binds it
  *    once first; the port can still be taken in between, so this narrows the case and does not close
- *    it ([keel#49](https://github.com/youndie/keel/issues/49)).
+ *    it (https://github.com/youndie/keel/issues/49).
  */
 fun keelMain(args: Array<String>) {
     if (args.any { it == "--print-config" }) {

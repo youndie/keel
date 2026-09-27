@@ -81,7 +81,7 @@ fun startKeel(settings: KeelSettings) {
                 // minute, and a container restart keeps the pod's network namespace. Measured: 20
                 // requests with `Connection: close`, then a restart — native refused, JVM served.
                 // A port another process is LISTENING on is still refused. `keelMain` passes the
-                // same flag to its port check; the two must agree (keel#49).
+                // same flag to its port check; the two must agree (https://github.com/youndie/keel/issues/49).
                 reuseAddress = REUSE_ADDRESS
             },
             module = { keelModule(startup, readiness, liveness, store) },

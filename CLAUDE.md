@@ -129,7 +129,7 @@ repositories open. The full list with addresses is
   coroutine of its own after `start` returns, so a busy port is `SIGABRT` on Kotlin/Native;
   `configuration.requireListenable(PORT, reuseAddress = …)` makes it a one-line refusal. And set
   `reuseAddress = true` on the engine: the JVM gets `SO_REUSEADDR` from NIO, the native build does
-  not, and without it cannot restart over its own TIME_WAIT (keel#49).
+  not, and without it cannot restart over its own TIME_WAIT (https://github.com/youndie/keel/issues/49).
 - **`nativeService { }` goes above the `kotlin { }` block**, or the build fails with "property
   entryPoint has no value available" and names neither the ordering nor the place.
 - **Two sibling modules applying different Kotlin plugins need the root build to declare both with
