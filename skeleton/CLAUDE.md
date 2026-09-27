@@ -58,9 +58,17 @@ repositories open.
   first, `pool(...)` for a pool.
 - **Never call `addShutdownHook`.** One global slot on Native, last registration wins, and the
   callback runs on the signal stack.
-- **`runUntilSignal` goes after `server.start(wait = false)`**, because its default `watch` argument
+- **Start the server with `server.startForKore()`, never `start()`.** On the JVM `start()` adds Ktor's
+  own shutdown hook, the JVM runs it beside kore's, and it closes the listener at the signal — a
+  readiness probe then gets a refused connection instead of a `503` (kore#90).
+- **`runUntilSignal` goes after `server.startForKore()`**, because its default `watch` argument
   installs the handler at the moment of the call. Print the transcript **inside** `onFinished`: on
   the JVM the line after the call never runs.
+- **Check the port before the engine binds it, with the engine's own `reuseAddress`.** CIO binds in a
+  coroutine of its own after `start` returns, so a busy port is `SIGABRT` on Kotlin/Native;
+  `configuration.requireListenable(PORT, reuseAddress = …)` makes it a one-line refusal. And set
+  `reuseAddress = true` on the engine: the JVM gets `SO_REUSEADDR` from NIO, the native build does
+  not, and without it cannot restart over its own TIME_WAIT (keel#49).
 - **`nativeService { }` goes above the `kotlin { }` block**, or the build fails with "property
   entryPoint has no value available" and names neither the ordering nor the place.
 - **Two sibling modules applying different Kotlin plugins need the root build to declare both with
