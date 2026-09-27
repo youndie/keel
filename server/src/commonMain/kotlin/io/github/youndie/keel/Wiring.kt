@@ -17,6 +17,7 @@ import io.github.youndie.kore.ktor.installKoreVersion
 import io.github.youndie.kore.ktor.installShutdownRefusal
 import io.github.youndie.kore.ktor.startForKore
 import io.github.youndie.kore.lifecycle.AnnounceNotReady
+import io.github.youndie.kore.lifecycle.DrainGate
 import io.github.youndie.kore.lifecycle.ShutdownDeadlines
 import io.github.youndie.kore.lifecycle.ShutdownParticipant
 import io.github.youndie.kore.lifecycle.runUntilSignal
@@ -39,6 +40,10 @@ fun startKeel(settings: KeelSettings) {
     val startup = StartupGate()
     val readiness = ReadinessGate()
     val liveness = LivenessGate()
+    // ONE INSTANCE, read by the refusal and opened by the drain. Two instances compile and never
+    // refuse. Not readiness: readiness falls at the announce, which goes on SERVING while the news
+    // travels, and a 503 then is the dropped request the wait exists to prevent (kore B-61).
+    val draining = DrainGate()
     val deadlines = ShutdownDeadlines()
 
     // THE DATABASE IS OPENED BEFORE ANYTHING SERVES, and the schema is applied before that. A
@@ -84,7 +89,7 @@ fun startKeel(settings: KeelSettings) {
                 // same flag to its port check; the two must agree (https://github.com/youndie/keel/issues/49).
                 reuseAddress = REUSE_ADDRESS
             },
-            module = { keelModule(startup, readiness, liveness, store) },
+            module = { keelModule(startup, readiness, liveness, draining, store) },
         )
 
     // NOT `start(...)` AT ALL. The main thread has to be free to wait for the signal and then run the
@@ -108,7 +113,7 @@ fun startKeel(settings: KeelSettings) {
             onFinished = { run -> println(run.transcript) },
         ) {
             announce(AnnounceNotReady(readiness))
-            drain(EngineDrain(server, deadlines.drain, deadlines.drain + 5.seconds))
+            drain(EngineDrain(server, deadlines.drain, deadlines.drain + 5.seconds, draining))
 
             // AFTER THE DRAIN, AND NEVER IN `ApplicationStopping` — which runs before the drain on
             // Kotlin/Native and after it on the JVM, from identical source. Closing the pool there
@@ -137,11 +142,12 @@ fun Application.keelModule(
     startup: StartupGate,
     readiness: ReadinessGate,
     liveness: LivenessGate,
+    draining: DrainGate,
     store: ItemStore,
 ) {
     // BEFORE the probes and the routes. An interceptor installed later would let calls through that
-    // arrived first, and the one thing this must never miss is the first request after the announce.
-    installShutdownRefusal(isShuttingDown = { readiness.isShuttingDown })
+    // arrived first, and the one thing this must never miss is the first request after the drain.
+    installShutdownRefusal(draining)
     installKoreProbes(startup, readiness, liveness)
     installKoreVersion(KoreBuildIdentity)
 

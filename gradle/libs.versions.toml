@@ -29,9 +29,10 @@ serialization = "1.11.0"
 # The process lifecycle: the ordered shutdown, the three probes, the typed configuration, /version.
 # On the portfolio's repository and NOT on Maven Central, which is what the README's reposilite block
 # is for and what the "stranger test" waits on.
-# 0.1.6 is the first with `requireListenable` (https://github.com/youndie/keel/issues/49) and `startForKore` (kore#90); both are
-# called from the wiring, so moving back is a compile error, not a quiet regression.
-kore = "0.1.6"
+# 0.1.6 is the first with `requireListenable` (https://github.com/youndie/keel/issues/49) and `startForKore` (kore#90);
+# 0.1.7 the first with `DrainGate` (kore#94), so the refusal opens at the drain. All three are called
+# from the wiring, so moving back is a compile error, not a quiet regression.
+kore = "0.1.7"
 
 # The size gate `sborka.binaryBudget` is enforced by. Applied by `:server` rather than carried by the
 # convention — sborka's own comment says why.
