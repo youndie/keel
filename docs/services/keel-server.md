@@ -156,7 +156,7 @@ Nothing goes to keel except renaming.
 
 | Kind | Name | What for |
 |---|---|---|
-| Library | `io.github.youndie:kore-core`, `kore-ktor` | the shutdown sequence, the probes, the typed config, `/version`, the port check. `0.1.7` on the portfolio's repository — `requireListenable` and `startForKore` since 0.1.6, `DrainGate` since 0.1.7 |
+| Library | `io.github.youndie:kore-core`, `kore-ktor` | the shutdown sequence, the probes, the typed config, `/version`, the port check. `0.1.10` on the portfolio's repository — `requireListenable` and `startForKore` since 0.1.6, `DrainGate` since 0.1.7, the native signal taken before `start` since 0.1.9 and handled in C on Linux since 0.1.10 |
 | Gradle | `io.github.youndie.sborka.native-service`, `.kmp`, `.lint`, `.settings` | the binary's name and staging, `fixedBlockPageSize`, `--as-needed`, ktlint. `0.4.0.79` |
 | Gradle | `io.github.youndie.razves` | the size budget `sborka.binaryBudget` is enforced by; the convention fails configuration if the property is set and this is absent |
 | Gradle | `io.github.youndie.zavarnik` | the AOT cache for the JVM distribution, and `aotVerify` on `check` |
@@ -253,7 +253,11 @@ reader will not have kore's research open, and each one looks like a bug in the 
    flip readiness — which is the one thing its name suggests.
 3. **The Kotlin/Native shutdown hook is a single global slot**, last registration wins, and the
    callback runs on the POSIX signal-handler stack. Never call `addShutdownHook`; kore installs a
-   handler that writes a flag and nothing else.
+   handler that writes a flag and nothing else. **And that handler is C on Linux** (kore 0.1.10): a
+   handler written in Kotlin is a `staticCFunction`, a bridge that initialises the runtime on whichever
+   thread the kernel hands the signal to — and a `Dispatchers.IO` worker receiving it in its first
+   instructions died on a null memory state, about one early `SIGTERM` in a hundred (kore#100). Never
+   install a Kotlin signal handler of your own; macOS still has kore's Kotlin one.
 4. **`Connection: close` on a response does not close a CIO connection** — the engine reads keep-alive
    from the *request's* header. kore promises the header and not the socket, and so does keel.
 5. **Enumerating the environment is `__environ` on Linux and does not exist on macOS native**, so the
@@ -270,7 +274,9 @@ And keel's own:
    while the process is alive — which is the failure the three probes exist to stop.
 8. **`runUntilSignal`'s default `watch` argument installs a signal handler when the call is made**, so
    the call belongs *after* `server.startForKore()`. Installed earlier, it catches a signal whose
-   sequence has nothing to drain. Nothing at the call site shows this.
+   sequence has nothing to drain. Nothing at the call site shows this. On Kotlin/Native
+   `startForKore()` itself installs kore's handler around `start` (kore 0.1.9), so a signal between
+   the two is recorded and acted on — not met by Ktor's handler, which hung the process (kore#98).
 9. **The shutdown transcript is printed inside `onFinished`, not after the call.** On the JVM,
    `runUntilSignal` returning means the shutdown hook has returned and the process is already on its
    way out; the line after the call never runs. kore shipped this defect in its own example and a
