@@ -107,7 +107,7 @@ class ItemRoutesTest {
     /**
      * The refusal opens at the drain, not at the announce — the wiring is what decides it.
      *
-     * keel gated it on readiness until kore B-61, so every request inside the five-second announce was
+     * keel gated it on readiness until kore#94, so every request inside the five-second announce was
      * a `503`, and the oracle's A5 failed on every run. Reverting to that predicate fails the first
      * assertion; handing `EngineDrain` a different `DrainGate` from the one the refusal reads fails
      * nothing here and never refuses at all, which is the second half's reason to exist.
