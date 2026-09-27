@@ -74,6 +74,14 @@ fun startKeel(settings: KeelSettings) {
                 // than a great many real requests. The engine still needs them explicitly.
                 shutdownGracePeriod = deadlines.drain.inWholeMilliseconds
                 shutdownTimeout = deadlines.drain.inWholeMilliseconds + 5_000
+                // `SO_REUSEADDR`, which the JVM's NIO sets by itself and CIO on Kotlin/Native does not
+                // (its default is `false`, applied literally). Without it the native build cannot
+                // restart on its own port while connections it closed sit in TIME_WAIT — about a
+                // minute, and a container restart keeps the pod's network namespace. Measured: 20
+                // requests with `Connection: close`, then a restart — native refused, JVM served.
+                // A port another process is LISTENING on is still refused. `keelMain` passes the
+                // same flag to its port check; the two must agree (keel#49).
+                reuseAddress = REUSE_ADDRESS
             },
             module = { keelModule(startup, readiness, liveness, store) },
         )
@@ -168,3 +176,6 @@ internal fun keelDatabaseUrl(path: String): String = "sqlite://$path?mode=rwc"
  * starting point to measure, not a tuned number.
  */
 private const val POOL_SIZE = 2
+
+/** Shared by the engine and the port check in `keelMain`, which have to bind the same way. */
+internal const val REUSE_ADDRESS = true
