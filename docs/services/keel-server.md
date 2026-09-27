@@ -135,7 +135,7 @@ the process will not start; the configuration is read once before anything serve
 the message and nothing else, because a stack trace buries the two lines that say which variable and
 why. A port another process holds is one of those refusals — kore's `requireListenable` binds it once
 before the engine, because the engine's own failure on Kotlin/Native is `SIGABRT` and 55 lines of
-stack ([keel#49](https://github.com/youndie/keel/issues/49)); the port can still be taken in between.
+stack (https://github.com/youndie/keel/issues/49); the port can still be taken in between.
 
 **The order things run in at shutdown** is kore's and is the product:
 `announce` (readiness false, then a wait long enough to matter) → `drain` (accept stops, in-flight
