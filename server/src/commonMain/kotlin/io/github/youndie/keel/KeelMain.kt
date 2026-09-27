@@ -32,7 +32,7 @@ fun keelMain(args: Array<String>) {
     val settings =
         try {
             val configuration = KeelConfig.SCHEMA.read(systemEnvironment())
-            configuration.requireListenable(KeelConfig.PORT)
+            configuration.requireListenable(KeelConfig.PORT, reuseAddress = REUSE_ADDRESS)
             KeelSettings(
                 port = configuration[KeelConfig.PORT],
                 dbPath = configuration[KeelConfig.DB_PATH],
