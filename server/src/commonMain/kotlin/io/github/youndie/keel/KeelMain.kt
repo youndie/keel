@@ -3,6 +3,7 @@ package io.github.youndie.keel
 import io.github.youndie.kore.config.ConfigurationException
 import io.github.youndie.kore.config.printConfig
 import io.github.youndie.kore.config.systemEnvironment
+import io.github.youndie.kore.ktor.requireListenable
 
 /**
  * Everything both entry points do, so the two `main`s stay the one line that genuinely differs.
@@ -16,6 +17,10 @@ import io.github.youndie.kore.config.systemEnvironment
  *    does not start, not a route that fails later under a user.
  * 3. **The refusal is the message and nothing else.** A stack trace here buries the two lines that
  *    say which variable and why under frames nobody reading `kubectl logs` wants.
+ * 4. **A port something else holds is one of those refusals.** Left to the engine it is `SIGABRT` on
+ *    Kotlin/Native — CIO binds in a coroutine of its own, after `start` has returned. kore binds it
+ *    once first; the port can still be taken in between, so this narrows the case and does not close
+ *    it ([keel#49](https://github.com/youndie/keel/issues/49)).
  */
 fun keelMain(args: Array<String>) {
     if (args.any { it == "--print-config" }) {
@@ -27,6 +32,7 @@ fun keelMain(args: Array<String>) {
     val settings =
         try {
             val configuration = KeelConfig.SCHEMA.read(systemEnvironment())
+            configuration.requireListenable(KeelConfig.PORT)
             KeelSettings(
                 port = configuration[KeelConfig.PORT],
                 dbPath = configuration[KeelConfig.DB_PATH],
