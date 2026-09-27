@@ -15,6 +15,7 @@ import io.github.youndie.kore.ktor.EngineDrain
 import io.github.youndie.kore.ktor.installKoreProbes
 import io.github.youndie.kore.ktor.installKoreVersion
 import io.github.youndie.kore.ktor.installShutdownRefusal
+import io.github.youndie.kore.ktor.startForKore
 import io.github.youndie.kore.lifecycle.AnnounceNotReady
 import io.github.youndie.kore.lifecycle.ShutdownDeadlines
 import io.github.youndie.kore.lifecycle.ShutdownParticipant
@@ -86,9 +87,11 @@ fun startKeel(settings: KeelSettings) {
             module = { keelModule(startup, readiness, liveness, store) },
         )
 
-    // NOT `start(wait = true)`. The main thread has to be free to wait for the signal and then run
-    // the sequence — which is the whole reason kore does not go through `addShutdownHook`.
-    server.start(wait = false)
+    // NOT `start(...)` AT ALL. The main thread has to be free to wait for the signal and then run the
+    // sequence, and on the JVM `start` also adds Ktor's own shutdown hook, which the JVM runs beside
+    // kore's and which stops the engine mid-announce — readiness a refused connection instead of a
+    // 503 (kore#90). `startForKore` is `start(wait = false)` with that hook switched off first.
+    server.startForKore()
     startup.markStarted()
 
     runBlocking {
