@@ -32,7 +32,11 @@ serialization = "1.11.0"
 # 0.1.6 is the first with `requireListenable` (https://github.com/youndie/keel/issues/49) and `startForKore` (kore#90);
 # 0.1.7 the first with `DrainGate` (kore#94), so the refusal opens at the drain. All three are called
 # from the wiring, so moving back is a compile error, not a quiet regression.
-kore = "0.1.7"
+# 0.1.9 and 0.1.10 are NOT compile errors to move back from, and that is why they are named here: on
+# Kotlin/Native, 0.1.9's `startForKore` takes SIGTERM before Ktor's own handler can meet it (kore#98),
+# and 0.1.10's handler is C on Linux, because a Kotlin one initialised the runtime on whichever thread
+# received the signal and killed a worker born at that moment (kore#100).
+kore = "0.1.10"
 
 # The size gate `sborka.binaryBudget` is enforced by. Applied by `:server` rather than carried by the
 # convention — sborka's own comment says why.

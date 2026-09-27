@@ -121,7 +121,11 @@ repositories open. The full list with addresses is
   callback runs on the signal stack.
 - **Start the server with `server.startForKore()`, never `start()`.** On the JVM `start()` adds Ktor's
   own shutdown hook, the JVM runs it beside kore's, and it closes the listener at the signal — a
-  readiness probe then gets a refused connection instead of a `503` (kore#90).
+  readiness probe then gets a refused connection instead of a `503` (kore#90). On Kotlin/Native it also
+  installs kore's signal handler around `start`, so no signal meets Ktor's own (kore#98).
+- **Never install a signal handler written in Kotlin.** A `staticCFunction` is a bridge that
+  initialises the runtime on whichever thread receives the signal; a worker receiving it in its first
+  instructions dies. kore's handler is C on Linux (kore#100) — read its flag, do not add another.
 - **One `DrainGate`, handed to both `installShutdownRefusal` and `EngineDrain`.** The refusal opens at
   the drain, never at the announce, which goes on serving while the news travels; two instances
   compile and never refuse (kore#94).
