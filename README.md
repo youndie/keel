@@ -36,7 +36,7 @@ The test for every file in it: *did konekt or katcher need this?* If not, it is 
 | kore | `installKoreProbes`, `installKoreVersion`, `runUntilSignal` with `announce → drain → release` |
 | sborka | `fixedBlockPageSize=16`, `--as-needed`, ktlint, a size budget, the staged binary path |
 | zavarnik | a Leyden AOT cache for the JVM distribution, `aotVerify` on `check` |
-| `Dockerfile` | two stages; `gcr.io/distroless/cc-debian13`, the binary and nothing beside it |
+| `nativeImage { }` in `server/build.gradle.kts` | `gcr.io/distroless/cc-debian13` by digest, the binary and nothing beside it; `./gradlew :server:nativeImageTar` builds it with no Docker daemon and refuses a base that cannot load the binary |
 | `k6/` | one scenario, used for the parity smoke and for `:server:measure` |
 | `docs/` | this tree, passing `make check` on day one |
 

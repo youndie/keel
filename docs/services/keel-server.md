@@ -85,7 +85,7 @@ What it deliberately does **not** do:
 | `build.gradle.kts` | the root, and it exists for one reason — two Kotlin plugins in one build |
 | `distribution/build.gradle.kts` | `application` + zavarnik, and the reason it exists (§3) |
 | `distribution/src/main/kotlin/.../jvm/Main.kt` | one line; anything that grows here belongs in `:server` |
-| `Dockerfile` | two stages; one runtime image, and no static variant — B-16 |
+| `server/build.gradle.kts` → `nativeImage { }` | the runtime image: `distroless/cc-debian13` by digest, the binary and nothing beside it, built by sborka's `nativeImageTar` with no Docker daemon — and refused before it is written if that base cannot load the binary. No static variant — B-16 |
 | `k6/items.js` | the scenario both binaries are driven with; `KEEL_MEASURE=1` gives it a constant-work profile |
 | `k6/measure.sh` | the three numbers, and the refusal to write them without a stand |
 | `.github/workflows/check.yaml` | the documentation gate and the build gate |
@@ -125,9 +125,19 @@ peak from 39.3 MB to 413.7 MB and 10 survivals out of 10 to 7. Both lines carry 
 **Where the binary lands.** `stageNativeImage` puts the release `.kexe` at
 `server/build/native-image/<baseName>` whatever the target was declared as, and writes a
 `<baseName>.needed.txt`
-next to it naming what the binary asks the loader for. The `Dockerfile` copies from that path and
-nothing else; the whole point of the convention is that a `COPY` line survives being moved between
-repositories.
+next to it naming what the binary asks the loader for. `nativeImageTar` takes the binary from that
+path and nothing else, puts it at `/app/<baseName>`, and makes it the entrypoint in exec form.
+
+**The image is described in the build, and checked before it is written.** Since 2026-09-30 keel has
+no `Dockerfile` ([sborka B-34](https://github.com/youndie/sborka/blob/main/docs/backlog/B-34-build-keels-image-without-docker-build.md)): `nativeImage { base = "…@sha256:…" }` in
+`server/build.gradle.kts` names the base by digest, and `./gradlew :server:nativeImageTar` pulls it
+with no daemon, asks its files whether the loader will load the binary — interpreter, every `NEEDED`
+entry, every symbol version — and only then writes `server/build/native-image-oci/keel.tar`
+([sborka B-33](https://github.com/youndie/sborka/blob/main/docs/backlog/B-33-make-the-load-check-a-gate.md)). A base that cannot load it fails the build naming the library.
+**What the check does not see, and a person has to:** CA certificates and glibc's gconv modules. Neither
+is a library an ELF entry names; `distroless/cc-debian13` carries both, and a clone that changes the
+base has to know that it needs them — outbound TLS fails without the first, and anything glibc
+converts through `iconv` without the second.
 
 **The order things run in at startup**, and it is a claim about what a service owes an operator:
 `--print-config` answers before anything else including the build line, because it is asked *because*
@@ -178,14 +188,15 @@ repository configured — which is acceptance 1's precondition and the README's 
   never updated again — [B-16](../backlog/B-16-static-image.md), with
   [B-18](../backlog/B-18-scratch-when-static-is-static.md) as its expiry. The recipe is written down
   in the research; it is not shipped.
-* **`.dockerignore` does not exclude `.git`**, deliberately. `/version` is served from an identity the
-  Gradle plugin reads out of git at build time, so excluding the directory — the obvious thing to do
-  for context size — answers `0.1.0+unknown` in the artefact where the question matters most.
+* **`/version` and the image's OCI labels agree**: both come from the same build — `org.opencontainers.image.version`
+  and `.revision` are the project version and the git commit. There is no build context to exclude
+  `.git` from any more; the identity is read where the build runs.
 * **Probes:** `GET /health/startup`, `GET /health/ready`, `GET /health/live`. A chart must point
   readiness at `/health/ready` and **not** at `/health`, which is an alias for liveness — see §8.
 * **Version:** `GET /version`, `key: value` per line, read by deploy checks rather than by people.
-* **`ENTRYPOINT` in exec form, always.** Shell form makes `/bin/sh -c` PID 1 and it does not forward
-  `SIGTERM`, so the process never sees the signal and the run looks like an instant clean shutdown.
+* **The entrypoint is exec form, and cannot be anything else**: `nativeImageTar` writes it. Shell form
+  makes `/bin/sh -c` PID 1 and it does not forward `SIGTERM`, so the process would never see the signal
+  and the run would look like an instant clean shutdown.
 * **No chart.** keel ships no Helm; the chart is a decision about a cluster keel does not have. The
   `native-service-bootstrap` skill carries one.
 
@@ -195,7 +206,8 @@ repository configured — which is acceptance 1's precondition and the README's 
 ./gradlew :distribution:run                     # the JVM half; works on a fresh clone, no config
 ./gradlew :server:linkReleaseExecutableLinuxX64 # the native binary; Linux only
 ./gradlew :server:measure                       # three numbers, and a refusal to write them
-docker build -t keel .                          # the only image there is
+./gradlew :server:nativeImageTar                # the only image there is: server/build/native-image-oci/keel.tar
+docker load -i server/build/native-image-oci/keel.tar   # to run it; building it needs no Docker
 ```
 
 Nothing else has to be running: the store is SQLite in a file, and `KEEL_DB_PATH` defaults to one
@@ -287,9 +299,9 @@ And keel's own:
 11. **The chronik timer block is `linuxX64` only.** Turning it on together with `keel.linuxArm64=true`
     fails at resolution with "no matching variant", which names an attribute and not the decision
     that caused it.
-12. **`writeNativeDockerfile` refuses to overwrite.** keel's `Dockerfile` is committed, so the task
-    will always refuse here; it is for a clone that deleted the file, and the refusal is deliberate —
-    the runtime image is where certificates, shared libraries and a base image's glibc are decided.
+12. **There is no `Dockerfile`, and `writeNativeDockerfile` would write one.** It is sborka's other
+    path to an image; keel took the image task instead ([sborka B-34](https://github.com/youndie/sborka/blob/main/docs/backlog/B-34-build-keels-image-without-docker-build.md)). A clone that wants a `Dockerfile`
+    back runs it once — and loses the load check, which only the image task runs.
 13. **A green `build` on one host does not mean both targets were tested.** Kotlin/Native has no
     `linux_arm64` host, so `linuxArm64Test` is never *created* — it does not appear as skipped, it does
     not appear at all. CI links there and executes the test binary on an arm64 runner; a local green
@@ -332,13 +344,11 @@ And keel's own:
     a second. The measurement profile skips it (`KEEL_MEASURE=1`); the parity and smoke runs keep it,
     because there the body is the point. A clone that keeps this route past its first thousand rows
     has a denial of service it wrote itself.
-19. **Turning `keel.linuxArm64` on moves the staged binary, and the `Dockerfile` does not follow.**
+19. **Turning `keel.linuxArm64` on moves the staged binary, and the image still takes `linux_x64`.**
     `stageNativeImage` stages flat under one native target and per-target under two —
-    `build/native-image/linux_x64/keel` — which is correct, because one name for two binaries is a
-    `COPY` that finds the wrong file. keel ships with the property off so the committed `COPY` is
-    right; a clone that turns it on edits that line, and the `Dockerfile` says so at the line itself.
-    The failure otherwise arrives at image build time as "not found", naming the path and nothing
-    about the property that moved it.
+    `build/native-image/linux_x64/keel` — because one name for two binaries is an image built from the
+    wrong file. `nativeImageTar` follows the staged path and picks `linux_x64` when both are there; an
+    arm64 image is not something it builds, and a clone that needs one says so to sborka.
 20. **A Gradle task that writes into the repository must not be run through the replica.** The mutagen
     session is a one-way replica, so `./gradlew updateEditorconfig` on the Linux box wrote
     `.editorconfig` there and the next sync deleted it. Generated files arrive on the Mac or not at
@@ -396,6 +406,6 @@ environment test. With no required key, `complete` becomes an empty map and `POR
 two roles. Replacing `DB_PATH` with `PORT` mechanically breaks
 `a default is used and is reported as a default`, because it asserts `PORT`'s default.
 
-**`MALLOC_ARENA_MAX=2` is measured on a service with a database.** The `Dockerfile` records that on
-a service without one it went the other way. A clone that removes the database measures that line
-again or deletes it (§3).
+**`MALLOC_ARENA_MAX=2` is measured on a service with a database.** It is `nativeImage`'s default
+environment; on a service without a database it went the other way. A clone that removes the database
+measures it again, or sets `nativeImage { environment = emptyMap() }` (§3).

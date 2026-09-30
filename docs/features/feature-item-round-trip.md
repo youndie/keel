@@ -220,7 +220,8 @@ the JVM and on `linuxX64` from one source, which is the property worth having ra
 
 ### Scenario: the image starts with the binary and nothing beside it
 
-* **Given:** the image built from the committed `Dockerfile` with no `COPY` line other than the binary
+* **Given:** the image built by `./gradlew :server:nativeImageTar` — the binary on `distroless/cc-debian13`
+  by digest and nothing beside it, after the load check passed; no `docker build`
 * **When:** the container is started
 * **Then:** it answers `/health/ready` — no `cannot open shared object file`, no library dragged from
   the builder stage
