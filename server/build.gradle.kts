@@ -29,7 +29,7 @@ nativeService {
 
 // THE IMAGE, AND NO DOCKERFILE. `./gradlew :server:nativeImageTar` pulls this base by digest with no
 // Docker daemon, checks that its loader can load the binary — and refuses to write the image if not —
-// then writes `server/build/native-image-oci/keel.tar`. sborka's B-33/B-34, on the owner's decision:
+// then writes `server/build/native-image-oci/keel.tar`. sborka's image task, on the owner's decision:
 // https://github.com/youndie/sborka/blob/main/docs/research/research-native-image.md
 //
 // What the check cannot see stays a decision for whoever changes this line: CA certificates and
