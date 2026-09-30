@@ -36,7 +36,9 @@ serialization = "1.11.0"
 # Kotlin/Native, 0.1.9's `startForKore` takes SIGTERM before Ktor's own handler can meet it (kore#98),
 # and 0.1.10's handler is C on Linux, because a Kotlin one initialised the runtime on whichever thread
 # received the signal and killed a worker born at that moment (kore#100).
-kore = "0.1.10"
+# 0.1.13 takes `builtAt` from SOURCE_DATE_EPOCH when it is set (kore#102): set to the commit time, one
+# commit links to one binary and so to one image digest. Unset, nothing changes.
+kore = "0.1.13"
 
 # The size gate `sborka.binaryBudget` is enforced by. Applied by `:server` rather than carried by the
 # convention — sborka's own comment says why.

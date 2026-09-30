@@ -134,6 +134,10 @@ no `Dockerfile` ([sborka B-34](https://github.com/youndie/sborka/blob/main/docs/
 with no daemon, asks its files whether the loader will load the binary — interpreter, every `NEEDED`
 entry, every symbol version — and only then writes `server/build/native-image-oci/keel.tar`
 ([sborka B-33](https://github.com/youndie/sborka/blob/main/docs/backlog/B-33-make-the-load-check-a-gate.md)). A base that cannot load it fails the build naming the library.
+**The same commit gives the same digest only when the build is told the time.** kore's `builtAt` is
+the wall clock unless `SOURCE_DATE_EPOCH` is set (kore#102); with it set to the commit time, two clean
+builds of one commit give one binary and one image. The two distributions' linkers still name
+themselves differently in `.comment`, so the claim holds per build-host OS, not across macOS and Linux.
 **What the check does not see, and a person has to:** CA certificates and glibc's gconv modules. Neither
 is a library an ELF entry names; `distroless/cc-debian13` carries both, and a clone that changes the
 base has to know that it needs them — outbound TLS fails without the first, and anything glibc
@@ -207,6 +211,7 @@ repository configured — which is acceptance 1's precondition and the README's 
 ./gradlew :server:linkReleaseExecutableLinuxX64 # the native binary; Linux only
 ./gradlew :server:measure                       # three numbers, and a refusal to write them
 ./gradlew :server:nativeImageTar                # the only image there is: server/build/native-image-oci/keel.tar
+SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct) ./gradlew :server:nativeImageTar   # the same image digest for the same commit
 docker load -i server/build/native-image-oci/keel.tar   # to run it; building it needs no Docker
 ```
 
