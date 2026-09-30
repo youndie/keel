@@ -97,7 +97,7 @@ repositories open.
 - **A green build on one host says nothing about arm64.** Kotlin/Native has no `linux_arm64` host, so
   `linuxArm64Test` is never created: it does not appear as skipped, it does not appear at all. CI
   cross-links the test binary and runs it on an arm64 runner. Turning `{{name}}.linuxArm64` on also
-  moves the staged binary, and the `Dockerfile` says at its `COPY` line what to change.
+  moves the staged binary; `nativeImageTar` still builds the `linux_x64` one, and an arm64 image is not something it builds.
 - **A number that was not measured says so**, and names the item that will measure it.
 - **Do not fork a toolkit.** A gap goes upstream as an issue.
 

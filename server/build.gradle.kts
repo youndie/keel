@@ -27,6 +27,18 @@ nativeService {
     baseName = "keel"
 }
 
+// THE IMAGE, AND NO DOCKERFILE. `./gradlew :server:nativeImageTar` pulls this base by digest with no
+// Docker daemon, checks that its loader can load the binary — and refuses to write the image if not —
+// then writes `server/build/native-image-oci/keel.tar`. sborka's B-33/B-34, on the owner's decision:
+// https://github.com/youndie/sborka/blob/main/docs/research/research-native-image.md
+//
+// What the check cannot see stays a decision for whoever changes this line: CA certificates and
+// glibc's gconv modules, which this base carries and no ELF entry names (service document §3).
+nativeImage {
+    base = "gcr.io/distroless/cc-debian13@sha256:4594d59540d1948417f6ca2829ddd9294493a7c68b7528f4dd459de7f203a750"
+    ports = listOf(8080)
+}
+
 // THE BUDGET WATCHES WHAT SHIPS, AND THIS IS A WORKAROUND WITH AN ADDRESS: youndie/razves#4.
 //
 // razves applies `binarySize.budget` to every executable, and the debug binary is 3.1x the release

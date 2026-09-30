@@ -13,7 +13,7 @@ is the template's until B-01 says otherwise.
 ./gradlew :distribution:run --args="--print-config"   # every {{PREFIX}}_* variable and where its value came from
 ./gradlew :server:linkReleaseExecutableLinuxX64 # the native binary; Linux only
 ./gradlew build                                 # both targets, both suites
-docker build -t {{name}} .                      # the image
+./gradlew :server:nativeImageTar               # the image, no Docker needed: server/build/native-image-oci/{{name}}.tar
 ```
 
 ## Resolving the dependencies

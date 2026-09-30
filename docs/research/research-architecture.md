@@ -146,6 +146,9 @@ the file.
 | a Kotlin/Native binary's `NEEDED` list is the **runtime's**, not the application's: two unrelated services, a CLI and a hello-world give a byte-identical list of ten | `sborka/docs/research/research-static-binary.md` §1.2 |
 | the glibc floor is `memcpy@GLIBC_2.14` hard, `__cxa_thread_atexit_impl@GLIBC_2.18` weak — a decade below every base image anyone would consider | same, §1.2 |
 
+**Superseded 2026-09-30** — keel's image is now built by sborka's `nativeImageTar` and there is no `Dockerfile`
+([sborka B-34](https://github.com/youndie/sborka/blob/main/docs/backlog/B-34-build-keels-image-without-docker-build.md)). What follows is the decision as it stood.
+
 **Consequence — keel's `Dockerfile` is sborka's reference with two holes filled, and it is committed
 rather than generated.** `writeNativeDockerfile` produces the starting point; the runtime image is a
 decision about certificates, shared libraries and a base image's glibc, and it belongs in a file a
