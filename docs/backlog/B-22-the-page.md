@@ -44,7 +44,7 @@ deliverable is consistent with everything.
 
 ## Iteration 1 — 2026-09-16: written, waiting on a repository this loop does not merge in
 
-[vedutsya-raboty/kotlin-website#24](https://github.com/vedutsya-raboty/kotlin-website/pull/24) —
+A pull request to the portfolio's landing-page repository, which is private —
 `AKotlinServerThatShipsTwice.md`. No registration needed: `Site.kt` says dropping a `.md` into
 `resources/markdown/blog/` is the whole of it and `BLOG_ENTRIES` is generated.
 
@@ -69,8 +69,8 @@ exactly where the checks in this repository stop.
 
 ### Not merged
 
-kotlin-website is not this repository, and keel's `CLAUDE.md` authorises the loop to merge its own
-work *here*. The item closes when a person merges it.
+The landing page's repository is not this one, and keel's `CLAUDE.md` authorises the loop to merge
+its own work *here*. The item closes when a person merges it.
 
 **Its state is worth a line for whoever does:** `KotlinNativeFromScratch.md` is modified and
 uncommitted there, and two `medium-*.md` files are untracked at the root. Branched from `main`, left
