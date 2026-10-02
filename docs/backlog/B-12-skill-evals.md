@@ -96,3 +96,12 @@ judgement calls flagged in the pull request are the likeliest candidates.
 thing here that is deliberately not automated: `:server:measure --stand` still refuses, because the
 measurement that exists was taken by hand over ssh and writing orchestration nobody has run would
 give this repository the appearance of a capability it does not have.
+
+---
+
+## Corrected 2026-10-02
+
+"There is none" above is true of this skill, which is all this item needed. The reason given beside
+it is not: the plugin already held three suites — `backlog-item`, `design-to-compose` and
+`product-brief`, since 2026-09-08 — and Iteration 1 wrote its cases in their shape. The correction and
+its addresses are in [research-architecture](../research/research-architecture.md) §1.11.
