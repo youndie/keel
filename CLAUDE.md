@@ -42,7 +42,7 @@ is why it is worth naming here.
      tickets; the decision survived and its address changed.
 2. [backlog.md](backlog.md) — the goal, the stages, the index. Items are one file each in
    `docs/backlog/`; the index between the markers is generated, so edit the item and run
-   `python3 scripts/backlog_index.py`.
+   `make fix`.
 3. The layer document the task belongs to — [docs/services/keel-server.md](docs/services/keel-server.md)
    for the modules and the twenty quirks, [docs/api/endpoint-items.md](docs/api/endpoint-items.md)
    for the routes, [docs/features/feature-item-round-trip.md](docs/features/feature-item-round-trip.md)
@@ -197,9 +197,19 @@ English.
 
 ```bash
 pip install pyyaml
-LOCAL=1 make check      # the gate; CI runs exactly it
-LOCAL=1 make report     # the two non-blocking reports
+LOCAL=1 make check      # the gate and the reports; CI's check job runs exactly it
+LOCAL=1 make report     # the two non-blocking reports alone
+LOCAL=1 make fix        # regenerate the backlog index, append missing coverage-map lines
 ```
+
+**The checks are not in this repository.** They are docs-bootstrap's, at the version the
+`uses: youndie/docs-bootstrap@<tag>` line in `.github/workflows/check.yaml` pins: CI runs them from
+there, and the Makefile reads the same line and fetches that tag into `.docs-bootstrap/` (it ignores
+itself), so a local `make check` runs what CI runs. A new version arrives as a Renovate bump of that
+line. Never copy the scripts back in — a copy stops at the version of the day it was taken — and never
+pin the version a second time in the Makefile. The guard that fails the gate on an absent `docs/` or an
+empty backlog is docs-bootstrap's (`docs-guard`) now, not a hand-written target here; this
+repository's own lines are `gate`, `build`, and the `-` that keeps `report` from failing `check`.
 
 `code_anchors` reports most of this tree rotten today, and that is correct — the paths are where the
 code will live, and the count going down is how the template arriving looks from here. It does not

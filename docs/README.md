@@ -34,7 +34,7 @@ are one file each in [`backlog/`](backlog/), cited as
 [B-10](backlog/B-10-draft-gate.md), which records the four sentences that re-reading corrected. One of
 them was not a stale reference but an instruction that ran and silently produced the wrong artefact,
 which is why the re-reading is the point and the status field is only its result.
-`docs_check.py --on-main` enforces it on the default branch.
+`make docs-on-main` (docs-bootstrap's `docs_check.py --on-main`) enforces it on the default branch.
 
 **`active` does not mean everything described is built; it means nothing described is wrong.** What is
 absent says so where a reader meets it: a `scratch` image (B-16, by decision), `linuxArm64` coverage
@@ -91,7 +91,10 @@ pip install pyyaml
 make check
 ```
 
-`make check` is the gate and CI runs exactly it. `make report` is the two non-blocking reports:
+`make check` is the gate and CI runs exactly it, at the docs-bootstrap version the
+`uses: youndie/docs-bootstrap@<tag>` line in `.github/workflows/check.yaml` pins — the Makefile reads
+that line and fetches the same tag, so nothing is copied in. `make fix` regenerates the backlog index.
+`make report` is the two non-blocking reports:
 `bdd_report` counts scenarios, which is meaningless as a percentage while every scenario is target
 behaviour, and `code_anchors` cannot tell a path quoted as obsolete from a live one.
 
