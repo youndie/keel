@@ -209,7 +209,8 @@ itself), so a local `make check` runs what CI runs. A new version arrives as a R
 line. Never copy the scripts back in — a copy stops at the version of the day it was taken — and never
 pin the version a second time in the Makefile. The guard that fails the gate on an absent `docs/` or an
 empty backlog is docs-bootstrap's (`docs-guard`) now, not a hand-written target here; this
-repository's own lines are `gate`, `build`, and the `-` that keeps `report` from failing `check`.
+repository's own lines are `gate` and `build`. `report` is check.mk's `docs-report`, whose `-` keeps
+the two reports from failing `check` - unless `ANCHORS_ARGS=--check` asks for code anchors to fail it.
 
 `code_anchors` lists what it cannot find, and what it lists today is build outputs and names quoted
 in prose (`lib/`, `evals/evals.json`), not rot. A path into another repository is not among them: it
