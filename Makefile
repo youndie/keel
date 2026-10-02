@@ -81,8 +81,7 @@ DOCS_BOOTSTRAP_SHIM := 2
 
 # The goals that load the checks - and so read the pin and, on a fresh clone, fetch it. check.mk's
 # `docs-` targets load them by themselves. `build` is not here: it needs Gradle, not the checks, and
-# so runs without the pin and without the network. `report` runs `docs-report` in a sub-make, which
-# loads the checks by its own goal.
+# so runs without the pin and without the network.
 DOCS_BOOTSTRAP_GOALS := check gate report fix
 
 .DEFAULT_GOAL := help
@@ -102,19 +101,20 @@ check: gate report
 # branch-specific, and CI runs it on pushes to the default branch (`make docs-on-main`, B-10).
 gate: docs-gate
 
-# Non-blocking, on purpose - AND THE `-` IS WHAT MAKES THAT TRUE.
+# Non-blocking, on purpose - and check.mk's `-` is what makes that true: it runs `bdd_report` with
+# one, and `code_anchors` with one unless ANCHORS_ARGS asks for `--check`.
 #
 # `bdd_report` counts scenarios; a percentage is meaningless while most scenarios are target
-# behaviour. `code_anchors` cannot tell a path quoted AS OBSOLETE from a live one, and what rots lives
-# in other people's repositories. Neither is a gate.
+# behaviour. `code_anchors` cannot tell a path quoted AS OBSOLETE from a live one. Neither is a gate.
 #
-# They are nevertheless *run* by `check`, so a report that fails would fail the gate - and B-08 found
-# it the way such things are found: a fresh clone at `/work` made `code_anchors` scan `/`, the kernel
-# killed it, and `make check` went red on a repository whose documentation was entirely consistent.
-# check.mk runs the two without a `-`, so the target is run as a sub-make and the `-` is put on that:
-# the reports still print, and what they print is still read by a person.
-report:
-	-@$(MAKE) --no-print-directory docs-report
+# They are nevertheless *run* by `check`, so a report that fails without a `-` fails the gate - and
+# B-08 found it the way such things are found: a fresh clone at `/work` made `code_anchors` scan `/`,
+# the kernel killed it, and `make check` went red on a repository whose documentation was entirely
+# consistent. docs-bootstrap 0.3.0 ran the two without a `-`, so this target wrapped them in a
+# sub-make with a `-` on it; since 0.3.1 check.mk carries the `-` itself. The wrapper is gone because
+# its `-` swallowed the one failure that is asked for: `make check ANCHORS_ARGS=--check` exited 0 on
+# an anchor that resolved to nothing.
+report: docs-report
 
 fix: docs-fix
 
