@@ -291,6 +291,23 @@ says which repository the number comes from.
 | it tells the agent to copy a **living service** — metrik or katcher — rather than the templates in the file | same, Step 0 |
 | there is **no `evals/evals.json`** anywhere in the plugin | `youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/` holds `skills/` and nothing else |
 
+**Corrected 2026-10-02 — the last row is wrong at the commit it cites.** `git ls-tree -r 16515bd` in
+kotlin-skills lists an `evals/evals.json` under three skills of the plugin, the three pipeline ones:
+`youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/skills/backlog-item/evals/evals.json`,
+`youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/skills/design-to-compose/evals/evals.json` and
+`youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/skills/product-brief/evals/evals.json`, all
+added on 2026-09-08 by kotlin-skills `50a61f7` ("a harness for the three pipeline skills, and a first
+run") — eight days before this row was written. Its address was wrong too: the plugin directory also
+holds `youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/.claude-plugin/plugin.json`. What the
+row should have said is narrower: **`native-service-bootstrap` has no `evals/`**, nor do the six other
+skills. The row stays as written; this is the record of it.
+
+**The consequence below does not change.** It needs only the narrower fact — the missing suite is this
+skill's — and B-12 delivered exactly that. The wrong row did not mislead the work either: B-12's pull
+request found the three suites and wrote its five cases "in the shape the three sibling suites already
+use". What the row did get wrong is the framing — a fourth suite in an existing shape presented as
+the first — and [B-12](../backlog/B-12-skill-evals.md) repeated it.
+
 **Consequence — one deliverable of the brief is already done and one is not.** The move into
 kotlin-skills happened; what is missing is keel as the skill's reference project (Step 0 names two
 production services, and a starter is a better answer for "a new service") and the eval suite. Both
