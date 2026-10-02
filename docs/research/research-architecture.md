@@ -37,12 +37,12 @@ artefacts a clone would resolve.
 
 | Fact | Where verified |
 |---|---|
-| `installKoreProbes(startup, readiness, liveness)` mounts `/health/startup`, `/health/ready`, `/health/live` and the alias `/health` | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` |
+| `installKoreProbes(startup, readiness, liveness)` mounts `/health/startup`, `/health/ready`, `/health/live` and the alias `/health` | `youndie/kore@795907e!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` |
 | `/health` is an **alias for liveness**, not readiness — a chart pointing readiness there gets a probe that cannot fail while the process is alive | same file, the `KoreRoutes.HEALTH` route |
-| `installKoreVersion(identity, release, reduced)` mounts `/version` as `key: value` lines, and **refuses to start** when `reduced` is on and the release still names the commit | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/VersionRoute.kt` |
-| `runUntilSignal(deadlines, watch, onFinished, register)` is `suspend`, installs the signal watch **as a side effect of the default argument**, and takes the registrations in a builder | `kore/kore-core/src/commonMain/kotlin/io/github/youndie/kore/lifecycle/RunUntilSignal.kt` |
-| the stages are `announce → drain → consumer → pool`, registered in that order | `kore/samples/service/src/commonMain/kotlin/io/github/youndie/kore/sample/KoreWiring.kt` |
-| `ConfigKey` has `required` / `string` / `optional` / `secret` / `int` / `millis`, and `ConfigSchema(prefix, keys, pairs)` collects **every** problem rather than failing on the first | `kore/kore-core/src/commonMain/kotlin/io/github/youndie/kore/config/ConfigKey.kt`, `.../config/ConfigSchema.kt` |
+| `installKoreVersion(identity, release, reduced)` mounts `/version` as `key: value` lines, and **refuses to start** when `reduced` is on and the release still names the commit | `youndie/kore@795907e!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/VersionRoute.kt` |
+| `runUntilSignal(deadlines, watch, onFinished, register)` is `suspend`, installs the signal watch **as a side effect of the default argument**, and takes the registrations in a builder | `youndie/kore@795907e!/kore-core/src/commonMain/kotlin/io/github/youndie/kore/lifecycle/RunUntilSignal.kt` |
+| the stages are `announce → drain → consumer → pool`, registered in that order | `youndie/kore@795907e!/samples/service/src/commonMain/kotlin/io/github/youndie/kore/sample/KoreWiring.kt` |
+| `ConfigKey` has `required` / `string` / `optional` / `secret` / `int` / `millis`, and `ConfigSchema(prefix, keys, pairs)` collects **every** problem rather than failing on the first | `youndie/kore@795907e!/kore-core/src/commonMain/kotlin/io/github/youndie/kore/config/ConfigKey.kt`, `youndie/kore@795907e!/kore-core/src/commonMain/kotlin/io/github/youndie/kore/config/ConfigSchema.kt` |
 | `kore-core` is published at `0.1.4` | `https://reposilite.kotlin.website/snapshots/io/github/youndie/kore-core/maven-metadata.xml`, read 2026-09-16 |
 
 **Consequence — keel's own Kotlin is wiring and one route, and acceptance 6 is plausible.** The
@@ -71,9 +71,9 @@ not have kore's research open.
 |---|---|
 | `EmbeddedServer.stop` runs its steps in **opposite order** on JVM and Kotlin/Native, so `ApplicationStopping` fires *after* the drain on one and *before* it on the other, from identical source | `ktor-server-core-3.6.0!/jvmMain/io/ktor/server/engine/EmbeddedServerJvm.kt`, `ktor-server-core-3.6.0!/posixMain/io/ktor/server/engine/EmbeddedServer.posix.kt` |
 | `ApplicationStopPreparing` fires **after** the socket has stopped accepting on CIO, so it cannot be used to flip readiness — which is the one thing its name suggests | `ktor-server-cio-3.6.0!/commonMain/io/ktor/server/cio/CIOApplicationEngine.kt` |
-| the Kotlin/Native shutdown hook is **one global slot**, last registration wins, and the callback runs on the POSIX signal-handler stack — `runBlocking` and all | Kotlin/Native 2.4.20 platform klibs; `kore/kore-core/src/nativeMain/kotlin/io/github/youndie/kore/signal/ShutdownSignalWatch.native.kt` is the answer |
+| the Kotlin/Native shutdown hook is **one global slot**, last registration wins, and the callback runs on the POSIX signal-handler stack — `runBlocking` and all | Kotlin/Native 2.4.20 platform klibs; `youndie/kore@54cbc54!/kore-core/src/nativeMain/kotlin/io/github/youndie/kore/signal/ShutdownSignalWatch.native.kt` is the answer |
 | `Connection: close` on a **response** does not close a CIO connection — the engine reads keep-alive from the *request's* header | `ktor-server-cio-3.6.0!/commonMain/io/ktor/server/cio/backend/ServerPipeline.kt` |
-| enumerating the environment is `__environ` on Linux and **does not exist** on macOS native, so the unknown-variable check is a declared capability rather than a universal one | `kore/kore-core/src/linuxMain/kotlin/io/github/youndie/kore/config/Environment.linux.kt`, `.../macosMain/.../Environment.macos.kt` |
+| enumerating the environment is `__environ` on Linux and **does not exist** on macOS native, so the unknown-variable check is a declared capability rather than a universal one | `youndie/kore@795907e!/kore-core/src/linuxMain/kotlin/io/github/youndie/kore/config/Environment.linux.kt`, `.../macosMain/.../Environment.macos.kt` |
 
 **Consequence — keel documents them and implements none of them.** They are the argument for taking
 kore rather than writing wiring by hand, and a starter whose service document does not name them
@@ -90,7 +90,7 @@ Read in `youndie/sborka` at `fb35de4`.
 
 | Fact | Where verified |
 |---|---|
-| `nativeService { entryPoint; baseName; allocatorPageSize }`, and `entryPoint` must be set **before** the target is declared or the build fails with "property entryPoint has no value available" | `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/native-service.gradle.kts` |
+| `nativeService { entryPoint; baseName; allocatorPageSize }`, and `entryPoint` must be set **before** the target is declared or the build fails with "property entryPoint has no value available" | `youndie/sborka@fb35de4!/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/native-service.gradle.kts` |
 | `binaryOption("fixedBlockPageSize", "16")` is the **default**, not advice; `allocatorPageSize = 0` leaves the compiler's own | same file |
 | `stageNativeImage` copies the release `.kexe` to `build/native-image/<baseName>` and writes `<baseName>.needed.txt` beside it, logging what the binary asks the loader for. Never fails: no `readelf`, no answer, reported as an absence | same file |
 | `writeNativeDockerfile` writes the reference image **once** and refuses to overwrite an existing `Dockerfile` | same file |
@@ -125,7 +125,7 @@ is the routing table paying for itself.
 
 **Correction to the brief.** The brief lists `--as-needed` among `sborka.native-service`'s contents.
 It is in **`sborka.kmp`**, gated to the Linux target family because `ld64` and `lld-link` reject the
-flag — `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/kmp.gradle.kts`. The
+flag — `youndie/sborka@fb35de4!/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/kmp.gradle.kts`. The
 distinction matters to keel's build file: a module that applies `native-service` and not `kmp` links
 without it, gets ten `NEEDED` entries instead of seven, and then needs the `libcrypt.so.1` copy the
 convention exists to delete. keel applies both.
@@ -140,10 +140,10 @@ the file.
 
 | Fact | Where verified |
 |---|---|
-| the reference Dockerfile is two stages: `gradle:9.7.1-jdk25-noble` building `:<module>:stageNativeImage` under a `~/.konan` cache mount, then `gcr.io/distroless/cc-debian13` carrying the binary and nothing else | `sborka/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/internal/NativeImageReference.kt` |
-| `distroless/base` fails at exec, and not over glibc: Kotlin/Native's exception handling imports **13 `_Unwind_*` symbols** from `libgcc_s`, which `base` does not carry | `sborka/docs/research/research-static-binary.md` §1.2 |
-| the image sets `ENV MALLOC_ARENA_MAX=2`, and that number is measured rather than conventional — and **dangerous with `-Xallocator=std`**: same service, peak 39.3 MB uncapped and 413.7 MB capped, 7 of 10 runs surviving instead of 10 | `NativeImageReference.kt`; `sborka/docs/research/research-static-binary.md` |
-| a Kotlin/Native binary's `NEEDED` list is the **runtime's**, not the application's: two unrelated services, a CLI and a hello-world give a byte-identical list of ten | `sborka/docs/research/research-static-binary.md` §1.2 |
+| the reference Dockerfile is two stages: `gradle:9.7.1-jdk25-noble` building `:<module>:stageNativeImage` under a `~/.konan` cache mount, then `gcr.io/distroless/cc-debian13` carrying the binary and nothing else | `youndie/sborka@fb35de4!/build-logic/conventions/src/main/kotlin/io/github/youndie/sborka/internal/NativeImageReference.kt` |
+| `distroless/base` fails at exec, and not over glibc: Kotlin/Native's exception handling imports **13 `_Unwind_*` symbols** from `libgcc_s`, which `base` does not carry | `youndie/sborka@fb35de4!/docs/research/research-static-binary.md` §1.2 |
+| the image sets `ENV MALLOC_ARENA_MAX=2`, and that number is measured rather than conventional — and **dangerous with `-Xallocator=std`**: same service, peak 39.3 MB uncapped and 413.7 MB capped, 7 of 10 runs surviving instead of 10 | `NativeImageReference.kt`; `youndie/sborka@fb35de4!/docs/research/research-static-binary.md` |
+| a Kotlin/Native binary's `NEEDED` list is the **runtime's**, not the application's: two unrelated services, a CLI and a hello-world give a byte-identical list of ten | `youndie/sborka@fb35de4!/docs/research/research-static-binary.md` §1.2 |
 | the glibc floor is `memcpy@GLIBC_2.14` hard, `__cxa_thread_atexit_impl@GLIBC_2.18` weak — a decade below every base image anyone would consider | same, §1.2 |
 
 **Superseded 2026-09-30** — keel's image is now built by sborka's `nativeImageTar` and there is no `Dockerfile`
@@ -158,13 +158,13 @@ person reads and a pull request reviews.
 
 | Fact | Where verified |
 |---|---|
-| `-static` against glibc does not link; the musl route links only after three archives are shimmed and then **segfaults with no output**, `rc=139` | `sborka/docs/research/research-static-binary.md` §1.6 |
+| `-static` against glibc does not link; the musl route links only after three archives are shimmed and then **segfaults with no output**, `rc=139` | `youndie/sborka@fb35de4!/docs/research/research-static-binary.md` §1.6 |
 | a statically linked binary still `dlopen`s: Ktor's charset layer on Kotlin/Native **is** glibc `iconv`, and `encodeURLParameter` goes through it — so every page does. A `scratch` image without gconv answers `500` with `Failed to open iconv for charset UTF-8 with error code 22` | same, §1.5c, from a deploy on 2026-09-15 |
 | the five paths, taken with `strace -e trace=openat` rather than derived: `/etc/ld.so.cache`, `/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2`, `/lib/x86_64-linux-gnu/libc.so.6`, `/usr/lib/x86_64-linux-gnu/gconv`, `/usr/share/zoneinfo` | same, §1.5c |
 | the **whole** gconv directory, not the module that appears in the trace — glibc picked `UTF-16.so` to convert UTF-8. Copying only that one would have saved 2 811 555 bytes | same |
 | copied **out of the build stage**, never from the host or another image of the same version: `dlopen` from a static binary needs the same glibc *build* as the `libc.a` it was linked against | same |
 | the recipe pins five `konan.properties` keys, and JetBrains' own advice (KT-38876) is that those may change in any patch release — which is why sborka refuses to carry it as an option | same, D3 |
-| the upstream ticket is [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362), still open; [JetBrains/kotlin#8127](https://github.com/JetBrains/kotlin/pull/8127) carried the patch and was **closed unmerged on 2026-09-15** | `sborka/docs/research/static-probe/UPSTREAM.md` |
+| the upstream ticket is [KT-89362](https://youtrack.jetbrains.com/issue/KT-89362), still open; [JetBrains/kotlin#8127](https://github.com/JetBrains/kotlin/pull/8127) carried the patch and was **closed unmerged on 2026-09-15** | `youndie/sborka@fb35de4!/docs/research/static-probe/UPSTREAM.md` |
 
 **Correction to the brief — there are five paths, not "four gconv lines", and one of them is not
 about gconv.** `/usr/share/zoneinfo` is carried as insurance and nothing reads it:
@@ -187,7 +187,7 @@ The fact that settles D1, and it is not what the brief assumed. Read from Maven 
 | `sqlx4k-sqlite:1.13.1` publishes `jvmApiElements` / `jvmRuntimeElements` alongside `linuxX64`, `linuxArm64`, `macosArm64`, `mingwX64`, `androidNative*`, `ios*` and an `androidJvm` variant | `io.github.smyrgeorge:sqlx4k-sqlite:1.13.1!/sqlx4k-sqlite-1.13.1.module` |
 | the JVM variant is a **JDBC facade**: its classes are `SQLite$JdbcConnection`, `SQLite$JdbcTransaction`, and its POM carries `org.xerial:sqlite-jdbc:3.53.4.0` at runtime scope | `io.github.smyrgeorge:sqlx4k-sqlite-jvm:1.13.1!/io/github/smyrgeorge/sqlx4k/sqlite/SQLite$JdbcConnection.class`, `io.github.smyrgeorge:sqlx4k-sqlite-jvm:1.13.1!/sqlx4k-sqlite-jvm-1.13.1.pom` |
 | `SQLite.Companion.createConnectionPool` exists on the JVM variant too | same jar |
-| the database-agnostic half is the separate coordinate `io.github.smyrgeorge:sqlx4k`, which publishes the same target set; chronik depends on **that** and never on a driver, because two sqlx4k drivers in one Kotlin/Native binary do not link — `duplicate symbol: std::panicking::EMPTY_PANIC` | `chronik/chronik-sqlx4k-sqlite/build.gradle.kts` |
+| the database-agnostic half is the separate coordinate `io.github.smyrgeorge:sqlx4k`, which publishes the same target set; chronik depends on **that** and never on a driver, because two sqlx4k drivers in one Kotlin/Native binary do not link — `duplicate symbol: std::panicking::EMPTY_PANIC` | `youndie/chronik@36db439!/chronik-sqlx4k-sqlite/build.gradle.kts` |
 
 **Consequence — one `ItemStore` implementation, not two.** The brief priced a runnable JVM at two
 implementations behind the port and called that a cost rather than a design flaw. It is not a cost
@@ -228,8 +228,8 @@ The fact that settles D2.
 
 | Fact | Where verified |
 |---|---|
-| `chronik-core` declares `jvm()` and `linuxX64()` and **deliberately no other native target** | `chronik/chronik-core/build.gradle.kts` |
-| `chronik-sqlx4k-sqlite` — the store that exists because JDBC "does not travel here" — declares `jvm()` and `linuxX64()` | `chronik/chronik-sqlx4k-sqlite/build.gradle.kts` |
+| `chronik-core` declares `jvm()` and `linuxX64()` and **deliberately no other native target** | `youndie/chronik@36db439!/chronik-core/build.gradle.kts` |
+| `chronik-sqlx4k-sqlite` — the store that exists because JDBC "does not travel here" — declares `jvm()` and `linuxX64()` | `youndie/chronik@36db439!/chronik-sqlx4k-sqlite/build.gradle.kts` |
 | `chronik-core` is on Maven Central | `https://central.sonatype.com/artifact/io.github.youndie.chronik/chronik-core` |
 
 **Consequence — the timer slot is a commented block with a named hole, not a documented absence.**
@@ -245,10 +245,10 @@ The fact the brief did not have, and the one that costs keel a decision.
 
 | Fact | Where verified |
 |---|---|
-| zavarnik **refuses** a project without the `application` plugin, with the message "needs the `application` plugin" | `zavarnik/zavarnik-gradle-plugin/src/functionalTest/kotlin/io/github/youndie/zavarnik/ConfigurationChecksFunctionalTest.kt` |
-| the cache is trained through the start script over the `lib/*.jar` layout; a classpath of directories — which is what `run` uses — yields no cache; a zip cannot carry it; a wildcard on the start script's classpath is refused at `installDist` | `zavarnik/README.md`, "Requirements" |
-| the `application` and Ktor Gradle plugins are `kotlinJvm`-only and do not apply to a multiplatform module; kore's sample assembles its runnable jar by hand for exactly this reason | `kore/samples/service/build.gradle.kts` |
-| JDK 25 or newer is required as the toolchain (JEP 514), and the **same JDK build** must run in production as trained | `zavarnik/README.md` |
+| zavarnik **refuses** a project without the `application` plugin, with the message "needs the `application` plugin" | `youndie/zavarnik@0b24f5d!/zavarnik-gradle-plugin/src/functionalTest/kotlin/io/github/youndie/zavarnik/ConfigurationChecksFunctionalTest.kt` |
+| the cache is trained through the start script over the `lib/*.jar` layout; a classpath of directories — which is what `run` uses — yields no cache; a zip cannot carry it; a wildcard on the start script's classpath is refused at `installDist` | `youndie/zavarnik@0b24f5d!/README.md`, "Requirements" |
+| the `application` and Ktor Gradle plugins are `kotlinJvm`-only and do not apply to a multiplatform module; kore's sample assembles its runnable jar by hand for exactly this reason | `youndie/kore@795907e!/samples/service/build.gradle.kts` |
+| JDK 25 or newer is required as the toolchain (JEP 514), and the **same JDK build** must run in production as trained | `youndie/zavarnik@0b24f5d!/README.md` |
 
 **Consequence — "one KMP module" and "zavarnik on `check`" cannot both be literal.** See D5. This is
 the single place where the brief's contents table and its acceptance list disagree with each other,
@@ -258,10 +258,10 @@ and it was found by reading zavarnik's functional test rather than by building a
 
 | Fact | Where verified |
 |---|---|
-| [KTOR-9891](https://youtrack.jetbrains.com/issue/KTOR-9891) is **fixed**: [ktorio/ktor#5874](https://github.com/ktorio/ktor/pull/5874) is merged into the release/3.x branch and targets **3.6.0** | `kotlin-website/site/src/jsMain/resources/markdown/blog/UnderAContainerLimit.md` |
+| [KTOR-9891](https://youtrack.jetbrains.com/issue/KTOR-9891) is **fixed**: [ktorio/ktor#5874](https://github.com/ktorio/ktor/pull/5874) is merged into the release/3.x branch and targets **3.6.0** | [Ktor on Kotlin/Native under a container limit](https://kotlin.website/blog/under-a-container-limit), published 2026-09-14 |
 | it is a concurrency finding from the container-limit study, measured on a two-host stand at 2 000 rps — nothing to do with charsets | same |
 | the runtime half, [KT-89365](https://youtrack.jetbrains.com/issue/KT-89365), is **open** | same |
-| the gconv finding has **no ticket**; it was found at a deploy and lives in sborka's research and in [katcher#55](https://github.com/youndie/katcher/issues/55) | `sborka/docs/research/research-static-binary.md` §1.5c, D3 |
+| the gconv finding has **no ticket**; it was found at a deploy and lives in sborka's research and in [katcher#55](https://github.com/youndie/katcher/issues/55) | `youndie/sborka@fb35de4!/docs/research/research-static-binary.md` §1.5c, D3 |
 
 **Correction to the brief.** D3 reads "`distroless/cc` until KTOR's gconv issue lands", which joins
 two unrelated things: the Ktor ticket that is fixed and shipping in 3.6.0, and a charset-layer fact
@@ -272,8 +272,8 @@ survives the correction and its address changes; see D3 below.
 
 | Fact | Where verified |
 |---|---|
-| Kotlin `2.4.20`, coroutines `1.11.0`, serialization `1.11.0`, Ktor `3.6.0`, JUnit `6.1.3` are what the portfolio's shared catalog carries | `sborka/catalog/sborka.versions.toml` |
-| Kotlin comes from the shared `wip` catalog rather than being pinned here. It was held at 2.4.10 while kore's verification addresses were dumps of that distribution; kore re-ran them against 2.4.20 and every address held | `kore/gradle/libs.versions.toml`, youndie/kore#88 |
+| Kotlin `2.4.20`, coroutines `1.11.0`, serialization `1.11.0`, Ktor `3.6.0`, JUnit `6.1.3` are what the portfolio's shared catalog carries | `youndie/sborka@f0e9a01!/catalog/sborka.versions.toml` |
+| Kotlin comes from the shared `wip` catalog rather than being pinned here. It was held at 2.4.10 while kore's verification addresses were dumps of that distribution; kore re-ran them against 2.4.20 and every address held | `youndie/kore@bf3ca29!/gradle/libs.versions.toml`, youndie/kore#88 |
 | kore compiles its JVM half at toolchain **25**, and a library published at 25 cannot be consumed below 25 | same file |
 | `sborka` `0.4.0.79`, `kore-core` `0.1.4`, `razves` `0.1.0.30`, all on `https://reposilite.kotlin.website/snapshots` and none on Maven Central | the three `maven-metadata.xml` listings, read 2026-09-16 |
 | `github.com/youndie/keel` does not exist yet | `gh repo view youndie/keel` → "Could not resolve to a Repository", 2026-09-16 |
@@ -286,10 +286,10 @@ says which repository the number comes from.
 
 | Fact | Where verified |
 |---|---|
-| the skill is the tenth of ten in the plugin, with `references/{memory-under-a-limit,scratch-image,build-time,sqlite-under-load}.md` and `examples/deploy.md` | `kotlin-skills/plugins/kotlin-fullstack/skills/native-service-bootstrap/` |
-| it already names the split keel depends on: "**This file describes and measures; the convention compels**", mechanisms having moved to sborka and kore on 2026-09-15 | `.../native-service-bootstrap/SKILL.md` |
+| the skill is the tenth of ten in the plugin, with `references/{memory-under-a-limit,scratch-image,build-time,sqlite-under-load}.md` and `examples/deploy.md` | `youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/skills/native-service-bootstrap/` |
+| it already names the split keel depends on: "**This file describes and measures; the convention compels**", mechanisms having moved to sborka and kore on 2026-09-15 | `youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/skills/native-service-bootstrap/SKILL.md` |
 | it tells the agent to copy a **living service** — metrik or katcher — rather than the templates in the file | same, Step 0 |
-| there is **no `evals/evals.json`** anywhere in the plugin | `kotlin-skills/plugins/kotlin-fullstack/` holds `skills/` and nothing else |
+| there is **no `evals/evals.json`** anywhere in the plugin | `youndie/kotlin-skills@16515bd!/plugins/kotlin-fullstack/` holds `skills/` and nothing else |
 
 **Consequence — one deliverable of the brief is already done and one is not.** The move into
 kotlin-skills happened; what is missing is keel as the skill's reference project (Step 0 names two
@@ -428,7 +428,7 @@ Why: a normaliser written after the first red run is a list of whatever differed
 the next real divergence without anybody noticing. sborka's own parity convention exists for the same
 reason and asks the platform through Ktor rather than through the syscall underneath, because the
 failure this portfolio paid for was in Ktor's `InetSocketAddress` while every syscall below it worked
-(`sborka/docs/research/research-parity.md` §1.5).
+(`youndie/sborka@fb35de4!/docs/research/research-parity.md` §1.5).
 
 ### D8. keel documents the `scratch` recipe and does not ship it — *deviation from the brief*
 

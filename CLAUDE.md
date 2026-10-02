@@ -211,10 +211,11 @@ pin the version a second time in the Makefile. The guard that fails the gate on 
 empty backlog is docs-bootstrap's (`docs-guard`) now, not a hand-written target here; this
 repository's own lines are `gate`, `build`, and the `-` that keeps `report` from failing `check`.
 
-`code_anchors` reports most of this tree rotten today, and that is correct — the paths are where the
-code will live, and the count going down is how the template arriving looks from here. It does not
-become a gate when it reaches zero: a path quoted *as obsolete* is indistinguishable by machine from
-a live one.
+`code_anchors` lists what it cannot find, and what it lists today is build outputs and names quoted
+in prose (`lib/`, `evals/evals.json`), not rot. A path into another repository is not among them: it
+is written as an address at a commit, `youndie/kore@<sha>!/<path>` (docs/README.md, conventions),
+because CI checks this clone alone. The report does not become a gate when it reaches zero: a path
+quoted *as obsolete* is indistinguishable by machine from a live one.
 
 ## Commits
 
