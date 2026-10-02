@@ -76,7 +76,7 @@ authentication (see [endpoint-items](../api/endpoint-items.md)).
 | keel-server | `server/src/commonTest/kotlin/.../item/ItemRoutesTest.kt` — the route against an in-memory `ItemStore` |
 | keel-server | `server/src/commonTest/kotlin/.../item/ItemStoreContractTest.kt` — the same suite run against SQLite on both targets |
 | keel-server | `k6/items.js` — the scenario both binaries are driven with, for parity and for `:server:measure` |
-| kore | `kore/samples/service/src/commonMain/kotlin/io/github/youndie/kore/sample/KoreWiring.kt` — the wiring keel's is derived from |
+| kore | `youndie/kore@47b8c68!/samples/service/src/commonMain/kotlin/io/github/youndie/kore/sample/KoreWiring.kt` — the wiring keel's is derived from |
 
 ## 5. Scenarios (BDD / test cases)
 

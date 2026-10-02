@@ -71,7 +71,11 @@ defect worth a backlog item, because both halves then look equally authoritative
   dependency's artefact are written with the separator a jar URL uses —
   `ktor-server-core-3.6.0!/posixMain/io/ktor/server/engine/EmbeddedServer.posix.kt` — because no search
   over sibling repositories can ever resolve them, and a permanently non-zero rot list is a list
-  nobody reads.
+  nobody reads. A path into another repository of the portfolio is written the same way, at the
+  commit the fact was read in —
+  `youndie/kore@795907e!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` —
+  because CI checks this clone alone, and since docs-bootstrap 0.3.4 a bare `kore/…` path is looked
+  for in kore only.
 - `keel-server.md` carries `repo_url` since B-01, and not before: the repository did not exist when
   the tree was written, and a URL written before its repository is intent documented as fact. The
   checker's warning about its absence was the correct state for exactly one commit.

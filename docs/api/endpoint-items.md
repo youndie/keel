@@ -42,7 +42,7 @@ comes from the `ktor-server-feature` skill.
 cannot fail while the process is alive — which is precisely what three probes exist to stop. The
 alias is there because every chart in this portfolio already names it, and removing it would break a
 running deployment. Verified in
-`kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt`.
+`youndie/kore@47b8c68!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt`.
 
 ## Handlers (code anchors)
 
@@ -50,9 +50,9 @@ running deployment. Verified in
 |---|---|
 | `GET /items`, `POST /items` | `server/src/commonMain/kotlin/.../item/ItemRoutes.kt` |
 | the store behind both | `server/src/commonMain/kotlin/.../item/ItemStore.kt` |
-| the three probes and `/health` | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` |
-| `/version` | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/VersionRoute.kt` |
-| the 503-during-shutdown interceptor | `kore/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ShutdownRefusal.kt` |
+| the three probes and `/health` | `youndie/kore@47b8c68!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ProbeRoutes.kt` |
+| `/version` | `youndie/kore@47b8c68!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/VersionRoute.kt` |
+| the 503-during-shutdown interceptor | `youndie/kore@47b8c68!/kore-ktor/src/commonMain/kotlin/io/github/youndie/kore/ktor/ShutdownRefusal.kt` |
 
 ## Request and response bodies
 
