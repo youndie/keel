@@ -17,7 +17,7 @@ this service, and none of it was copied here.
    the wiring looks the way it does.
 2. [backlog.md](backlog.md): the goal, the stages, the index. Items are one file each in
    `docs/backlog/`. The index between the markers is generated, so edit the item and run
-   `python3 scripts/backlog_index.py`.
+   `make fix`.
 3. The layer document the task belongs to. The map is [docs/README.md](docs/README.md), and a new
    document starts from `docs/templates/`.
 4. The skills, when the task is building rather than documenting: `native-service-bootstrap` for the
@@ -118,9 +118,18 @@ English.
 
 ```bash
 pip install pyyaml
-make check      # the gate; CI runs exactly it
-make report     # the two non-blocking reports
+make check      # the gate and the reports; CI's check job runs exactly it
+make report     # the two non-blocking reports alone
+make fix        # regenerate the backlog index, append missing coverage-map lines
 ```
+
+**The checks are not in this repository.** They are docs-bootstrap's, at the version the
+`uses: youndie/docs-bootstrap@<tag>` line in `.github/workflows/check.yaml` pins: CI runs them from
+there, and the Makefile reads the same line and fetches that tag into `.docs-bootstrap/` (it ignores
+itself), so a local `make check` runs what CI runs. A new version arrives as a Renovate bump of that
+line. Never copy the scripts in — a copy stops at the version of the day it was taken — and never pin
+the version a second time in the Makefile. A clone that does not sit beside its sibling repositories
+runs the reports with `make report REPOS=.`.
 
 ## Commits
 

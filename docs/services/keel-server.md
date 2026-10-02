@@ -88,7 +88,7 @@ What it deliberately does **not** do:
 | `server/build.gradle.kts` → `nativeImage { }` | the runtime image: `distroless/cc-debian13` by digest, the binary and nothing beside it, built by sborka's `nativeImageTar` with no Docker daemon — and refused before it is written if that base cannot load the binary. No static variant — B-16 |
 | `k6/items.js` | the scenario both binaries are driven with; `KEEL_MEASURE=1` gives it a constant-work profile |
 | `k6/measure.sh` | the three numbers, and the refusal to write them without a stand |
-| `.github/workflows/check.yaml` | the documentation gate and the build gate |
+| `.github/workflows/check.yaml` | the documentation gate — docs-bootstrap at the version its `uses:` line pins, which the `Makefile` reads too — and the build gate |
 | `scripts/rename.sh` | the rename a clone starts with, and the `git grep` that fails when it missed a spelling |
 | `skeleton/` | the documentation a clone gets in place of this tree, installed by `scripts/rename.sh` |
 
